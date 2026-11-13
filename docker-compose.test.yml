@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  playwright:
+    image: mcr.microsoft.com/playwright:v1.50.1-noble
+    working_dir: /work
+    volumes:
+      - ./frontend:/work
+    environment:
+      - BASE_URL=http://frontend:80
+      - CI=true
+    command: npx playwright test --config=tests/playwright.config.ts
+    depends_on:
+      - frontend
+    networks:
+      - finance-tracker-net
+
