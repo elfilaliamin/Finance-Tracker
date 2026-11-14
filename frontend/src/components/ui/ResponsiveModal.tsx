@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { X } from 'lucide-react';
+import React, { useEffect, useRef } from 'react';
+import { RiCloseLine } from '@remixicon/react';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 
 interface ResponsiveModalProps {
@@ -22,21 +22,39 @@ export const ResponsiveModal: React.FC<ResponsiveModalProps> = ({
   closeOnBackdrop = true,
 }) => {
   const { isMobile } = useBreakpoint();
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
-    };
     if (isOpen) {
+      triggerRef.current = document.activeElement as HTMLElement;
       document.body.style.overflow = 'hidden';
+
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          onClose();
+        }
+      };
       window.addEventListener('keydown', handleKeyDown);
+
+      // Focus first focusable element
+      setTimeout(() => {
+        const focusable = dialogRef.current?.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable && focusable.length > 0) {
+          focusable[0].focus();
+        }
+      }, 50);
+
+      return () => {
+        document.body.style.overflow = '';
+        window.removeEventListener('keydown', handleKeyDown);
+        if (triggerRef.current) {
+          triggerRef.current.focus();
+        }
+      };
     }
-    return () => {
-      document.body.style.overflow = '';
-      window.removeEventListener('keydown', handleKeyDown);
-    };
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
@@ -52,42 +70,47 @@ export const ResponsiveModal: React.FC<ResponsiveModalProps> = ({
 
   if (isMobile) {
     return (
-      <div className="fixed inset-0 z-50 flex flex-col justify-end">
-        {/* Backdrop */}
+      <div className="fixed inset-0 z-[var(--z-modal)] flex flex-col justify-end">
+        {/* Backdrop Scrim */}
         <div
-          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity animate-in fade-in"
+          className="fixed inset-0 bg-[var(--color-scrim)] backdrop-blur-[var(--blur-glass)] transition-opacity animate-in fade-in"
           onClick={closeOnBackdrop ? onClose : undefined}
           aria-hidden="true"
         />
 
         {/* Mobile Bottom Sheet */}
         <div
+          ref={dialogRef}
           role="dialog"
           aria-modal="true"
           aria-labelledby="modal-title"
-          className="relative bg-white rounded-t-2xl shadow-2xl flex flex-col max-h-[92vh] pb-[calc(1rem+env(safe-area-inset-bottom))] animate-in slide-in-from-bottom duration-250 z-10"
+          className="relative bg-[var(--color-surface)] text-[color:var(--color-text)] rounded-t-[var(--radius-surface)] border-t border-[var(--color-border)] shadow-[var(--shadow-lg)] flex flex-col max-h-[92vh] pb-[calc(1rem+var(--safe-area-inset-bottom))] animate-in slide-in-from-bottom duration-200 z-10"
         >
-          {/* Grab Bar */}
-          <div className="w-12 h-1.5 bg-slate-300 rounded-full mx-auto my-3 shrink-0" />
+          {/* Pull Bar */}
+          <div className="w-12 h-1.5 bg-[var(--color-border)] rounded-full mx-auto my-3 shrink-0" />
 
           {/* Header */}
-          <div className="flex items-center justify-between px-5 pb-3 border-b border-slate-100 shrink-0">
+          <div className="flex items-center justify-between px-5 pb-3 border-b border-[var(--color-border)] shrink-0">
             <div>
-              <h2 id="modal-title" className="text-base font-bold text-slate-900">
+              <h2 id="modal-title" className="text-[length:var(--font-size-step-1)] font-bold font-[family-name:var(--font-heading)] text-[color:var(--color-text)]">
                 {title}
               </h2>
-              {description && <p className="text-xs text-slate-500 mt-0.5">{description}</p>}
+              {description && (
+                <p className="text-[length:var(--font-size-step-sub1)] text-[color:var(--color-muted)] mt-0.5">
+                  {description}
+                </p>
+              )}
             </div>
             <button
               onClick={onClose}
-              className="p-2 -mr-2 text-slate-400 hover:text-slate-600 rounded-full touch-target"
-              aria-label="Close modal"
+              className="p-2 -mr-2 text-[color:var(--color-muted)] hover:text-[color:var(--color-text)] hover:bg-[var(--color-background)] rounded-[var(--radius-base)] touch-target transition-colors"
+              aria-label="Close dialog"
             >
-              <X size={20} />
+              <RiCloseLine size={20} />
             </button>
           </div>
 
-          {/* Scrollable Content */}
+          {/* Content */}
           <div className="px-5 py-4 overflow-y-auto flex-1">{children}</div>
         </div>
       </div>
@@ -96,35 +119,40 @@ export const ResponsiveModal: React.FC<ResponsiveModalProps> = ({
 
   // Desktop / Tablet Centered Dialog
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity animate-in fade-in"
+        className="fixed inset-0 bg-[var(--color-scrim)] backdrop-blur-[var(--blur-glass)] transition-opacity animate-in fade-in"
         onClick={closeOnBackdrop ? onClose : undefined}
         aria-hidden="true"
       />
 
-      {/* Centered Modal */}
+      {/* Centered Modal Surface */}
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
-        className={`relative bg-white rounded-2xl shadow-2xl w-full ${maxWidthClasses} max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 z-10`}
+        className={`relative bg-[var(--color-surface)] text-[color:var(--color-text)] border border-[var(--color-border)] rounded-[var(--radius-surface)] shadow-[var(--shadow-lg)] w-full ${maxWidthClasses} max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 z-10`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-border)]">
           <div>
-            <h2 id="modal-title" className="text-lg font-bold text-slate-900">
+            <h2 id="modal-title" className="text-[length:var(--font-size-step-2)] font-bold font-[family-name:var(--font-heading)] text-[color:var(--color-text)]">
               {title}
             </h2>
-            {description && <p className="text-sm text-slate-500 mt-0.5">{description}</p>}
+            {description && (
+              <p className="text-[length:var(--font-size-step-sub1)] text-[color:var(--color-muted)] mt-0.5">
+                {description}
+              </p>
+            )}
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-600 rounded-full touch-target hover:bg-slate-100 transition-colors"
+            className="p-2 text-[color:var(--color-muted)] hover:text-[color:var(--color-text)] hover:bg-[var(--color-background)] rounded-[var(--radius-base)] touch-target transition-colors"
             aria-label="Close dialog"
           >
-            <X size={20} />
+            <RiCloseLine size={20} />
           </button>
         </div>
 
@@ -134,4 +162,3 @@ export const ResponsiveModal: React.FC<ResponsiveModalProps> = ({
     </div>
   );
 };
-

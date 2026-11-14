@@ -22,11 +22,17 @@ export const ResponsiveChartWrapper: React.FC<ResponsiveChartWrapperProps> = ({
   const height = isMobile ? mobileHeight : desktopHeight;
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-4 md:p-6 w-full flex flex-col">
+    <div className="bg-[var(--color-surface)] rounded-[var(--radius-surface)] border border-[var(--color-border)] shadow-[var(--shadow-base)] p-4 md:p-6 w-full flex flex-col transition-all">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
         <div>
-          <h3 className="font-bold text-slate-900 text-base md:text-lg">{title}</h3>
-          {subtitle && <p className="text-xs md:text-sm text-slate-500 mt-0.5">{subtitle}</p>}
+          <h3 className="font-bold text-[color:var(--color-text)] font-[family-name:var(--font-heading)] text-[length:var(--font-size-step-1)]">
+            {title}
+          </h3>
+          {subtitle && (
+            <p className="text-[length:var(--font-size-step-sub1)] text-[color:var(--color-muted)] mt-0.5">
+              {subtitle}
+            </p>
+          )}
         </div>
         {action && <div className="self-start sm:self-auto">{action}</div>}
       </div>
@@ -37,4 +43,3 @@ export const ResponsiveChartWrapper: React.FC<ResponsiveChartWrapperProps> = ({
     </div>
   );
 };
-

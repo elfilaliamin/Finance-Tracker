@@ -18,13 +18,16 @@ import { BudgetingPage } from '@/pages/budgeting/BudgetingPage';
 import { ReportPage } from '@/pages/reports/ReportPage';
 import { SettingsPage } from '@/pages/settings/SettingsPage';
 
+// Error Pages
+import { NotFoundPage } from '@/pages/error/NotFoundPage';
+
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="w-8 h-8 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)]">
+        <div className="w-8 h-8 border-3 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -62,8 +65,8 @@ export const AppRoutes: React.FC = () => {
         <Route path="/settings" element={<SettingsPage />} />
       </Route>
 
-      {/* Fallback */}
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      {/* Catch-all Not Found */}
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 };

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Trash2, Receipt } from 'lucide-react';
+import { RiAddLine, RiDeleteBinLine, RiReceiptLine } from '@remixicon/react';
 import { spendingApi, SpendingRecord, CreateSpendingInput } from '@/api/spendingApi';
 import { walletApi } from '@/api/walletApi';
 import { useAuth } from '@/hooks/useAuth';
@@ -81,20 +81,20 @@ export const SpendingPage: React.FC = () => {
     {
       key: 'date',
       header: 'Date',
-      render: (item) => <span className="font-mono text-slate-800">{item.date}</span>,
+      render: (item) => <span className="font-mono text-[var(--color-text)]">{item.date}</span>,
     },
     {
       key: 'storeMerchant',
       header: 'Merchant',
       render: (item) => (
-        <span className="font-semibold text-slate-900">{item.storeMerchant || 'General Expense'}</span>
+        <span className="font-semibold text-[var(--color-text)]">{item.storeMerchant || 'General Expense'}</span>
       ),
     },
     {
       key: 'walletName',
       header: 'Paid From',
       render: (item) => (
-        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-700">
+        <span className="inline-flex items-center px-2 py-0.5 rounded-[var(--radius-pill)] text-xs font-medium bg-[var(--color-primary-bg)] text-[var(--color-text)] border border-[var(--color-border)]">
           {item.walletName || 'Unassigned'}
         </span>
       ),
@@ -103,7 +103,7 @@ export const SpendingPage: React.FC = () => {
       key: 'itemsCount',
       header: 'Articles',
       render: (item) => (
-        <span className="text-xs text-slate-500">
+        <span className="text-xs text-[var(--color-text-muted)]">
           {item.items?.length || 0} {(item.items?.length || 0) === 1 ? 'item' : 'items'}
         </span>
       ),
@@ -114,12 +114,12 @@ export const SpendingPage: React.FC = () => {
       align: 'right',
       render: (item) => (
         <div className="text-right">
-          <span className="font-bold text-rose-600 font-mono text-sm">
+          <span className="font-bold text-[var(--color-danger)] font-mono text-sm">
             -{parseFloat(item.totalAmount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{' '}
             {item.currency}
           </span>
           {item.currency !== defaultCurrency && (
-            <p className="text-[11px] text-slate-400 font-mono">
+            <p className="text-[11px] text-[var(--color-text-muted)] font-mono">
               ~{parseFloat(item.totalAmountInBase).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{' '}
               {defaultCurrency}
             </p>
@@ -135,10 +135,10 @@ export const SpendingPage: React.FC = () => {
         <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
           <button
             onClick={() => setSelectedReceipt(item)}
-            className="p-1.5 text-slate-400 hover:text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors touch-target"
+            className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-accent)] rounded-[var(--radius-base)] hover:bg-[var(--color-primary-bg)] transition-colors touch-target"
             title="View Receipt"
           >
-            <Receipt size={16} />
+            <RiReceiptLine className="w-4 h-4" />
           </button>
           <button
             onClick={() => {
@@ -146,10 +146,10 @@ export const SpendingPage: React.FC = () => {
                 deleteMutation.mutate(item.id);
               }
             }}
-            className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors touch-target"
+            className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-danger)] rounded-[var(--radius-base)] hover:bg-[var(--color-danger)]/10 transition-colors touch-target"
             title="Delete Spending"
           >
-            <Trash2 size={16} />
+            <RiDeleteBinLine className="w-4 h-4" />
           </button>
         </div>
       ),
@@ -159,21 +159,21 @@ export const SpendingPage: React.FC = () => {
   const renderMobileCard = (item: SpendingRecord) => (
     <div onClick={() => setSelectedReceipt(item)}>
       <div className="flex items-center justify-between mb-1.5">
-        <span className="font-bold text-slate-900 text-sm">{item.storeMerchant || 'Store Expense'}</span>
-        <span className="text-xs text-slate-500 font-mono">{item.date}</span>
+        <span className="font-bold text-[var(--color-text)] text-sm">{item.storeMerchant || 'Store Expense'}</span>
+        <span className="text-xs text-[var(--color-text-muted)] font-mono">{item.date}</span>
       </div>
 
       <div className="flex items-center justify-between my-1">
-        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-700">
+        <span className="inline-flex items-center px-2 py-0.5 rounded-[var(--radius-pill)] text-xs font-medium bg-[var(--color-primary-bg)] text-[var(--color-text)] border border-[var(--color-border)]">
           {item.walletName || 'Unassigned Wallet'}
         </span>
         <div className="text-right">
-          <span className="font-bold text-rose-600 font-mono text-base">
+          <span className="font-bold text-[var(--color-danger)] font-mono text-base">
             -{parseFloat(item.totalAmount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{' '}
             {item.currency}
           </span>
           {item.currency !== defaultCurrency && (
-            <p className="text-[11px] text-slate-400 font-mono">
+            <p className="text-[11px] text-[var(--color-text-muted)] font-mono">
               ~{parseFloat(item.totalAmountInBase).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{' '}
               {defaultCurrency}
             </p>
@@ -182,20 +182,20 @@ export const SpendingPage: React.FC = () => {
       </div>
 
       {item.items && item.items.length > 0 && (
-        <div className="text-xs text-slate-500 mt-2 border-t border-slate-100 pt-1.5 line-clamp-1">
+        <div className="text-xs text-[var(--color-text-muted)] mt-2 border-t border-[var(--color-border)] pt-1.5 line-clamp-1">
           {item.items.map((i) => `${i.name} (x${i.quantity})`).join(', ')}
         </div>
       )}
 
       <div
-        className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between"
+        className="mt-2 pt-2 border-t border-[var(--color-border)] flex items-center justify-between"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={() => setSelectedReceipt(item)}
-          className="text-xs text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1 touch-target py-1 px-2"
+          className="text-xs text-[var(--color-accent)] hover:underline font-medium flex items-center gap-1 touch-target py-1 px-2"
         >
-          <Receipt size={14} />
+          <RiReceiptLine className="w-3.5 h-3.5" />
           <span>View Receipt</span>
         </button>
 
@@ -205,9 +205,9 @@ export const SpendingPage: React.FC = () => {
               deleteMutation.mutate(item.id);
             }
           }}
-          className="text-xs text-rose-600 hover:text-rose-700 font-medium flex items-center gap-1 touch-target py-1 px-2"
+          className="text-xs text-[var(--color-danger)] hover:underline font-medium flex items-center gap-1 touch-target py-1 px-2"
         >
-          <Trash2 size={14} />
+          <RiDeleteBinLine className="w-3.5 h-3.5" />
           <span>Delete</span>
         </button>
       </div>
@@ -219,17 +219,17 @@ export const SpendingPage: React.FC = () => {
       {/* Top Action Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-900">Spending Ledger</h2>
-          <p className="text-xs sm:text-sm text-slate-500">
+          <h2 className="text-xl sm:text-2xl font-heading font-bold text-[var(--color-text)]">Spending Ledger</h2>
+          <p className="text-xs sm:text-sm text-[var(--color-text-muted)]">
             Itemized bills and receipts. Deducts money from designated wallets.
           </p>
         </div>
 
         <button
           onClick={() => setIsBillModalOpen(true)}
-          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-rose-600 text-white font-semibold text-sm hover:bg-rose-700 shadow-sm transition-all touch-target"
+          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-[var(--radius-base)] bg-[var(--color-primary)] text-white font-medium text-sm hover:bg-[var(--color-primary-hover)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-all touch-target"
         >
-          <Plus size={18} />
+          <RiAddLine className="w-5 h-5" />
           <span>Record Spending</span>
         </button>
       </div>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { ResponsiveModal } from '@/components/ui/ResponsiveModal';
 import { SpendingRecord } from '@/api/spendingApi';
-import { Store, Calendar, Wallet } from 'lucide-react';
+import { RiStore2Line, RiCalendarLine, RiWallet3Line } from '@remixicon/react';
 
 interface MiniReceiptModalProps {
   isOpen: boolean;
@@ -24,35 +24,35 @@ export const MiniReceiptModal: React.FC<MiniReceiptModalProps> = ({
       description={`Receipt ID: ${spending.id.substring(0, 8)}`}
       maxWidth="md"
     >
-      <div className="bg-amber-50/50 p-5 rounded-2xl border border-amber-200/60 font-mono text-slate-800 space-y-4 shadow-inner">
+      <div className="bg-[var(--color-primary-bg)] p-5 rounded-[var(--radius-surface)] border border-[var(--color-border)] font-mono text-[var(--color-text)] space-y-4 shadow-inner">
         {/* Receipt Header */}
-        <div className="text-center pb-3 border-b-2 border-dashed border-amber-300">
-          <h3 className="font-extrabold text-lg text-slate-900 uppercase tracking-widest">
+        <div className="text-center pb-3 border-b-2 border-dashed border-[var(--color-border)]">
+          <h3 className="font-extrabold text-lg text-[var(--color-text)] uppercase tracking-widest font-heading">
             {spending.storeMerchant || 'STORE RECEIPT'}
           </h3>
-          <p className="text-[11px] text-slate-500 mt-1">Itemized Purchase Record</p>
+          <p className="text-[11px] text-[var(--color-text-muted)] mt-1">Itemized Purchase Record</p>
         </div>
 
         {/* Metadata */}
-        <div className="text-xs space-y-1.5 py-1 border-b border-dashed border-amber-300">
+        <div className="text-xs space-y-1.5 py-1 border-b border-dashed border-[var(--color-border)]">
           <div className="flex items-center justify-between">
-            <span className="text-slate-500 flex items-center gap-1">
-              <Calendar size={13} /> Date:
+            <span className="text-[var(--color-text-muted)] flex items-center gap-1">
+              <RiCalendarLine className="w-3.5 h-3.5" /> Date:
             </span>
             <span className="font-semibold">{spending.date}</span>
           </div>
 
           <div className="flex items-center justify-between">
-            <span className="text-slate-500 flex items-center gap-1">
-              <Wallet size={13} /> Wallet:
+            <span className="text-[var(--color-text-muted)] flex items-center gap-1">
+              <RiWallet3Line className="w-3.5 h-3.5" /> Wallet:
             </span>
             <span className="font-semibold">{spending.walletName || 'Unassigned'}</span>
           </div>
 
           {spending.storeMerchant && (
             <div className="flex items-center justify-between">
-              <span className="text-slate-500 flex items-center gap-1">
-                <Store size={13} /> Merchant:
+              <span className="text-[var(--color-text-muted)] flex items-center gap-1">
+                <RiStore2Line className="w-3.5 h-3.5" /> Merchant:
               </span>
               <span className="font-semibold">{spending.storeMerchant}</span>
             </div>
@@ -61,7 +61,7 @@ export const MiniReceiptModal: React.FC<MiniReceiptModalProps> = ({
 
         {/* Line Items */}
         <div className="space-y-2 py-2">
-          <div className="flex items-center justify-between text-xs text-slate-400 font-bold uppercase pb-1 border-b border-amber-200">
+          <div className="flex items-center justify-between text-xs text-[var(--color-text-muted)] font-bold uppercase pb-1 border-b border-[var(--color-border)]">
             <span>Item & Quantity</span>
             <span>Total</span>
           </div>
@@ -70,26 +70,26 @@ export const MiniReceiptModal: React.FC<MiniReceiptModalProps> = ({
             spending.items.map((item, idx) => (
               <div key={idx} className="flex items-start justify-between text-xs gap-2">
                 <div className="flex-1">
-                  <p className="font-semibold text-slate-900">{item.name}</p>
-                  <p className="text-[10px] text-slate-500">
+                  <p className="font-semibold text-[var(--color-text)]">{item.name}</p>
+                  <p className="text-[10px] text-[var(--color-text-muted)]">
                     {item.quantity} x {Number(item.unitPrice).toFixed(2)} {spending.currency}
                     {item.categoryName ? ` • ${item.categoryName}` : ''}
                   </p>
                 </div>
-                <span className="font-bold text-slate-800">
+                <span className="font-bold text-[var(--color-text)]">
                   {Number(item.lineTotal).toFixed(2)} {spending.currency}
                 </span>
               </div>
             ))
           ) : (
-            <p className="text-xs text-slate-400 text-center py-2">No line items recorded</p>
+            <p className="text-xs text-[var(--color-text-muted)] text-center py-2">No line items recorded</p>
           )}
         </div>
 
         {/* Grand Total */}
-        <div className="pt-3 border-t-2 border-dashed border-amber-300 flex items-center justify-between">
+        <div className="pt-3 border-t-2 border-dashed border-[var(--color-border)] flex items-center justify-between">
           <span className="font-bold text-sm uppercase">Total Amount:</span>
-          <span className="text-xl font-extrabold text-rose-700">
+          <span className="text-xl font-extrabold text-[var(--color-danger)] font-mono">
             {parseFloat(spending.totalAmount).toLocaleString(undefined, {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
@@ -99,7 +99,7 @@ export const MiniReceiptModal: React.FC<MiniReceiptModalProps> = ({
         </div>
 
         {spending.notes && (
-          <div className="pt-2 border-t border-amber-200 text-[11px] text-slate-500">
+          <div className="pt-2 border-t border-[var(--color-border)] text-[11px] text-[var(--color-text-muted)]">
             <span className="font-bold">Notes: </span>
             <span>{spending.notes}</span>
           </div>
@@ -109,7 +109,7 @@ export const MiniReceiptModal: React.FC<MiniReceiptModalProps> = ({
       <div className="mt-4 flex justify-end">
         <button
           onClick={onClose}
-          className="px-5 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 touch-target"
+          className="px-5 py-2.5 rounded-[var(--radius-base)] bg-[var(--color-primary)] text-white text-sm font-semibold hover:bg-[var(--color-primary-hover)] touch-target"
         >
           Close Receipt
         </button>

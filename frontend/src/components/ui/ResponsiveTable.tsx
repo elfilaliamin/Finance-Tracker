@@ -33,17 +33,17 @@ export function ResponsiveTable<T>({
 
   if (isLoading) {
     return (
-      <div className="w-full py-12 flex flex-col items-center justify-center text-slate-400">
-        <div className="w-8 h-8 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin mb-3" />
-        <p className="text-sm">Loading data...</p>
+      <div className="w-full py-12 flex flex-col items-center justify-center text-[color:var(--color-muted)]">
+        <div className="w-8 h-8 border-3 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin mb-3" />
+        <p className="text-[length:var(--font-size-step-sub1)]">Loading data...</p>
       </div>
     );
   }
 
   if (data.length === 0) {
     return (
-      <div className="w-full py-12 text-center bg-white rounded-xl border border-slate-200/80 p-8 shadow-sm">
-        <p className="text-slate-500 text-sm">{emptyMessage}</p>
+      <div className="w-full py-12 text-center bg-[var(--color-surface)] text-[color:var(--color-muted)] rounded-[var(--radius-surface)] border border-[var(--color-border)] p-8 shadow-[var(--shadow-sm)]">
+        <p className="text-[length:var(--font-size-step-0)]">{emptyMessage}</p>
       </div>
     );
   }
@@ -56,7 +56,7 @@ export function ResponsiveTable<T>({
           <div
             key={keyExtractor(item)}
             onClick={onRowClick ? () => onRowClick(item) : undefined}
-            className={`bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm transition-all ${
+            className={`bg-[var(--color-surface)] rounded-[var(--radius-surface)] border border-[var(--color-border)] p-4 shadow-[var(--shadow-sm)] transition-all ${
               onRowClick ? 'active:scale-[0.99] cursor-pointer' : ''
             }`}
           >
@@ -67,7 +67,7 @@ export function ResponsiveTable<T>({
     );
   }
 
-  // Default Mobile fallback when no renderMobileCard is passed: Stacked key-value cards
+  // Default Mobile fallback when no renderMobileCard is passed
   if (isMobile) {
     return (
       <div className="space-y-3">
@@ -75,14 +75,14 @@ export function ResponsiveTable<T>({
           <div
             key={keyExtractor(item)}
             onClick={onRowClick ? () => onRowClick(item) : undefined}
-            className={`bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm space-y-2 ${
+            className={`bg-[var(--color-surface)] rounded-[var(--radius-surface)] border border-[var(--color-border)] p-4 shadow-[var(--shadow-sm)] space-y-2 ${
               onRowClick ? 'active:scale-[0.99] cursor-pointer' : ''
             }`}
           >
             {columns.map((col) => (
-              <div key={col.key} className="flex justify-between items-center text-sm">
-                <span className="text-slate-500 font-medium">{col.header}</span>
-                <span className="text-slate-900 font-semibold text-right">
+              <div key={col.key} className="flex justify-between items-center text-[length:var(--font-size-step-sub1)]">
+                <span className="text-[color:var(--color-muted)] font-medium">{col.header}</span>
+                <span className="text-[color:var(--color-text)] font-semibold text-right">
                   {col.render ? col.render(item) : (item as any)[col.key]}
                 </span>
               </div>
@@ -95,11 +95,11 @@ export function ResponsiveTable<T>({
 
   // Desktop / Tablet Table View
   return (
-    <div className="w-full bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+    <div className="w-full bg-[var(--color-surface)] rounded-[var(--radius-surface)] border border-[var(--color-border)] shadow-[var(--shadow-sm)] overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-slate-50/80 border-b border-slate-200 text-xs font-semibold uppercase tracking-wider text-slate-500">
+            <tr className="bg-[var(--color-primary-bg)] border-b border-[var(--color-border)] text-[length:var(--font-size-step-sub1)] font-semibold uppercase tracking-wider text-[color:var(--color-muted)]">
               {columns.map((col) => (
                 <th
                   key={col.key}
@@ -112,19 +112,21 @@ export function ResponsiveTable<T>({
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 text-sm">
+          <tbody className="divide-y divide-[var(--color-border)] text-[length:var(--font-size-step-0)]">
             {data.map((item) => (
               <tr
                 key={keyExtractor(item)}
                 onClick={onRowClick ? () => onRowClick(item) : undefined}
                 className={`transition-colors ${
-                  onRowClick ? 'hover:bg-indigo-50/40 cursor-pointer' : 'hover:bg-slate-50/60'
+                  onRowClick
+                    ? 'hover:bg-[var(--color-primary-bg)] cursor-pointer'
+                    : 'hover:bg-[var(--color-background)]'
                 }`}
               >
                 {columns.map((col) => (
                   <td
                     key={col.key}
-                    className={`py-3.5 px-4 text-slate-700 ${
+                    className={`py-3.5 px-4 text-[color:var(--color-text)] ${
                       col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'
                     } ${col.className || ''}`}
                   >
@@ -139,4 +141,3 @@ export function ResponsiveTable<T>({
     </div>
   );
 }
-

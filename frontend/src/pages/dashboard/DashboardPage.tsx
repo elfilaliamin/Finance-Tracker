@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { MetricCardsGrid } from './components/MetricCardsGrid';
 import { DashboardCharts } from './components/DashboardCharts';
 import { SpendingMatrix } from './components/SpendingMatrix';
-import { Filter, Calendar } from 'lucide-react';
+import { RiFilterLine, RiCalendarLine } from '@remixicon/react';
 
 export const DashboardPage: React.FC = () => {
   const { user } = useAuth();
@@ -51,23 +51,23 @@ export const DashboardPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Top Filter Bar */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-2 text-slate-700 font-medium text-sm">
-          <Filter size={18} className="text-indigo-600" />
+      <div className="bg-[var(--color-surface)] p-4 rounded-[var(--radius-surface)] border border-[var(--color-border)] shadow-[var(--shadow-sm)] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-2 text-[var(--color-text)] font-medium text-sm">
+          <RiFilterLine className="w-5 h-5 text-[var(--color-accent)]" />
           <span>Dashboard Filters:</span>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
           {/* Year Selector */}
-          <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5">
-            <Calendar size={16} className="text-slate-400" />
+          <div className="flex items-center gap-1.5 bg-[var(--color-primary-bg)] border border-[var(--color-border)] rounded-[var(--radius-base)] px-3 py-1.5">
+            <RiCalendarLine className="w-4 h-4 text-[var(--color-text-muted)]" />
             <select
               value={selectedYear}
               onChange={(e) => setSelectedYear(parseInt(e.target.value, 10))}
-              className="bg-transparent text-sm font-semibold text-slate-800 focus:outline-none"
+              className="bg-transparent text-sm font-semibold text-[var(--color-text)] focus:outline-none"
             >
               {[currentYear - 2, currentYear - 1, currentYear, currentYear + 1].map((yr) => (
-                <option key={yr} value={yr}>
+                <option key={yr} value={yr} className="bg-[var(--color-surface)] text-[var(--color-text)]">
                   {yr}
                 </option>
               ))}
@@ -75,16 +75,16 @@ export const DashboardPage: React.FC = () => {
           </div>
 
           {/* Global Wallet Filter */}
-          <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 flex-1 sm:flex-initial">
-            <span className="text-xs text-slate-500 font-medium whitespace-nowrap">Wallet:</span>
+          <div className="flex items-center gap-1.5 bg-[var(--color-primary-bg)] border border-[var(--color-border)] rounded-[var(--radius-base)] px-3 py-1.5 flex-1 sm:flex-initial">
+            <span className="text-xs text-[var(--color-text-muted)] font-medium whitespace-nowrap">Wallet:</span>
             <select
               value={selectedWalletId}
               onChange={(e) => setSelectedWalletId(e.target.value)}
-              className="bg-transparent text-sm font-semibold text-slate-800 focus:outline-none w-full sm:w-auto"
+              className="bg-transparent text-sm font-semibold text-[var(--color-text)] focus:outline-none w-full sm:w-auto"
             >
-              <option value="">All Wallets (Consolidated)</option>
+              <option value="" className="bg-[var(--color-surface)] text-[var(--color-text)]">All Wallets (Consolidated)</option>
               {wallets.map((w) => (
-                <option key={w.id} value={w.id}>
+                <option key={w.id} value={w.id} className="bg-[var(--color-surface)] text-[var(--color-text)]">
                   {w.name} ({w.type})
                 </option>
               ))}
@@ -94,8 +94,8 @@ export const DashboardPage: React.FC = () => {
       </div>
 
       {isLoading ? (
-        <div className="py-20 flex flex-col items-center justify-center text-slate-400">
-          <div className="w-8 h-8 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin mb-3" />
+        <div className="py-20 flex flex-col items-center justify-center text-[var(--color-text-muted)]">
+          <div className="w-8 h-8 border-3 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin mb-3" />
           <p className="text-sm">Calculating financial metrics...</p>
         </div>
       ) : (

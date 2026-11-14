@@ -50,21 +50,21 @@ export const SpendingFilters: React.FC<SpendingFiltersProps> = ({
           placeholder="Search items or notes..."
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-xs text-slate-800 w-full sm:w-48"
+          className="px-3 py-1.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-xs text-[var(--color-text)] focus:ring-1 focus:ring-[var(--color-ring)] focus:outline-none w-full sm:w-48"
         />
       </div>
 
       {/* Wallet */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 w-full sm:w-auto">
-        <label className="text-xs text-slate-500 font-semibold sm:hidden">Wallet</label>
+        <label className="text-xs text-[var(--color-text-muted)] font-semibold sm:hidden">Wallet</label>
         <select
           value={selectedWalletId}
           onChange={(e) => onSelectWalletId(e.target.value)}
-          className="px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-800 w-full sm:w-auto"
+          className="px-3 py-1.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-xs font-semibold text-[var(--color-text)] focus:ring-1 focus:ring-[var(--color-ring)] focus:outline-none w-full sm:w-auto"
         >
-          <option value="">All Wallets</option>
+          <option value="" className="bg-[var(--color-surface)] text-[var(--color-text)]">All Wallets</option>
           {wallets.map((w) => (
-            <option key={w.id} value={w.id}>
+            <option key={w.id} value={w.id} className="bg-[var(--color-surface)] text-[var(--color-text)]">
               {w.name}
             </option>
           ))}
@@ -73,15 +73,15 @@ export const SpendingFilters: React.FC<SpendingFiltersProps> = ({
 
       {/* Category */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 w-full sm:w-auto">
-        <label className="text-xs text-slate-500 font-semibold sm:hidden">Category</label>
+        <label className="text-xs text-[var(--color-text-muted)] font-semibold sm:hidden">Category</label>
         <select
           value={selectedCategoryId}
           onChange={(e) => onSelectCategoryId(e.target.value)}
-          className="px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-800 w-full sm:w-auto"
+          className="px-3 py-1.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-xs font-semibold text-[var(--color-text)] focus:ring-1 focus:ring-[var(--color-ring)] focus:outline-none w-full sm:w-auto"
         >
-          <option value="">All Categories</option>
+          <option value="" className="bg-[var(--color-surface)] text-[var(--color-text)]">All Categories</option>
           {categories.map((c) => (
-            <option key={c.id} value={c.id}>
+            <option key={c.id} value={c.id} className="bg-[var(--color-surface)] text-[var(--color-text)]">
               {c.name}
             </option>
           ))}
@@ -90,16 +90,16 @@ export const SpendingFilters: React.FC<SpendingFiltersProps> = ({
 
       {/* Currency */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 w-full sm:w-auto">
-        <label className="text-xs text-slate-500 font-semibold sm:hidden">Currency</label>
+        <label className="text-xs text-[var(--color-text-muted)] font-semibold sm:hidden">Currency</label>
         <select
           value={selectedCurrency}
           onChange={(e) => onSelectCurrency(e.target.value)}
-          className="px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-800 w-full sm:w-auto"
+          className="px-3 py-1.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-xs font-semibold text-[var(--color-text)] focus:ring-1 focus:ring-[var(--color-ring)] focus:outline-none w-full sm:w-auto"
         >
-          <option value="">All Currencies</option>
-          <option value="MAD">MAD</option>
-          <option value="USD">USD</option>
-          <option value="EUR">EUR</option>
+          <option value="" className="bg-[var(--color-surface)] text-[var(--color-text)]">All Currencies</option>
+          <option value="MAD" className="bg-[var(--color-surface)] text-[var(--color-text)]">MAD</option>
+          <option value="USD" className="bg-[var(--color-surface)] text-[var(--color-text)]">USD</option>
+          <option value="EUR" className="bg-[var(--color-surface)] text-[var(--color-text)]">EUR</option>
         </select>
       </div>
     </FilterDrawer>

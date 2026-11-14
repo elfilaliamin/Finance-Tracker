@@ -68,14 +68,14 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Type Toggle */}
-        <div className="flex rounded-xl bg-slate-100 p-1 border border-slate-200">
+        <div className="flex rounded-[var(--radius-base)] bg-[var(--color-primary-bg)] p-1 border border-[var(--color-border)]">
           <button
             type="button"
             onClick={() => setType('spending_limit')}
-            className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all touch-target ${
+            className={`flex-1 py-2 rounded-[var(--radius-base)] text-xs font-semibold transition-all touch-target ${
               type === 'spending_limit'
-                ? 'bg-white text-indigo-700 shadow-sm'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-[var(--color-surface)] text-[var(--color-accent)] shadow-[var(--shadow-sm)]'
+                : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
             }`}
           >
             Spending Limit (Expense Cap)
@@ -83,10 +83,10 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
           <button
             type="button"
             onClick={() => setType('saving_goal')}
-            className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all touch-target ${
+            className={`flex-1 py-2 rounded-[var(--radius-base)] text-xs font-semibold transition-all touch-target ${
               type === 'saving_goal'
-                ? 'bg-white text-purple-700 shadow-sm'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-[var(--color-surface)] text-[var(--color-accent)] shadow-[var(--shadow-sm)]'
+                : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
             }`}
           >
             Saving Goal (Target Balance)
@@ -95,7 +95,7 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
 
         {/* Name */}
         <div>
-          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5">
             {type === 'spending_limit' ? 'Budget Name *' : 'Goal Name *'}
           </label>
           <input
@@ -104,14 +104,14 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
             placeholder={type === 'spending_limit' ? 'e.g. Monthly Dining Out' : 'e.g. Emergency Fund 2026'}
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm shadow-sm"
+            className="w-full px-3.5 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-ring)] focus:outline-none text-sm"
           />
         </div>
 
         {/* Target Amount & Currency */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5">
               Target Amount *
             </label>
             <input
@@ -121,22 +121,22 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
               placeholder="0.00"
               value={targetAmount}
               onChange={(e) => setTargetAmount(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-mono shadow-sm"
+              className="w-full px-3.5 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-ring)] focus:outline-none text-sm font-mono"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5">
               Currency *
             </label>
             <select
               value={currency}
               onChange={(e) => setCurrency(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-sm shadow-sm"
+              className="w-full px-3.5 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-ring)] focus:outline-none text-sm"
             >
-              <option value="MAD">MAD</option>
-              <option value="USD">USD</option>
-              <option value="EUR">EUR</option>
+              <option value="MAD" className="bg-[var(--color-surface)] text-[var(--color-text)]">MAD</option>
+              <option value="USD" className="bg-[var(--color-surface)] text-[var(--color-text)]">USD</option>
+              <option value="EUR" className="bg-[var(--color-surface)] text-[var(--color-text)]">EUR</option>
             </select>
           </div>
         </div>
@@ -146,32 +146,32 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
             {/* Period */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5">
                   Period
                 </label>
                 <select
                   value={period}
                   onChange={(e) => setPeriod(e.target.value as any)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-sm shadow-sm"
+                  className="w-full px-3.5 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-ring)] focus:outline-none text-sm"
                 >
-                  <option value="monthly">Monthly Reset</option>
-                  <option value="yearly">Yearly Reset</option>
-                  <option value="custom">Custom Duration</option>
+                  <option value="monthly" className="bg-[var(--color-surface)] text-[var(--color-text)]">Monthly Reset</option>
+                  <option value="yearly" className="bg-[var(--color-surface)] text-[var(--color-text)]">Yearly Reset</option>
+                  <option value="custom" className="bg-[var(--color-surface)] text-[var(--color-text)]">Custom Duration</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5">
                   Spending Category (Optional)
                 </label>
                 <select
                   value={categoryId}
                   onChange={(e) => setCategoryId(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-sm shadow-sm"
+                  className="w-full px-3.5 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-ring)] focus:outline-none text-sm"
                 >
-                  <option value="">All Categories</option>
+                  <option value="" className="bg-[var(--color-surface)] text-[var(--color-text)]">All Categories</option>
                   {categories.map((c) => (
-                    <option key={c.id} value={c.id}>
+                    <option key={c.id} value={c.id} className="bg-[var(--color-surface)] text-[var(--color-text)]">
                       {c.name}
                     </option>
                   ))}
@@ -180,17 +180,17 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5">
                 Restricted to Wallet (Optional)
               </label>
               <select
                 value={walletId}
                 onChange={(e) => setWalletId(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-sm shadow-sm"
+                className="w-full px-3.5 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-ring)] focus:outline-none text-sm"
               >
-                <option value="">All Wallets</option>
+                <option value="" className="bg-[var(--color-surface)] text-[var(--color-text)]">All Wallets</option>
                 {wallets.map((w) => (
-                  <option key={w.id} value={w.id}>
+                  <option key={w.id} value={w.id} className="bg-[var(--color-surface)] text-[var(--color-text)]">
                     {w.name}
                   </option>
                 ))}
@@ -201,19 +201,19 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
           <>
             {/* Target Wallet for Saving Goal */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5">
                 Target Wallet *
               </label>
               <select
                 value={walletId}
                 onChange={(e) => setWalletId(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-sm shadow-sm"
+                className="w-full px-3.5 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-ring)] focus:outline-none text-sm"
               >
-                <option value="">Select a wallet...</option>
+                <option value="" className="bg-[var(--color-surface)] text-[var(--color-text)]">Select a wallet...</option>
                 {wallets
                   .filter((w) => w.type === 'asset')
                   .map((w) => (
-                    <option key={w.id} value={w.id}>
+                    <option key={w.id} value={w.id} className="bg-[var(--color-surface)] text-[var(--color-text)]">
                       {w.name} ({w.currentBalance} {w.defaultCurrency})
                     </option>
                   ))}
@@ -222,32 +222,32 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
 
             {/* Target Date */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5">
                 Target Date (Optional)
               </label>
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm shadow-sm"
+                className="w-full px-3.5 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-ring)] focus:outline-none text-sm"
               />
             </div>
           </>
         )}
 
         {/* Action Buttons */}
-        <div className="pt-3 border-t border-slate-100 flex justify-end gap-3">
+        <div className="pt-3 border-t border-[var(--color-border)] flex justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-50 touch-target"
+            className="px-4 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] text-[var(--color-text)] text-sm font-medium hover:bg-[var(--color-primary-bg)] touch-target"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold shadow-md disabled:opacity-60 touch-target"
+            className="px-5 py-2.5 rounded-[var(--radius-base)] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-sm font-semibold shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] disabled:opacity-60 touch-target"
           >
             {isSubmitting ? 'Saving...' : 'Create Plan'}
           </button>

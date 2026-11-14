@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ResponsiveModal } from '@/components/ui/ResponsiveModal';
 import { settingsApi } from '@/api/settingsApi';
-import { Upload, CheckCircle2, AlertTriangle, FileCode } from 'lucide-react';
+import { RiUploadLine, RiCheckboxCircleLine, RiAlertLine } from '@remixicon/react';
 
 interface ImportWizardModalProps {
   isOpen: boolean;
@@ -75,10 +75,10 @@ export const ImportWizardModal: React.FC<ImportWizardModalProps> = ({
       <div className="space-y-4">
         {/* File Picker */}
         <div>
-          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+          <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-2">
             Select Backup File (.json)
           </label>
-          <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:border-indigo-500 transition-colors bg-slate-50">
+          <div className="border-2 border-dashed border-[var(--color-border)] rounded-[var(--radius-base)] p-6 text-center hover:border-[var(--color-ring)] transition-colors bg-[var(--color-primary-bg)]">
             <input
               type="file"
               accept=".json,application/json"
@@ -87,65 +87,65 @@ export const ImportWizardModal: React.FC<ImportWizardModalProps> = ({
               id="backupFileInput"
             />
             <label htmlFor="backupFileInput" className="cursor-pointer flex flex-col items-center">
-              <Upload size={28} className="text-indigo-600 mb-2" />
-              <span className="text-sm font-semibold text-slate-800">
+              <RiUploadLine className="w-8 h-8 text-[var(--color-accent)] mb-2" />
+              <span className="text-sm font-semibold text-[var(--color-text)]">
                 {fileName || 'Click to browse backup file'}
               </span>
-              <span className="text-xs text-slate-500 mt-0.5">finance-tracker-backup.json</span>
+              <span className="text-xs text-[var(--color-text-muted)] mt-0.5">finance-tracker-backup.json</span>
             </label>
           </div>
         </div>
 
         {isValidating && (
-          <div className="py-4 text-center text-xs text-slate-500 flex items-center justify-center gap-2">
-            <div className="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+          <div className="py-4 text-center text-xs text-[var(--color-text-muted)] flex items-center justify-center gap-2">
+            <div className="w-4 h-4 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin" />
             <span>Analyzing backup package schema & integrity...</span>
           </div>
         )}
 
         {error && (
-          <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 flex items-start gap-2">
-            <AlertTriangle size={16} className="shrink-0 mt-0.5" />
+          <div className="p-3 bg-[var(--color-danger)]/10 border border-[var(--color-danger)]/20 rounded-[var(--radius-base)] text-xs text-[var(--color-danger)] flex items-start gap-2">
+            <RiAlertLine className="w-4 h-4 shrink-0 mt-0.5" />
             <span>{error}</span>
           </div>
         )}
 
         {/* Dry Run Report */}
         {dryRunResult && (
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
-            <div className="flex items-center gap-2 text-emerald-700 font-bold text-xs uppercase tracking-wider">
-              <CheckCircle2 size={16} />
+          <div className="bg-[var(--color-primary-bg)] border border-[var(--color-border)] rounded-[var(--radius-base)] p-4 space-y-3">
+            <div className="flex items-center gap-2 text-[var(--color-accent)] font-bold text-xs uppercase tracking-wider">
+              <RiCheckboxCircleLine className="w-4 h-4" />
               <span>Dry-Run Analysis Succeeded</span>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
-              <div className="bg-white p-2 rounded-lg border border-slate-200">
-                <span className="text-slate-400 block text-[10px]">Wallets</span>
-                <span className="font-bold text-slate-800 font-mono">
+              <div className="bg-[var(--color-surface)] p-2 rounded-[var(--radius-base)] border border-[var(--color-border)]">
+                <span className="text-[var(--color-text-muted)] block text-[10px]">Wallets</span>
+                <span className="font-bold text-[var(--color-text)] font-mono">
                   {dryRunResult.walletsCount ?? dryRunResult.wallets?.length ?? 0}
                 </span>
               </div>
-              <div className="bg-white p-2 rounded-lg border border-slate-200">
-                <span className="text-slate-400 block text-[10px]">Incomes</span>
-                <span className="font-bold text-slate-800 font-mono">
+              <div className="bg-[var(--color-surface)] p-2 rounded-[var(--radius-base)] border border-[var(--color-border)]">
+                <span className="text-[var(--color-text-muted)] block text-[10px]">Incomes</span>
+                <span className="font-bold text-[var(--color-text)] font-mono">
                   {dryRunResult.incomesCount ?? dryRunResult.incomes?.length ?? 0}
                 </span>
               </div>
-              <div className="bg-white p-2 rounded-lg border border-slate-200">
-                <span className="text-slate-400 block text-[10px]">Spendings</span>
-                <span className="font-bold text-slate-800 font-mono">
+              <div className="bg-[var(--color-surface)] p-2 rounded-[var(--radius-base)] border border-[var(--color-border)]">
+                <span className="text-[var(--color-text-muted)] block text-[10px]">Spendings</span>
+                <span className="font-bold text-[var(--color-text)] font-mono">
                   {dryRunResult.spendingsCount ?? dryRunResult.spendings?.length ?? 0}
                 </span>
               </div>
-              <div className="bg-white p-2 rounded-lg border border-slate-200">
-                <span className="text-slate-400 block text-[10px]">Categories</span>
-                <span className="font-bold text-slate-800 font-mono">
+              <div className="bg-[var(--color-surface)] p-2 rounded-[var(--radius-base)] border border-[var(--color-border)]">
+                <span className="text-[var(--color-text-muted)] block text-[10px]">Categories</span>
+                <span className="font-bold text-[var(--color-text)] font-mono">
                   {dryRunResult.categoriesCount ?? 0}
                 </span>
               </div>
-              <div className="bg-white p-2 rounded-lg border border-slate-200">
-                <span className="text-slate-400 block text-[10px]">Budgets</span>
-                <span className="font-bold text-slate-800 font-mono">
+              <div className="bg-[var(--color-surface)] p-2 rounded-[var(--radius-base)] border border-[var(--color-border)]">
+                <span className="text-[var(--color-text-muted)] block text-[10px]">Budgets</span>
+                <span className="font-bold text-[var(--color-text)] font-mono">
                   {dryRunResult.budgetsCount ?? dryRunResult.budgets?.length ?? 0}
                 </span>
               </div>
@@ -154,11 +154,11 @@ export const ImportWizardModal: React.FC<ImportWizardModalProps> = ({
         )}
 
         {/* Action Buttons */}
-        <div className="pt-3 border-t border-slate-100 flex justify-end gap-3">
+        <div className="pt-3 border-t border-[var(--color-border)] flex justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-50 touch-target"
+            className="px-4 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] text-[var(--color-text)] text-sm font-medium hover:bg-[var(--color-primary-bg)] touch-target"
           >
             Cancel
           </button>
@@ -166,7 +166,7 @@ export const ImportWizardModal: React.FC<ImportWizardModalProps> = ({
             type="button"
             onClick={handleExecuteImport}
             disabled={!dryRunResult || isImporting}
-            className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold shadow-md disabled:opacity-60 touch-target"
+            className="px-5 py-2.5 rounded-[var(--radius-base)] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-sm font-semibold shadow-[var(--shadow-sm)] disabled:opacity-60 touch-target"
           >
             {isImporting ? 'Restoring...' : 'Confirm & Restore'}
           </button>

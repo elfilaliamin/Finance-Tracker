@@ -68,24 +68,24 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
         {/* Date & Currency */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5">
               Date *
             </label>
             <input
               type="date"
               {...register('date')}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 text-sm shadow-sm"
+              className="w-full px-3.5 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-ring)] focus:outline-none text-sm"
             />
-            {errors.date && <p className="mt-1 text-xs text-rose-600">{errors.date.message}</p>}
+            {errors.date && <p className="mt-1 text-xs text-[var(--color-danger)]">{errors.date.message}</p>}
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5">
               Currency *
             </label>
             <select
               {...register('currency')}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-indigo-500 text-sm shadow-sm"
+              className="w-full px-3.5 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-ring)] focus:outline-none text-sm"
             >
               <option value="MAD">MAD - Moroccan Dirham</option>
               <option value="USD">USD - US Dollar</option>
@@ -96,7 +96,7 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
 
         {/* Amount */}
         <div>
-          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5">
             Amount *
           </label>
           <input
@@ -104,19 +104,19 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
             step="0.01"
             placeholder="0.00"
             {...register('amount')}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 text-sm font-mono shadow-sm"
+            className="w-full px-3.5 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-ring)] focus:outline-none text-sm font-mono"
           />
-          {errors.amount && <p className="mt-1 text-xs text-rose-600">{errors.amount.message}</p>}
+          {errors.amount && <p className="mt-1 text-xs text-[var(--color-danger)]">{errors.amount.message}</p>}
         </div>
 
         {/* Income Source */}
         <div>
-          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5">
             Income Source *
           </label>
           <select
             {...register('sourceId')}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-indigo-500 text-sm shadow-sm"
+            className="w-full px-3.5 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-ring)] focus:outline-none text-sm"
           >
             <option value="">Select a source...</option>
             {sources.map((s) => (
@@ -125,17 +125,17 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
               </option>
             ))}
           </select>
-          {errors.sourceId && <p className="mt-1 text-xs text-rose-600">{errors.sourceId.message}</p>}
+          {errors.sourceId && <p className="mt-1 text-xs text-[var(--color-danger)]">{errors.sourceId.message}</p>}
         </div>
 
         {/* Category (Optional) */}
         <div>
-          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5">
             Category (Optional)
           </label>
           <select
             {...register('categoryId')}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-indigo-500 text-sm shadow-sm"
+            className="w-full px-3.5 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-ring)] focus:outline-none text-sm"
           >
             <option value="">None (Uncategorized)</option>
             {categories.map((c) => (
@@ -148,43 +148,43 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
 
         {/* Description */}
         <div>
-          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5">
             Description
           </label>
           <input
             type="text"
             placeholder="e.g. November Consulting Invoice #104"
             {...register('description')}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 text-sm shadow-sm"
+            className="w-full px-3.5 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-ring)] focus:outline-none text-sm"
           />
         </div>
 
         {/* Notes */}
         <div>
-          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5">
             Notes
           </label>
           <textarea
             rows={2}
             placeholder="Additional context or payment reference..."
             {...register('notes')}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 text-sm shadow-sm"
+            className="w-full px-3.5 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-ring)] focus:outline-none text-sm"
           />
         </div>
 
         {/* Buttons */}
-        <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-3">
+        <div className="pt-3 border-t border-[var(--color-border)] flex items-center justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-50 touch-target"
+            className="px-4 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] text-[var(--color-text)] text-sm font-medium hover:bg-[var(--color-primary-bg)] touch-target"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold shadow-md disabled:opacity-60 touch-target"
+            className="px-5 py-2.5 rounded-[var(--radius-base)] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-sm font-semibold shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] disabled:opacity-60 touch-target"
           >
             {isSubmitting ? 'Saving...' : 'Save Income'}
           </button>

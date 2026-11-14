@@ -40,14 +40,14 @@ export const IncomeFilters: React.FC<IncomeFiltersProps> = ({
     <FilterDrawer activeCount={activeCount} onClear={onClear} title="Filter Income Ledger">
       {/* Year */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 w-full sm:w-auto">
-        <label className="text-xs text-slate-500 font-semibold sm:hidden">Year</label>
+        <label className="text-xs text-[var(--color-text-muted)] font-semibold sm:hidden">Year</label>
         <select
           value={selectedYear}
           onChange={(e) => onSelectYear(parseInt(e.target.value, 10))}
-          className="px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-800"
+          className="px-3 py-1.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-xs font-semibold text-[var(--color-text)] focus:ring-1 focus:ring-[var(--color-ring)] focus:outline-none"
         >
           {[currentYear - 2, currentYear - 1, currentYear, currentYear + 1].map((yr) => (
-            <option key={yr} value={yr}>
+            <option key={yr} value={yr} className="bg-[var(--color-surface)] text-[var(--color-text)]">
               Year: {yr}
             </option>
           ))}
@@ -56,15 +56,15 @@ export const IncomeFilters: React.FC<IncomeFiltersProps> = ({
 
       {/* Source */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 w-full sm:w-auto">
-        <label className="text-xs text-slate-500 font-semibold sm:hidden">Source</label>
+        <label className="text-xs text-[var(--color-text-muted)] font-semibold sm:hidden">Source</label>
         <select
           value={selectedSourceId}
           onChange={(e) => onSelectSourceId(e.target.value)}
-          className="px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-800 w-full sm:w-auto"
+          className="px-3 py-1.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-xs font-semibold text-[var(--color-text)] focus:ring-1 focus:ring-[var(--color-ring)] focus:outline-none w-full sm:w-auto"
         >
-          <option value="">All Sources</option>
+          <option value="" className="bg-[var(--color-surface)] text-[var(--color-text)]">All Sources</option>
           {sources.map((s) => (
-            <option key={s.id} value={s.id}>
+            <option key={s.id} value={s.id} className="bg-[var(--color-surface)] text-[var(--color-text)]">
               {s.name}
             </option>
           ))}
@@ -73,15 +73,15 @@ export const IncomeFilters: React.FC<IncomeFiltersProps> = ({
 
       {/* Category */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 w-full sm:w-auto">
-        <label className="text-xs text-slate-500 font-semibold sm:hidden">Category</label>
+        <label className="text-xs text-[var(--color-text-muted)] font-semibold sm:hidden">Category</label>
         <select
           value={selectedCategoryId}
           onChange={(e) => onSelectCategoryId(e.target.value)}
-          className="px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-800 w-full sm:w-auto"
+          className="px-3 py-1.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-xs font-semibold text-[var(--color-text)] focus:ring-1 focus:ring-[var(--color-ring)] focus:outline-none w-full sm:w-auto"
         >
-          <option value="">All Categories</option>
+          <option value="" className="bg-[var(--color-surface)] text-[var(--color-text)]">All Categories</option>
           {categories.map((c) => (
-            <option key={c.id} value={c.id}>
+            <option key={c.id} value={c.id} className="bg-[var(--color-surface)] text-[var(--color-text)]">
               {c.name}
             </option>
           ))}
@@ -90,16 +90,16 @@ export const IncomeFilters: React.FC<IncomeFiltersProps> = ({
 
       {/* Currency */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 w-full sm:w-auto">
-        <label className="text-xs text-slate-500 font-semibold sm:hidden">Currency</label>
+        <label className="text-xs text-[var(--color-text-muted)] font-semibold sm:hidden">Currency</label>
         <select
           value={selectedCurrency}
           onChange={(e) => onSelectCurrency(e.target.value)}
-          className="px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-800 w-full sm:w-auto"
+          className="px-3 py-1.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-xs font-semibold text-[var(--color-text)] focus:ring-1 focus:ring-[var(--color-ring)] focus:outline-none w-full sm:w-auto"
         >
-          <option value="">All Currencies</option>
-          <option value="MAD">MAD</option>
-          <option value="USD">USD</option>
-          <option value="EUR">EUR</option>
+          <option value="" className="bg-[var(--color-surface)] text-[var(--color-text)]">All Currencies</option>
+          <option value="MAD" className="bg-[var(--color-surface)] text-[var(--color-text)]">MAD</option>
+          <option value="USD" className="bg-[var(--color-surface)] text-[var(--color-text)]">USD</option>
+          <option value="EUR" className="bg-[var(--color-surface)] text-[var(--color-text)]">EUR</option>
         </select>
       </div>
     </FilterDrawer>

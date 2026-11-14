@@ -11,8 +11,8 @@ interface WalletModalProps {
 }
 
 const WALLET_COLORS = [
-  '#4f46e5', '#2563eb', '#0891b2', '#059669', '#16a34a',
-  '#ca8a04', '#d97706', '#dc2626', '#9333ea', '#475569'
+  '#047857', '#10b981', '#34d399', '#059669', '#0d9488',
+  '#0284c7', '#2563eb', '#7c3aed', '#db2777', '#d97706'
 ];
 
 export const WalletModal: React.FC<WalletModalProps> = ({
@@ -24,7 +24,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({
 }) => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [color, setColor] = useState('#4f46e5');
+  const [color, setColor] = useState('#047857');
   const [type, setType] = useState<'asset' | 'liability'>('asset');
   const [currency, setCurrency] = useState(defaultCurrency);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,13 +33,13 @@ export const WalletModal: React.FC<WalletModalProps> = ({
     if (wallet) {
       setName(wallet.name);
       setDescription(wallet.description || '');
-      setColor(wallet.color || '#4f46e5');
+      setColor(wallet.color || '#047857');
       setType(wallet.type);
       setCurrency(wallet.defaultCurrency);
     } else {
       setName('');
       setDescription('');
-      setColor('#4f46e5');
+      setColor('#047857');
       setType('asset');
       setCurrency(defaultCurrency);
     }
@@ -73,14 +73,14 @@ export const WalletModal: React.FC<WalletModalProps> = ({
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Type: Asset vs Liability */}
-        <div className="flex rounded-xl bg-slate-100 p-1 border border-slate-200">
+        <div className="flex rounded-[var(--radius-base)] bg-[var(--color-primary-bg)] p-1 border border-[var(--color-border)]">
           <button
             type="button"
             onClick={() => setType('asset')}
-            className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all touch-target ${
+            className={`flex-1 py-2 rounded-[var(--radius-base)] text-xs font-semibold transition-all touch-target ${
               type === 'asset'
-                ? 'bg-white text-indigo-700 shadow-sm'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-[var(--color-surface)] text-[var(--color-accent)] shadow-[var(--shadow-sm)]'
+                : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
             }`}
           >
             Asset (Savings, Cash, Checking)
@@ -88,10 +88,10 @@ export const WalletModal: React.FC<WalletModalProps> = ({
           <button
             type="button"
             onClick={() => setType('liability')}
-            className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all touch-target ${
+            className={`flex-1 py-2 rounded-[var(--radius-base)] text-xs font-semibold transition-all touch-target ${
               type === 'liability'
-                ? 'bg-white text-rose-700 shadow-sm'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-[var(--color-surface)] text-[var(--color-danger)] shadow-[var(--shadow-sm)]'
+                : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
             }`}
           >
             Liability (Debt, Credit Card)
@@ -100,7 +100,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({
 
         {/* Name */}
         <div>
-          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5">
             Wallet Name *
           </label>
           <input
@@ -109,29 +109,29 @@ export const WalletModal: React.FC<WalletModalProps> = ({
             placeholder="e.g. Attijariwafa Checking, Cash Wallet, Visa Card"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm shadow-sm"
+            className="w-full px-3.5 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-ring)] focus:outline-none text-sm"
           />
         </div>
 
         {/* Currency */}
         <div>
-          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5">
             Default Currency *
           </label>
           <select
             value={currency}
             onChange={(e) => setCurrency(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-sm shadow-sm"
+            className="w-full px-3.5 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-ring)] focus:outline-none text-sm"
           >
-            <option value="MAD">MAD - Moroccan Dirham</option>
-            <option value="USD">USD - US Dollar</option>
-            <option value="EUR">EUR - Euro</option>
+            <option value="MAD" className="bg-[var(--color-surface)] text-[var(--color-text)]">MAD - Moroccan Dirham</option>
+            <option value="USD" className="bg-[var(--color-surface)] text-[var(--color-text)]">USD - US Dollar</option>
+            <option value="EUR" className="bg-[var(--color-surface)] text-[var(--color-text)]">EUR - Euro</option>
           </select>
         </div>
 
         {/* Description */}
         <div>
-          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5">
             Description
           </label>
           <textarea
@@ -139,13 +139,13 @@ export const WalletModal: React.FC<WalletModalProps> = ({
             placeholder="Main account for bills, emergency fund..."
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm shadow-sm"
+            className="w-full px-3.5 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-ring)] focus:outline-none text-sm"
           />
         </div>
 
         {/* Color Swatch */}
         <div>
-          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+          <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-2">
             Wallet Color
           </label>
           <div className="flex flex-wrap items-center gap-2">
@@ -155,7 +155,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({
                 type="button"
                 onClick={() => setColor(c)}
                 className={`w-7 h-7 rounded-full transition-transform ${
-                  color === c ? 'scale-125 ring-2 ring-indigo-500 ring-offset-2' : 'hover:scale-110'
+                  color === c ? 'scale-125 ring-2 ring-[var(--color-ring)] ring-offset-2 ring-offset-[var(--color-surface)]' : 'hover:scale-110'
                 }`}
                 style={{ backgroundColor: c }}
                 aria-label={`Select color ${c}`}
@@ -165,18 +165,18 @@ export const WalletModal: React.FC<WalletModalProps> = ({
         </div>
 
         {/* Action Buttons */}
-        <div className="pt-3 border-t border-slate-100 flex justify-end gap-3">
+        <div className="pt-3 border-t border-[var(--color-border)] flex justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-50 touch-target"
+            className="px-4 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] text-[var(--color-text)] text-sm font-medium hover:bg-[var(--color-primary-bg)] touch-target"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold shadow-md disabled:opacity-60 touch-target"
+            className="px-5 py-2.5 rounded-[var(--radius-base)] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-sm font-semibold shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] disabled:opacity-60 touch-target"
           >
             {isSubmitting ? 'Saving...' : wallet ? 'Update Wallet' : 'Create Wallet'}
           </button>

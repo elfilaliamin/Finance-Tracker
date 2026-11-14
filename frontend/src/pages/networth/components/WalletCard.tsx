@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sliders, Edit2, Trash2 } from 'lucide-react';
+import { RiEqualizerLine, RiEditLine, RiDeleteBinLine } from '@remixicon/react';
 import { Wallet } from '@/api/walletApi';
 
 interface WalletCardProps {
@@ -19,7 +19,7 @@ export const WalletCard: React.FC<WalletCardProps> = ({
   const isAsset = wallet.type === 'asset';
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm hover:shadow transition-shadow flex flex-col justify-between">
+    <div className="bg-[var(--color-surface)] rounded-[var(--radius-surface)] border border-[var(--color-border)] p-5 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-shadow flex flex-col justify-between">
       <div>
         <div className="flex items-start justify-between gap-2 mb-3">
           <div className="flex items-center gap-2.5">
@@ -27,12 +27,14 @@ export const WalletCard: React.FC<WalletCardProps> = ({
               className="w-3.5 h-3.5 rounded-full shrink-0 shadow-xs"
               style={{ backgroundColor: wallet.color }}
             />
-            <h3 className="font-bold text-slate-900 text-base">{wallet.name}</h3>
+            <h3 className="font-heading font-bold text-[var(--color-text)] text-base">{wallet.name}</h3>
           </div>
 
           <span
-            className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider ${
-              isAsset ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'
+            className={`inline-flex items-center px-2.5 py-0.5 rounded-[var(--radius-pill)] text-[11px] font-semibold uppercase tracking-wider border ${
+              isAsset
+                ? 'bg-[var(--color-primary-bg)] text-[var(--color-accent)] border-[var(--color-border)]'
+                : 'bg-[var(--color-danger)]/10 text-[var(--color-danger)] border-[var(--color-danger)]/20'
             }`}
           >
             {wallet.type}
@@ -40,17 +42,17 @@ export const WalletCard: React.FC<WalletCardProps> = ({
         </div>
 
         {wallet.description && (
-          <p className="text-xs text-slate-500 mb-4 line-clamp-2">{wallet.description}</p>
+          <p className="text-xs text-[var(--color-text-muted)] mb-4 line-clamp-2">{wallet.description}</p>
         )}
 
         <div className="my-2">
-          <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
+          <span className="text-[11px] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider block">
             Current Balance
           </span>
-          <div className="flex items-baseline gap-1 mt-0.5">
+          <div className="flex items-baseline gap-1.5 mt-0.5">
             <span
-              className={`text-2xl font-bold font-mono tracking-tight ${
-                isAsset ? 'text-slate-900' : 'text-rose-600'
+              className={`text-2xl font-heading font-bold font-mono tracking-tight ${
+                isAsset ? 'text-[var(--color-text)]' : 'text-[var(--color-danger)]'
               }`}
             >
               {isAsset ? '' : '-'}
@@ -59,34 +61,34 @@ export const WalletCard: React.FC<WalletCardProps> = ({
                 maximumFractionDigits: 2,
               })}
             </span>
-            <span className="text-xs font-semibold text-slate-500">{wallet.defaultCurrency}</span>
+            <span className="text-xs font-semibold text-[var(--color-text-muted)]">{wallet.defaultCurrency}</span>
           </div>
         </div>
       </div>
 
-      <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+      <div className="mt-4 pt-3 border-t border-[var(--color-border)] flex items-center justify-between gap-2">
         <button
           onClick={() => onAdjust(wallet)}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 text-indigo-700 hover:bg-indigo-100 text-xs font-semibold transition-colors touch-target"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-base)] bg-[var(--color-primary-bg)] text-[var(--color-accent)] hover:bg-[var(--color-border)]/50 text-xs font-semibold transition-colors touch-target"
         >
-          <Sliders size={15} />
+          <RiEqualizerLine className="w-4 h-4" />
           <span>Adjust Balance</span>
         </button>
 
         <div className="flex items-center gap-1">
           <button
             onClick={() => onEdit(wallet)}
-            className="p-1.5 text-slate-400 hover:text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors touch-target"
+            className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-accent)] rounded-[var(--radius-base)] hover:bg-[var(--color-primary-bg)] transition-colors touch-target"
             title="Edit wallet details"
           >
-            <Edit2 size={16} />
+            <RiEditLine className="w-4 h-4" />
           </button>
           <button
             onClick={() => onDelete(wallet)}
-            className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors touch-target"
+            className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-danger)] rounded-[var(--radius-base)] hover:bg-[var(--color-danger)]/10 transition-colors touch-target"
             title="Delete wallet"
           >
-            <Trash2 size={16} />
+            <RiDeleteBinLine className="w-4 h-4" />
           </button>
         </div>
       </div>

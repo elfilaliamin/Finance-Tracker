@@ -1,44 +1,48 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
-  LayoutDashboard,
-  Receipt,
-  Wallet,
-  TrendingUp,
-  MoreHorizontal,
-  FolderKanban,
-  Target,
-  FileSpreadsheet,
-  Settings,
-  LogOut,
-  X,
-} from 'lucide-react';
+  RiDashboardLine,
+  RiReceiptLine,
+  RiWallet3Line,
+  RiArrowUpCircleLine,
+  RiMoreFill,
+  RiBriefcaseLine,
+  RiFocus3Line,
+  RiFileChartLine,
+  RiSettings3Line,
+  RiLogoutBoxRLine,
+  RiCloseLine,
+  RiSunLine,
+  RiMoonLine,
+} from '@remixicon/react';
 import { useAuth } from '@/hooks/useAuth';
+import { useTheme } from '@/hooks/useTheme';
 
 const primaryNav = [
-  { path: '/dashboard', label: 'Home', icon: LayoutDashboard },
-  { path: '/spending', label: 'Spending', icon: Receipt },
-  { path: '/net-worth', label: 'Net Worth', icon: Wallet },
-  { path: '/income', label: 'Income', icon: TrendingUp },
+  { path: '/dashboard', label: 'Home', icon: RiDashboardLine },
+  { path: '/spending', label: 'Spending', icon: RiReceiptLine },
+  { path: '/net-worth', label: 'Net Worth', icon: RiWallet3Line },
+  { path: '/income', label: 'Income', icon: RiArrowUpCircleLine },
 ];
 
 const secondaryNav = [
-  { path: '/income-sources', label: 'Income Sources', icon: FolderKanban },
-  { path: '/budgets', label: 'Budgets & Goals', icon: Target },
-  { path: '/reports', label: 'Reports', icon: FileSpreadsheet },
-  { path: '/settings', label: 'Settings', icon: Settings },
+  { path: '/income-sources', label: 'Income Sources', icon: RiBriefcaseLine },
+  { path: '/budgets', label: 'Budgets & Goals', icon: RiFocus3Line },
+  { path: '/reports', label: 'Reports', icon: RiFileChartLine },
+  { path: '/settings', label: 'Settings', icon: RiSettings3Line },
 ];
 
 export const BottomNav: React.FC = () => {
   const [showMore, setShowMore] = useState(false);
   const { user, logout } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
 
   return (
     <>
       {/* Fixed Bottom Navigation Bar */}
       <nav
         aria-label="Mobile Navigation"
-        className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 shadow-lg md:hidden pb-[env(safe-area-inset-bottom)]"
+        className="fixed bottom-0 left-0 right-0 z-[var(--z-sticky)] bg-[var(--color-surface)] border-t border-[var(--color-border)] shadow-[var(--shadow-lg)] lg:hidden pb-[var(--safe-area-inset-bottom)]"
       >
         <div className="grid grid-cols-5 h-16 items-center px-1">
           {primaryNav.map((item) => {
@@ -48,8 +52,10 @@ export const BottomNav: React.FC = () => {
                 key={item.path}
                 to={item.path}
                 className={({ isActive }) =>
-                  `flex flex-col items-center justify-center h-full touch-target text-[11px] font-medium transition-colors ${
-                    isActive ? 'text-indigo-600 font-semibold' : 'text-slate-500 hover:text-slate-800'
+                  `flex flex-col items-center justify-center h-full touch-target text-[10px] font-medium transition-colors ${
+                    isActive
+                      ? 'text-[color:var(--color-primary-text)] font-semibold'
+                      : 'text-[color:var(--color-muted)] hover:text-[color:var(--color-text)]'
                   }`
                 }
               >
@@ -59,16 +65,18 @@ export const BottomNav: React.FC = () => {
             );
           })}
 
-          {/* More Action */}
+          {/* More Action Drawer Trigger */}
           <button
             type="button"
             onClick={() => setShowMore(true)}
             aria-label="Open more navigation options"
-            className={`flex flex-col items-center justify-center h-full touch-target text-[11px] font-medium transition-colors ${
-              showMore ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-800'
+            className={`flex flex-col items-center justify-center h-full touch-target text-[10px] font-medium transition-colors ${
+              showMore
+                ? 'text-[color:var(--color-primary-text)] font-semibold'
+                : 'text-[color:var(--color-muted)] hover:text-[color:var(--color-text)]'
             }`}
           >
-            <MoreHorizontal size={20} className="mb-0.5" />
+            <RiMoreFill size={20} className="mb-0.5" />
             <span>More</span>
           </button>
         </div>
@@ -76,34 +84,36 @@ export const BottomNav: React.FC = () => {
 
       {/* "More" Bottom Sheet Drawer */}
       {showMore && (
-        <div className="fixed inset-0 z-50 md:hidden flex flex-col justify-end">
-          {/* Backdrop */}
+        <div className="fixed inset-0 z-[var(--z-modal)] lg:hidden flex flex-col justify-end">
+          {/* Backdrop Scrim */}
           <div
-            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
+            className="fixed inset-0 bg-[var(--color-scrim)] backdrop-blur-[var(--blur-glass)] transition-opacity"
             onClick={() => setShowMore(false)}
             aria-hidden="true"
           />
 
           {/* Bottom Sheet Menu */}
-          <div className="relative bg-white rounded-t-2xl shadow-2xl p-4 max-h-[85vh] overflow-y-auto pb-[calc(1.5rem+env(safe-area-inset-bottom))] animate-in slide-in-from-bottom duration-200">
+          <div className="relative bg-[var(--color-surface)] rounded-t-[var(--radius-surface)] border-t border-[var(--color-border)] shadow-[var(--shadow-lg)] p-4 max-h-[85vh] overflow-y-auto pb-[calc(1.5rem+var(--safe-area-inset-bottom))] animate-in slide-in-from-bottom duration-200">
             {/* Grab handle */}
-            <div className="w-12 h-1.5 bg-slate-300 rounded-full mx-auto mb-4" />
+            <div className="w-12 h-1.5 bg-[var(--color-border)] rounded-full mx-auto mb-4" />
 
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+            <div className="flex items-center justify-between pb-3 border-b border-[var(--color-border)]">
               <div>
-                <h3 className="font-semibold text-slate-900">Navigation Menu</h3>
+                <h3 className="font-bold text-[color:var(--color-text)] font-[family-name:var(--font-heading)]">
+                  Menu & Preferences
+                </h3>
                 {user && (
-                  <p className="text-xs text-slate-500">
-                    {user.email} &bull; <span className="font-medium text-indigo-600">{user.baseCurrency}</span>
+                  <p className="text-xs text-[color:var(--color-muted)]">
+                    {user.email} &bull; <span className="font-semibold text-[color:var(--color-primary-text)]">{user.baseCurrency}</span>
                   </p>
                 )}
               </div>
               <button
                 onClick={() => setShowMore(false)}
-                className="p-2 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 touch-target"
+                className="p-2 rounded-[var(--radius-base)] text-[color:var(--color-muted)] hover:text-[color:var(--color-text)] hover:bg-[var(--color-background)] touch-target"
                 aria-label="Close menu"
               >
-                <X size={20} />
+                <RiCloseLine size={20} />
               </button>
             </div>
 
@@ -116,29 +126,37 @@ export const BottomNav: React.FC = () => {
                     to={item.path}
                     onClick={() => setShowMore(false)}
                     className={({ isActive }) =>
-                      `flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-colors touch-target ${
+                      `flex items-center gap-3 px-3 py-3 rounded-[var(--radius-base)] text-[length:var(--font-size-step-sub1)] font-medium transition-colors touch-target ${
                         isActive
-                          ? 'bg-indigo-50 text-indigo-700 font-semibold'
-                          : 'text-slate-700 hover:bg-slate-100'
+                          ? 'bg-[var(--color-primary-bg)] text-[color:var(--color-primary-text)] font-semibold'
+                          : 'text-[color:var(--color-text)] hover:bg-[var(--color-background)]'
                       }`
                     }
                   >
-                    <Icon size={20} className="text-slate-500" />
+                    <Icon size={20} className="text-[color:var(--color-muted)]" />
                     <span>{item.label}</span>
                   </NavLink>
                 );
               })}
             </div>
 
-            <div className="pt-3 border-t border-slate-100">
+            <div className="pt-3 border-t border-[var(--color-border)] flex items-center justify-between gap-2">
+              <button
+                onClick={toggleTheme}
+                className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] text-xs font-semibold text-[color:var(--color-text)] bg-[var(--color-surface)] hover:bg-[var(--color-background)] touch-target transition-colors"
+              >
+                {isDark ? <RiSunLine size={16} /> : <RiMoonLine size={16} />}
+                <span>{isDark ? 'Light Mode' : 'Dark Mode'}</span>
+              </button>
+
               <button
                 onClick={() => {
                   setShowMore(false);
                   logout();
                 }}
-                className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-rose-600 hover:bg-rose-50 transition-colors touch-target"
+                className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-[var(--radius-base)] text-xs font-semibold text-[color:var(--color-danger-text)] bg-[var(--color-danger-bg)] hover:brightness-95 touch-target transition-all"
               >
-                <LogOut size={20} />
+                <RiLogoutBoxRLine size={16} />
                 <span>Sign Out</span>
               </button>
             </div>
@@ -148,4 +166,3 @@ export const BottomNav: React.FC = () => {
     </>
   );
 };
-

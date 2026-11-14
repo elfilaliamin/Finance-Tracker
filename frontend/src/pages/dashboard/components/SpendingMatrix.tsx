@@ -17,50 +17,50 @@ export const SpendingMatrix: React.FC<SpendingMatrixProps> = ({ data, currency, 
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-4 md:p-6 mb-6">
+    <div className="bg-[var(--color-surface)] rounded-[var(--radius-surface)] border border-[var(--color-border)] shadow-[var(--shadow-base)] p-4 md:p-6 mb-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
         <div>
-          <h3 className="font-bold text-slate-900 text-base md:text-lg">
+          <h3 className="font-heading font-bold text-[var(--color-text)] text-base md:text-lg">
             Spending Matrix &bull; {year}
           </h3>
-          <p className="text-xs md:text-sm text-slate-500 mt-0.5">
+          <p className="text-xs md:text-sm text-[var(--color-text-muted)] mt-0.5">
             Itemized spending breakdown by category across all 12 months ({currency})
           </p>
         </div>
       </div>
 
-      <div className="overflow-x-auto border border-slate-200 rounded-xl">
+      <div className="overflow-x-auto border border-[var(--color-border)] rounded-[var(--radius-base)]">
         <table className="w-full text-left border-collapse text-xs md:text-sm">
           <thead>
-            <tr className="bg-slate-50 border-b border-slate-200 font-semibold text-slate-600">
-              <th className="py-3 px-3 min-w-[140px] sticky left-0 bg-slate-50 z-10 shadow-[1px_0_0_0_#e2e8f0]">
+            <tr className="bg-[var(--color-primary-bg)] border-b border-[var(--color-border)] font-semibold text-[var(--color-text)]">
+              <th className="py-3 px-3 min-w-[140px] sticky left-0 bg-[var(--color-primary-bg)] z-10 shadow-[1px_0_0_0_var(--color-border)]">
                 Category
               </th>
-              {MONTHS.map((m, idx) => (
+              {MONTHS.map((m) => (
                 <th key={m} className="py-3 px-2.5 text-right min-w-[65px]">
                   {m}
                 </th>
               ))}
-              <th className="py-3 px-3 text-right min-w-[85px] bg-slate-100 font-bold text-slate-800">
+              <th className="py-3 px-3 text-right min-w-[85px] bg-[var(--color-primary-bg)]/80 font-bold text-[var(--color-text)]">
                 Total
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-[var(--color-border)]">
             {data.categories.length === 0 ? (
               <tr>
-                <td colSpan={14} className="py-8 text-center text-slate-400">
+                <td colSpan={14} className="py-8 text-center text-[var(--color-text-muted)]">
                   No spending records found for {year}.
                 </td>
               </tr>
             ) : (
               data.categories.map((cat) => (
-                <tr key={cat.id} className="hover:bg-slate-50/70 transition-colors">
-                  <td className="py-2.5 px-3 font-medium text-slate-800 sticky left-0 bg-white z-10 shadow-[1px_0_0_0_#e2e8f0] truncate max-w-[160px]">
+                <tr key={cat.id} className="hover:bg-[var(--color-primary-bg)]/30 transition-colors">
+                  <td className="py-2.5 px-3 font-medium text-[var(--color-text)] sticky left-0 bg-[var(--color-surface)] z-10 shadow-[1px_0_0_0_var(--color-border)] truncate max-w-[160px]">
                     <div className="flex items-center gap-1.5">
                       <span
                         className="w-2.5 h-2.5 rounded-full shrink-0"
-                        style={{ backgroundColor: cat.color || '#6366f1' }}
+                        style={{ backgroundColor: cat.color || 'var(--color-accent)' }}
                       />
                       <span className="truncate">{cat.name}</span>
                     </div>
@@ -69,12 +69,12 @@ export const SpendingMatrix: React.FC<SpendingMatrixProps> = ({ data, currency, 
                     const monthKey = String(idx + 1).padStart(2, '0');
                     const amt = cat.monthlyAmounts?.[monthKey] || '0';
                     return (
-                      <td key={idx} className="py-2.5 px-2.5 text-right text-slate-600 font-mono">
+                      <td key={idx} className="py-2.5 px-2.5 text-right text-[var(--color-text)] font-mono">
                         {formatMoney(amt)}
                       </td>
                     );
                   })}
-                  <td className="py-2.5 px-3 text-right font-bold text-slate-900 bg-slate-50/50 font-mono">
+                  <td className="py-2.5 px-3 text-right font-bold text-[var(--color-text)] bg-[var(--color-primary-bg)]/20 font-mono">
                     {formatMoney(cat.total)}
                   </td>
                 </tr>
@@ -83,20 +83,20 @@ export const SpendingMatrix: React.FC<SpendingMatrixProps> = ({ data, currency, 
           </tbody>
           {data.categories.length > 0 && (
             <tfoot>
-              <tr className="bg-slate-100/80 border-t-2 border-slate-300 font-bold text-slate-900">
-                <td className="py-3 px-3 sticky left-0 bg-slate-100 z-10 shadow-[1px_0_0_0_#cbd5e1]">
+              <tr className="bg-[var(--color-primary-bg)] border-t-2 border-[var(--color-border)] font-bold text-[var(--color-text)]">
+                <td className="py-3 px-3 sticky left-0 bg-[var(--color-primary-bg)] z-10 shadow-[1px_0_0_0_var(--color-border)]">
                   Total Spending
                 </td>
                 {MONTHS.map((_, idx) => {
                   const monthKey = String(idx + 1).padStart(2, '0');
                   const amt = data.monthlyTotals?.[monthKey] || '0';
                   return (
-                    <td key={idx} className="py-3 px-2.5 text-right font-mono text-indigo-700">
+                    <td key={idx} className="py-3 px-2.5 text-right font-mono text-[var(--color-accent)] font-semibold">
                       {formatMoney(amt)}
                     </td>
                   );
                 })}
-                <td className="py-3 px-3 text-right bg-indigo-50 font-extrabold text-indigo-900 font-mono">
+                <td className="py-3 px-3 text-right bg-[var(--color-primary)] font-extrabold text-white font-mono">
                   {formatMoney(data.grandTotal)}
                 </td>
               </tr>

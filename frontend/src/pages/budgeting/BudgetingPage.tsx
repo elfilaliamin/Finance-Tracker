@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Target, Flame } from 'lucide-react';
-import { budgetApi, Budget, CreateBudgetInput } from '@/api/budgetApi';
+import { RiAddLine, RiFocus3Line, RiFireLine } from '@remixicon/react';
+import { budgetApi, CreateBudgetInput } from '@/api/budgetApi';
 import { spendingApi } from '@/api/spendingApi';
 import { walletApi } from '@/api/walletApi';
 import { useAuth } from '@/hooks/useAuth';
@@ -55,39 +55,39 @@ export const BudgetingPage: React.FC = () => {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-900">Budgets & Goals</h2>
-          <p className="text-xs sm:text-sm text-slate-500">
+          <h2 className="text-xl sm:text-2xl font-heading font-bold text-[var(--color-text)]">Budgets & Goals</h2>
+          <p className="text-xs sm:text-sm text-[var(--color-text-muted)]">
             Enforce spending limits and work toward target savings on your wallets.
           </p>
         </div>
 
         <button
           onClick={() => setIsModalOpen(true)}
-          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-700 shadow-sm transition-all touch-target"
+          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-[var(--radius-base)] bg-[var(--color-primary)] text-white font-medium text-sm hover:bg-[var(--color-primary-hover)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-all touch-target"
         >
-          <Plus size={18} />
+          <RiAddLine className="w-5 h-5" />
           <span>New Budget or Goal</span>
         </button>
       </div>
 
       {isLoading ? (
-        <div className="py-12 flex justify-center text-slate-400">Loading budgets...</div>
+        <div className="py-12 flex justify-center text-[var(--color-text-muted)]">Loading budgets...</div>
       ) : (
         <div className="space-y-8">
           {/* Spending Limits Section */}
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-6 h-6 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
-                <Flame size={15} />
+              <div className="w-6 h-6 rounded-[var(--radius-base)] bg-[var(--color-danger)]/10 text-[var(--color-danger)] flex items-center justify-center">
+                <RiFireLine className="w-4 h-4" />
               </div>
-              <h3 className="text-base sm:text-lg font-bold text-slate-900">Spending Limits</h3>
-              <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700">
+              <h3 className="text-base sm:text-lg font-heading font-bold text-[var(--color-text)]">Spending Limits</h3>
+              <span className="px-2.5 py-0.5 rounded-[var(--radius-pill)] text-xs font-semibold bg-[var(--color-danger)]/10 text-[var(--color-danger)] border border-[var(--color-danger)]/20">
                 {spendingLimits.length}
               </span>
             </div>
 
             {spendingLimits.length === 0 ? (
-              <div className="bg-white rounded-2xl border border-slate-200 p-6 text-center text-slate-500 text-sm">
+              <div className="bg-[var(--color-surface)] rounded-[var(--radius-surface)] border border-[var(--color-border)] p-6 text-center text-[var(--color-text-muted)] text-sm">
                 No spending limits set. Create a monthly or custom limit to control expenses.
               </div>
             ) : (
@@ -106,17 +106,17 @@ export const BudgetingPage: React.FC = () => {
           {/* Saving Goals Section */}
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-6 h-6 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
-                <Target size={15} />
+              <div className="w-6 h-6 rounded-[var(--radius-base)] bg-[var(--color-primary-bg)] text-[var(--color-accent)] border border-[var(--color-border)] flex items-center justify-center">
+                <RiFocus3Line className="w-4 h-4" />
               </div>
-              <h3 className="text-base sm:text-lg font-bold text-slate-900">Saving Goals</h3>
-              <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-purple-700">
+              <h3 className="text-base sm:text-lg font-heading font-bold text-[var(--color-text)]">Saving Goals</h3>
+              <span className="px-2.5 py-0.5 rounded-[var(--radius-pill)] text-xs font-semibold bg-[var(--color-primary-bg)] text-[var(--color-accent)] border border-[var(--color-border)]">
                 {savingGoals.length}
               </span>
             </div>
 
             {savingGoals.length === 0 ? (
-              <div className="bg-white rounded-2xl border border-slate-200 p-6 text-center text-slate-500 text-sm">
+              <div className="bg-[var(--color-surface)] rounded-[var(--radius-surface)] border border-[var(--color-border)] p-6 text-center text-[var(--color-text-muted)] text-sm">
                 No saving goals configured. Set a savings target on one of your asset wallets!
               </div>
             ) : (

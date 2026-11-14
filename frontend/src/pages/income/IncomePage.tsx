@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Trash2 } from 'lucide-react';
+import { RiAddLine, RiDeleteBinLine } from '@remixicon/react';
 import { incomeApi, IncomeRecord, CreateIncomeInput } from '@/api/incomeApi';
 import { useAuth } from '@/hooks/useAuth';
 import { ResponsiveTable, Column } from '@/components/ui/ResponsiveTable';
@@ -69,7 +69,7 @@ export const IncomePage: React.FC = () => {
     {
       key: 'date',
       header: 'Date',
-      render: (item) => <span className="font-mono text-slate-800">{item.date}</span>,
+      render: (item) => <span className="font-mono text-[var(--color-text)]">{item.date}</span>,
     },
     {
       key: 'sourceName',
@@ -78,9 +78,9 @@ export const IncomePage: React.FC = () => {
         <div className="flex items-center gap-2">
           <span
             className="w-2.5 h-2.5 rounded-full shrink-0"
-            style={{ backgroundColor: item.sourceColor || '#10b981' }}
+            style={{ backgroundColor: item.sourceColor || 'var(--color-accent)' }}
           />
-          <span className="font-semibold text-slate-900">{item.sourceName || 'Unknown'}</span>
+          <span className="font-semibold text-[var(--color-text)]">{item.sourceName || 'Unknown'}</span>
         </div>
       ),
     },
@@ -90,12 +90,12 @@ export const IncomePage: React.FC = () => {
       align: 'right',
       render: (item) => (
         <div className="text-right">
-          <span className="font-bold text-emerald-700 font-mono text-sm">
+          <span className="font-bold text-[var(--color-accent)] font-mono text-sm">
             +{parseFloat(item.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{' '}
             {item.currency}
           </span>
           {item.currency !== defaultCurrency && (
-            <p className="text-[11px] text-slate-400 font-mono">
+            <p className="text-[11px] text-[var(--color-text-muted)] font-mono">
               ~{parseFloat(item.amountInBase).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{' '}
               {defaultCurrency}
             </p>
@@ -107,7 +107,7 @@ export const IncomePage: React.FC = () => {
       key: 'categoryName',
       header: 'Category',
       render: (item) => (
-        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-700">
+        <span className="inline-flex items-center px-2 py-0.5 rounded-[var(--radius-pill)] text-xs font-medium bg-[var(--color-primary-bg)] text-[var(--color-text)] border border-[var(--color-border)]">
           {item.categoryName || 'General'}
         </span>
       ),
@@ -116,7 +116,7 @@ export const IncomePage: React.FC = () => {
       key: 'description',
       header: 'Description',
       render: (item) => (
-        <span className="text-slate-600 truncate max-w-xs block" title={item.description || item.notes}>
+        <span className="text-[var(--color-text-muted)] truncate max-w-xs block" title={item.description || item.notes}>
           {item.description || item.notes || '-'}
         </span>
       ),
@@ -133,10 +133,10 @@ export const IncomePage: React.FC = () => {
               deleteMutation.mutate(item.id);
             }
           }}
-          className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors touch-target"
+          className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-danger)] rounded-[var(--radius-base)] hover:bg-[var(--color-danger)]/10 transition-colors touch-target"
           title="Delete Income"
         >
-          <Trash2 size={16} />
+          <RiDeleteBinLine className="w-4 h-4" />
         </button>
       ),
     },
@@ -148,24 +148,24 @@ export const IncomePage: React.FC = () => {
         <div className="flex items-center gap-2">
           <span
             className="w-3 h-3 rounded-full shrink-0"
-            style={{ backgroundColor: item.sourceColor || '#10b981' }}
+            style={{ backgroundColor: item.sourceColor || 'var(--color-accent)' }}
           />
-          <span className="font-bold text-slate-900 text-sm">{item.sourceName || 'Unknown'}</span>
+          <span className="font-bold text-[var(--color-text)] text-sm">{item.sourceName || 'Unknown'}</span>
         </div>
-        <span className="text-xs text-slate-500 font-mono">{item.date}</span>
+        <span className="text-xs text-[var(--color-text-muted)] font-mono">{item.date}</span>
       </div>
 
       <div className="flex items-baseline justify-between mt-1">
-        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-700">
+        <span className="inline-flex items-center px-2 py-0.5 rounded-[var(--radius-pill)] text-xs font-medium bg-[var(--color-primary-bg)] text-[var(--color-text)] border border-[var(--color-border)]">
           {item.categoryName || 'General'}
         </span>
         <div className="text-right">
-          <span className="font-bold text-emerald-600 font-mono text-base">
+          <span className="font-bold text-[var(--color-accent)] font-mono text-base">
             +{parseFloat(item.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{' '}
             {item.currency}
           </span>
           {item.currency !== defaultCurrency && (
-            <p className="text-[11px] text-slate-400 font-mono">
+            <p className="text-[11px] text-[var(--color-text-muted)] font-mono">
               ~{parseFloat(item.amountInBase).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{' '}
               {defaultCurrency}
             </p>
@@ -174,21 +174,21 @@ export const IncomePage: React.FC = () => {
       </div>
 
       {(item.description || item.notes) && (
-        <p className="text-xs text-slate-500 mt-2 border-t border-slate-100 pt-1.5">
+        <p className="text-xs text-[var(--color-text-muted)] mt-2 border-t border-[var(--color-border)] pt-1.5">
           {item.description || item.notes}
         </p>
       )}
 
-      <div className="mt-2 pt-2 border-t border-slate-100 flex justify-end">
+      <div className="mt-2 pt-2 border-t border-[var(--color-border)] flex justify-end">
         <button
           onClick={() => {
             if (confirm('Delete this income record?')) {
               deleteMutation.mutate(item.id);
             }
           }}
-          className="text-xs text-rose-600 hover:text-rose-700 font-medium flex items-center gap-1 touch-target py-1 px-2"
+          className="text-xs text-[var(--color-danger)] hover:underline font-medium flex items-center gap-1 touch-target py-1 px-2"
         >
-          <Trash2 size={14} />
+          <RiDeleteBinLine className="w-3.5 h-3.5" />
           <span>Delete</span>
         </button>
       </div>
@@ -200,17 +200,17 @@ export const IncomePage: React.FC = () => {
       {/* Top Action Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-900">Income Ledger</h2>
-          <p className="text-xs sm:text-sm text-slate-500">
+          <h2 className="text-xl sm:text-2xl font-heading font-bold text-[var(--color-text)]">Income Ledger</h2>
+          <p className="text-xs sm:text-sm text-[var(--color-text-muted)]">
             Recorded revenues across all sources (wallets are not affected).
           </p>
         </div>
 
         <button
           onClick={() => setIsModalOpen(true)}
-          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 text-white font-semibold text-sm hover:bg-emerald-700 shadow-sm transition-all touch-target"
+          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-[var(--radius-base)] bg-[var(--color-primary)] text-white font-medium text-sm hover:bg-[var(--color-primary-hover)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-all touch-target"
         >
-          <Plus size={18} />
+          <RiAddLine className="w-5 h-5" />
           <span>New Income</span>
         </button>
       </div>
