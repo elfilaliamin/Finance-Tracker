@@ -54,7 +54,6 @@ services:
       context: ./backend
       dockerfile: Dockerfile
       target: runner
-    image: finance-tracker-backend:latest
     container_name: ft-backend
     restart: unless-stopped
     networks:
@@ -94,7 +93,6 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       target: runner
-    image: finance-tracker-frontend:latest
     container_name: ft-frontend
     restart: unless-stopped
     networks:
