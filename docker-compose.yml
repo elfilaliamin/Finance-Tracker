@@ -62,16 +62,16 @@ services:
       db:
         condition: service_healthy
     environment:
-      NODE_ENV: production
-      PORT: 4000
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${BACKEND_PORT:-4000}
       DATABASE_URL: postgresql://${POSTGRES_USER:-ft_user}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-financetracker}
       JWT_SECRET: ${JWT_SECRET:?JWT secret required}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@financetracker.local}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Admin initial password required}
-      TRUST_PROXY: "1"
+      TRUST_PROXY: ${TRUST_PROXY:-1}
       NODE_OPTIONS: "--max-old-space-size=256"
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:4000/api/v1/health || exit 1"]
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:${BACKEND_PORT:-4000}/api/v1/health || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 3
@@ -98,7 +98,7 @@ services:
     networks:
       - finance-tracker-net
     ports:
-      - "127.0.0.1:3004:80"
+      - "${PORT_BINDING:-${HOST_IP:-127.0.0.1}:${FRONTEND_PORT:-3004}:80}"
     depends_on:
       backend:
         condition: service_healthy
