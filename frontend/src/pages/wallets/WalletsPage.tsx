@@ -184,7 +184,7 @@ export const WalletsPage: React.FC = () => {
             <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
               Total Wallets
             </span>
-            <div className="w-8 h-8 rounded-[var(--radius-base)] bg-[var(--color-primary-bg)] text-[var(--color-accent)] border border-[var(--color-border)] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-[var(--radius-base)] bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center">
               <RiBankCardLine className="w-4 h-4" />
             </div>
           </div>
@@ -200,7 +200,7 @@ export const WalletsPage: React.FC = () => {
             <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
               Asset Accounts
             </span>
-            <div className="w-8 h-8 rounded-[var(--radius-base)] bg-[var(--color-primary-bg)] text-[var(--color-accent)] border border-[var(--color-border)] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-[var(--radius-base)] bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center">
               <RiArrowRightUpLine className="w-4 h-4" />
             </div>
           </div>
@@ -219,7 +219,7 @@ export const WalletsPage: React.FC = () => {
             <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
               Liabilities & Debts
             </span>
-            <div className="w-8 h-8 rounded-[var(--radius-base)] bg-[var(--color-danger)]/10 text-[var(--color-danger)] border border-[var(--color-danger)]/20 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-[var(--radius-base)] bg-rose-100 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800 flex items-center justify-center">
               <RiArrowRightDownLine className="w-4 h-4" />
             </div>
           </div>
@@ -238,7 +238,7 @@ export const WalletsPage: React.FC = () => {
             <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
               Net Balance
             </span>
-            <div className="w-8 h-8 rounded-[var(--radius-base)] bg-[var(--color-primary-bg)] text-[var(--color-accent)] border border-[var(--color-border)] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-[var(--radius-base)] bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center">
               <RiWallet3Line className="w-4 h-4" />
             </div>
           </div>
@@ -262,20 +262,20 @@ export const WalletsPage: React.FC = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search wallet name or description..."
-            className="w-full pl-9 pr-3.5 py-2 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-primary-bg)]/30 text-[var(--color-text)] text-xs focus:ring-1 focus:ring-[var(--color-ring)] focus:outline-none"
+            className="w-full pl-9 pr-3.5 py-2 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-emerald-50/50 dark:bg-emerald-950/20 text-[var(--color-text)] text-xs focus:ring-1 focus:ring-[var(--color-ring)] focus:bg-white dark:focus:bg-[var(--color-surface)] focus:outline-none transition-colors"
           />
         </div>
 
         {/* Filter Controls */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Type Filter Buttons */}
-          <div className="inline-flex rounded-[var(--radius-base)] border border-[var(--color-border)] p-0.5 bg-[var(--color-primary-bg)]/40 text-xs font-semibold">
+          <div className="inline-flex rounded-[var(--radius-base)] border border-[var(--color-border)] p-0.5 bg-emerald-50/70 dark:bg-emerald-950/40 text-xs font-semibold">
             <button
               type="button"
               onClick={() => setTypeFilter('all')}
               className={`px-3 py-1.5 rounded-[calc(var(--radius-base)-2px)] transition-colors ${
                 typeFilter === 'all'
-                  ? 'bg-[var(--color-surface)] text-[var(--color-accent)] shadow-xs'
+                  ? 'bg-white dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 shadow-xs'
                   : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
               }`}
             >
@@ -286,7 +286,7 @@ export const WalletsPage: React.FC = () => {
               onClick={() => setTypeFilter('asset')}
               className={`px-3 py-1.5 rounded-[calc(var(--radius-base)-2px)] transition-colors ${
                 typeFilter === 'asset'
-                  ? 'bg-[var(--color-surface)] text-[var(--color-accent)] shadow-xs'
+                  ? 'bg-white dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 shadow-xs'
                   : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
               }`}
             >
@@ -297,7 +297,7 @@ export const WalletsPage: React.FC = () => {
               onClick={() => setTypeFilter('liability')}
               className={`px-3 py-1.5 rounded-[calc(var(--radius-base)-2px)] transition-colors ${
                 typeFilter === 'liability'
-                  ? 'bg-[var(--color-surface)] text-[var(--color-danger)] shadow-xs'
+                  ? 'bg-white dark:bg-rose-900/60 text-rose-600 dark:text-rose-300 shadow-xs'
                   : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
               }`}
             >
@@ -307,7 +307,7 @@ export const WalletsPage: React.FC = () => {
 
           {/* Currency Filter Dropdown */}
           {existingCurrencies.length > 1 && (
-            <div className="flex items-center gap-1.5 bg-[var(--color-primary-bg)]/40 border border-[var(--color-border)] rounded-[var(--radius-base)] px-2.5 py-1.5">
+            <div className="flex items-center gap-1.5 bg-emerald-50/70 dark:bg-emerald-950/40 border border-[var(--color-border)] rounded-[var(--radius-base)] px-2.5 py-1.5">
               <RiFilterLine className="w-3.5 h-3.5 text-[var(--color-text-muted)]" />
               <select
                 value={currencyFilter}
@@ -385,8 +385,8 @@ export const WalletsPage: React.FC = () => {
                       <span
                         className={`inline-flex items-center px-2 py-0.5 rounded-[var(--radius-pill)] text-[10px] font-bold uppercase tracking-wider border ${
                           isAsset
-                            ? 'bg-[var(--color-primary-bg)] text-[var(--color-accent)] border-[var(--color-border)]'
-                            : 'bg-[var(--color-danger)]/10 text-[var(--color-danger)] border-[var(--color-danger)]/20'
+                            ? 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+                            : 'bg-rose-100 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800'
                         }`}
                       >
                         {isAsset ? 'Asset' : 'Liability'}
@@ -402,7 +402,7 @@ export const WalletsPage: React.FC = () => {
                   )}
 
                   {/* Balance Display */}
-                  <div className="my-3 p-3 rounded-[var(--radius-base)] bg-[var(--color-primary-bg)]/40 border border-[var(--color-border)]">
+                  <div className="my-3 p-3 rounded-[var(--radius-base)] bg-emerald-50/60 dark:bg-emerald-950/30 border border-[var(--color-border)]">
                     <span className="text-[10px] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider block">
                       Current Balance
                     </span>
@@ -430,7 +430,7 @@ export const WalletsPage: React.FC = () => {
                   <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => handleOpenTransactions(wallet)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-base)] bg-[var(--color-primary-bg)] hover:bg-[var(--color-border)]/50 text-[var(--color-accent)] text-xs font-semibold border border-[var(--color-border)] transition-colors touch-target"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-base)] bg-emerald-100 hover:bg-emerald-200/80 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 text-xs font-semibold border border-emerald-200 dark:border-emerald-800 transition-colors touch-target shadow-xs"
                       title="View transactions history"
                     >
                       <RiHistoryLine size={14} />
@@ -438,7 +438,7 @@ export const WalletsPage: React.FC = () => {
                     </button>
                     <button
                       onClick={() => handleOpenAdjust(wallet)}
-                      className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-[var(--radius-base)] hover:bg-[var(--color-primary-bg)] text-[var(--color-text-muted)] hover:text-[var(--color-accent)] text-xs font-medium border border-transparent hover:border-[var(--color-border)] transition-colors touch-target"
+                      className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-[var(--radius-base)] bg-emerald-50/60 hover:bg-emerald-100 dark:bg-emerald-950/20 dark:hover:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300 text-xs font-medium border border-emerald-200/60 dark:border-emerald-800/60 transition-colors touch-target"
                       title="Record balance adjustment"
                     >
                       <RiSwapLine size={14} />
@@ -449,7 +449,7 @@ export const WalletsPage: React.FC = () => {
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => handleOpenEdit(wallet)}
-                      className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-accent)] rounded-[var(--radius-base)] hover:bg-[var(--color-primary-bg)] transition-colors touch-target"
+                      className="p-1.5 text-emerald-700 dark:text-emerald-400 hover:text-emerald-900 dark:hover:text-emerald-200 rounded-[var(--radius-base)] hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors touch-target"
                       title="Edit wallet"
                     >
                       <RiEditLine className="w-4 h-4" />
@@ -464,7 +464,7 @@ export const WalletsPage: React.FC = () => {
                           deleteWalletMutation.mutate(wallet.id);
                         }
                       }}
-                      className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-danger)] rounded-[var(--radius-base)] hover:bg-[var(--color-danger)]/10 transition-colors touch-target"
+                      className="p-1.5 text-rose-500 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-200 rounded-[var(--radius-base)] hover:bg-rose-100 dark:hover:bg-rose-950/40 transition-colors touch-target"
                       title="Delete wallet"
                     >
                       <RiDeleteBinLine className="w-4 h-4" />

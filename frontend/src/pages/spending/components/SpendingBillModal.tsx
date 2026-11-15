@@ -283,7 +283,7 @@ export const SpendingBillModal: React.FC<SpendingBillModalProps> = ({
                       <button
                         type="button"
                         onClick={() => setValue(`items.${idx}.quantity`, Math.max(1, currentQty - 1))}
-                        className="w-8 h-8 rounded-[var(--radius-base)] bg-[var(--color-primary-bg)] hover:bg-[var(--color-border)]/50 text-[var(--color-text)] font-bold flex items-center justify-center touch-target"
+                        className="w-8 h-8 rounded-[var(--radius-base)] bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 text-emerald-900 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-bold flex items-center justify-center touch-target transition-colors shadow-xs"
                       >
                         <RiSubtractLine className="w-3.5 h-3.5" />
                       </button>
@@ -296,7 +296,7 @@ export const SpendingBillModal: React.FC<SpendingBillModalProps> = ({
                       <button
                         type="button"
                         onClick={() => setValue(`items.${idx}.quantity`, currentQty + 1)}
-                        className="w-8 h-8 rounded-[var(--radius-base)] bg-[var(--color-primary-bg)] hover:bg-[var(--color-border)]/50 text-[var(--color-text)] font-bold flex items-center justify-center touch-target"
+                        className="w-8 h-8 rounded-[var(--radius-base)] bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 text-emerald-900 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-bold flex items-center justify-center touch-target transition-colors shadow-xs"
                       >
                         <RiAddLine className="w-3.5 h-3.5" />
                       </button>
