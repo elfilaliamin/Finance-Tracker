@@ -1,13 +1,24 @@
 import React from 'react';
-import { RiAlertLine, RiCheckboxCircleLine, RiFireLine, RiDeleteBinLine } from '@remixicon/react';
+import {
+  RiAlertLine,
+  RiCheckboxCircleLine,
+  RiFireLine,
+  RiDeleteBinLine,
+  RiEditLine,
+} from '@remixicon/react';
 import { Budget } from '@/api/budgetApi';
 
 interface SpendingLimitCardProps {
   budget: Budget;
+  onEdit: (budget: Budget) => void;
   onDelete: (id: string) => void;
 }
 
-export const SpendingLimitCard: React.FC<SpendingLimitCardProps> = ({ budget, onDelete }) => {
+export const SpendingLimitCard: React.FC<SpendingLimitCardProps> = ({
+  budget,
+  onEdit,
+  onDelete,
+}) => {
   const currentAmountStr = budget.currentAmount ?? budget.spentAmount ?? budget.progress?.currentAmount ?? '0';
   const percentageNum = budget.percentage ?? budget.progress?.percentage ?? 0;
   const statusStr = budget.status ?? budget.progress?.status ?? 'normal';
@@ -108,17 +119,24 @@ export const SpendingLimitCard: React.FC<SpendingLimitCardProps> = ({ budget, on
         </div>
       </div>
 
-      <div className="mt-4 pt-3 border-t border-[var(--color-border)] flex justify-end">
+      <div className="mt-4 pt-3 border-t border-[var(--color-border)] flex items-center justify-end gap-1.5">
+        <button
+          onClick={() => onEdit(budget)}
+          className="p-1.5 text-emerald-700 dark:text-emerald-400 hover:text-emerald-900 dark:hover:text-emerald-200 rounded-[var(--radius-base)] hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors touch-target"
+          title="Edit spending limit"
+        >
+          <RiEditLine className="w-4 h-4" />
+        </button>
         <button
           onClick={() => {
             if (confirm(`Delete budget "${budget.name}"?`)) {
               onDelete(budget.id);
             }
           }}
-          className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-danger)] font-medium flex items-center gap-1 touch-target py-1 px-2"
+          className="p-1.5 text-rose-500 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-200 rounded-[var(--radius-base)] hover:bg-rose-100 dark:hover:bg-rose-950/40 transition-colors touch-target"
+          title="Delete spending limit"
         >
-          <RiDeleteBinLine className="w-3.5 h-3.5" />
-          <span>Delete</span>
+          <RiDeleteBinLine className="w-4 h-4" />
         </button>
       </div>
     </div>

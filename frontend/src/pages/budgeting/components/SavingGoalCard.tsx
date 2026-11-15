@@ -4,16 +4,18 @@ import {
   RiCalendarLine,
   RiCheckboxCircleLine,
   RiDeleteBinLine,
+  RiEditLine,
   RiWallet3Line,
 } from '@remixicon/react';
 import { Budget } from '@/api/budgetApi';
 
 interface SavingGoalCardProps {
   goal: Budget;
+  onEdit: (goal: Budget) => void;
   onDelete: (id: string) => void;
 }
 
-export const SavingGoalCard: React.FC<SavingGoalCardProps> = ({ goal, onDelete }) => {
+export const SavingGoalCard: React.FC<SavingGoalCardProps> = ({ goal, onEdit, onDelete }) => {
   // Directly reflect the money in the linked wallet
   const currentAmountStr =
     goal.currentAmount ??
@@ -136,17 +138,24 @@ export const SavingGoalCard: React.FC<SavingGoalCardProps> = ({ goal, onDelete }
         )}
       </div>
 
-      <div className="mt-4 pt-3 border-t border-[var(--color-border)] flex justify-end">
+      <div className="mt-4 pt-3 border-t border-[var(--color-border)] flex items-center justify-end gap-1.5">
+        <button
+          onClick={() => onEdit(goal)}
+          className="p-1.5 text-emerald-700 dark:text-emerald-400 hover:text-emerald-900 dark:hover:text-emerald-200 rounded-[var(--radius-base)] hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors touch-target"
+          title="Edit saving goal"
+        >
+          <RiEditLine className="w-4 h-4" />
+        </button>
         <button
           onClick={() => {
             if (confirm(`Delete saving goal "${goal.name}"?`)) {
               onDelete(goal.id);
             }
           }}
-          className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-danger)] font-medium flex items-center gap-1 touch-target py-1 px-2 transition-colors"
+          className="p-1.5 text-rose-500 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-200 rounded-[var(--radius-base)] hover:bg-rose-100 dark:hover:bg-rose-950/40 transition-colors touch-target"
+          title="Delete saving goal"
         >
-          <RiDeleteBinLine className="w-3.5 h-3.5" />
-          <span>Delete</span>
+          <RiDeleteBinLine className="w-4 h-4" />
         </button>
       </div>
     </div>

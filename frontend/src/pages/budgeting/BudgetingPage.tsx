@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { RiAddLine, RiFocus3Line, RiFireLine } from '@remixicon/react';
-import { budgetApi, CreateBudgetInput } from '@/api/budgetApi';
+import { budgetApi, CreateBudgetInput, Budget } from '@/api/budgetApi';
 import { spendingApi } from '@/api/spendingApi';
 import { walletApi } from '@/api/walletApi';
 import { useAuth } from '@/hooks/useAuth';
@@ -15,6 +15,7 @@ export const BudgetingPage: React.FC = () => {
   const defaultCurrency = user?.baseCurrency || 'MAD';
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
 
   // Queries
   const { data: budgets = [], isLoading } = useQuery({
@@ -40,12 +41,43 @@ export const BudgetingPage: React.FC = () => {
     },
   });
 
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<CreateBudgetInput> }) =>
+      budgetApi.updateBudget(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['budgets'] });
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: (id: string) => budgetApi.deleteBudget(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['budgets'] });
     },
   });
+
+  const handleOpenCreate = () => {
+    setEditingBudget(null);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEdit = (b: Budget) => {
+    setEditingBudget(b);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingBudget(null);
+  };
+
+  const handleSubmit = async (data: CreateBudgetInput) => {
+    if (editingBudget) {
+      await updateMutation.mutateAsync({ id: editingBudget.id, data });
+    } else {
+      await createMutation.mutateAsync(data);
+    }
+  };
 
   const spendingLimits = budgets.filter((b) => b.type === 'spending_limit');
   const savingGoals = budgets.filter((b) => b.type === 'saving_goal');
@@ -62,7 +94,7 @@ export const BudgetingPage: React.FC = () => {
         </div>
 
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={handleOpenCreate}
           className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-[var(--radius-base)] bg-[var(--color-primary)] text-white font-medium text-sm hover:bg-[var(--color-primary-hover)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-all touch-target"
         >
           <RiAddLine className="w-5 h-5" />
@@ -96,6 +128,7 @@ export const BudgetingPage: React.FC = () => {
                   <SpendingLimitCard
                     key={b.id}
                     budget={b}
+                    onEdit={handleOpenEdit}
                     onDelete={(id) => deleteMutation.mutate(id)}
                   />
                 ))}
@@ -125,6 +158,7 @@ export const BudgetingPage: React.FC = () => {
                   <SavingGoalCard
                     key={g.id}
                     goal={g}
+                    onEdit={handleOpenEdit}
                     onDelete={(id) => deleteMutation.mutate(id)}
                   />
                 ))}
@@ -134,16 +168,15 @@ export const BudgetingPage: React.FC = () => {
         </div>
       )}
 
-      {/* New Budget Modal */}
+      {/* New / Edit Budget Modal */}
       <BudgetModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={async (data) => {
-          await createMutation.mutateAsync(data);
-        }}
+        onClose={handleCloseModal}
+        onSubmit={handleSubmit}
         categories={categories}
         wallets={wallets}
         defaultCurrency={defaultCurrency}
+        budget={editingBudget}
       />
     </div>
   );

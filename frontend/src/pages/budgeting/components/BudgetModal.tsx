@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ResponsiveModal } from '@/components/ui/ResponsiveModal';
-import { CreateBudgetInput } from '@/api/budgetApi';
+import { CreateBudgetInput, Budget } from '@/api/budgetApi';
 import { SpendingCategory } from '@/api/spendingApi';
 import { Wallet } from '@/api/walletApi';
 import { RiAlertLine } from '@remixicon/react';
@@ -12,6 +12,7 @@ interface BudgetModalProps {
   categories: SpendingCategory[];
   wallets: Wallet[];
   defaultCurrency: string;
+  budget?: Budget | null;
 }
 
 export const BudgetModal: React.FC<BudgetModalProps> = ({
@@ -21,6 +22,7 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
   categories,
   wallets,
   defaultCurrency,
+  budget,
 }) => {
   const [type, setType] = useState<'spending_limit' | 'saving_goal'>('spending_limit');
   const [name, setName] = useState('');
@@ -38,8 +40,31 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       setErrorMessage(null);
+      if (budget) {
+        setType(budget.type);
+        setName(budget.name);
+        setTargetAmount(budget.targetAmount);
+        setCurrency(budget.currency || defaultCurrency);
+        setPeriod(budget.period || 'monthly');
+        setStartDate(budget.startDate || new Date().toISOString().split('T')[0]);
+        setCategoryId(budget.categoryId || budget.spendingCategoryId || '');
+        setWalletId(budget.walletId || budget.wallet?.id || '');
+        setEndDate(budget.endDate || '');
+        setNotes(budget.notes || '');
+      } else {
+        setType('spending_limit');
+        setName('');
+        setTargetAmount('');
+        setCurrency(defaultCurrency);
+        setPeriod('monthly');
+        setStartDate(new Date().toISOString().split('T')[0]);
+        setCategoryId('');
+        setWalletId('');
+        setEndDate('');
+        setNotes('');
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, budget, defaultCurrency]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,8 +102,20 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
     <ResponsiveModal
       isOpen={isOpen}
       onClose={onClose}
-      title={type === 'spending_limit' ? 'Create Spending Limit' : 'Create Saving Goal'}
-      description="Plan your financial boundaries and future milestones."
+      title={
+        budget
+          ? budget.type === 'spending_limit'
+            ? 'Edit Spending Limit'
+            : 'Edit Saving Goal'
+          : type === 'spending_limit'
+          ? 'Create Spending Limit'
+          : 'Create Saving Goal'
+      }
+      description={
+        budget
+          ? 'Update your target amounts, timeline, or restrictions.'
+          : 'Plan your financial boundaries and future milestones.'
+      }
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Error notification banner */}
@@ -89,31 +126,33 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
           </div>
         )}
 
-        {/* Type Toggle */}
-        <div className="flex rounded-[var(--radius-base)] bg-[var(--color-primary-bg)] p-1 border border-[var(--color-border)]">
-          <button
-            type="button"
-            onClick={() => setType('spending_limit')}
-            className={`flex-1 py-2 rounded-[var(--radius-base)] text-xs font-semibold transition-all touch-target ${
-              type === 'spending_limit'
-                ? 'bg-[var(--color-surface)] text-[var(--color-accent)] shadow-[var(--shadow-sm)]'
-                : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
-            }`}
-          >
-            Spending Limit (Expense Cap)
-          </button>
-          <button
-            type="button"
-            onClick={() => setType('saving_goal')}
-            className={`flex-1 py-2 rounded-[var(--radius-base)] text-xs font-semibold transition-all touch-target ${
-              type === 'saving_goal'
-                ? 'bg-[var(--color-surface)] text-[var(--color-accent)] shadow-[var(--shadow-sm)]'
-                : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
-            }`}
-          >
-            Saving Goal (Target Balance)
-          </button>
-        </div>
+        {/* Type Toggle (only when creating new) */}
+        {!budget && (
+          <div className="flex rounded-[var(--radius-base)] bg-[var(--color-primary-bg)] p-1 border border-[var(--color-border)]">
+            <button
+              type="button"
+              onClick={() => setType('spending_limit')}
+              className={`flex-1 py-2 rounded-[var(--radius-base)] text-xs font-semibold transition-all touch-target ${
+                type === 'spending_limit'
+                  ? 'bg-[var(--color-surface)] text-[var(--color-accent)] shadow-[var(--shadow-sm)]'
+                  : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
+              }`}
+            >
+              Spending Limit (Expense Cap)
+            </button>
+            <button
+              type="button"
+              onClick={() => setType('saving_goal')}
+              className={`flex-1 py-2 rounded-[var(--radius-base)] text-xs font-semibold transition-all touch-target ${
+                type === 'saving_goal'
+                  ? 'bg-[var(--color-surface)] text-[var(--color-accent)] shadow-[var(--shadow-sm)]'
+                  : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
+              }`}
+            >
+              Saving Goal (Target Balance)
+            </button>
+          </div>
+        )}
 
         {/* Name */}
         <div>
@@ -308,7 +347,7 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
             disabled={isSubmitting}
             className="px-5 py-2.5 rounded-[var(--radius-base)] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-sm font-semibold shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] disabled:opacity-60 touch-target"
           >
-            {isSubmitting ? 'Saving...' : 'Create Plan'}
+            {isSubmitting ? 'Saving...' : budget ? 'Save Changes' : 'Create Plan'}
           </button>
         </div>
       </form>
