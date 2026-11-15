@@ -32,10 +32,26 @@ export class IncomeService {
       throw new NotFoundError(`Income source with ID '${input.sourceId}' does not exist.`);
     }
 
-    // 2. Verify Income Category exists and belongs to user
-    const category = await incomeCategoriesRepository.findById(input.categoryId, userId);
-    if (!category) {
-      throw new NotFoundError(`Income category with ID '${input.categoryId}' does not exist.`);
+    // 2. Resolve Income Category (use provided, or fall back to user's first category / create General)
+    let categoryId = input.categoryId;
+    if (categoryId) {
+      const category = await incomeCategoriesRepository.findById(categoryId, userId);
+      if (!category) {
+        throw new NotFoundError(`Income category with ID '${categoryId}' does not exist.`);
+      }
+    } else {
+      const categories = await incomeCategoriesRepository.listByUser(userId);
+      if (categories.length > 0) {
+        categoryId = categories[0].id;
+      } else {
+        const defaultCategory = await incomeCategoriesRepository.create(
+          userId,
+          'General',
+          '#10b981',
+          'wallet'
+        );
+        categoryId = defaultCategory.id;
+      }
     }
 
     // 3. Resolve exchange rate to base currency (MAD) on transaction date
@@ -43,15 +59,17 @@ export class IncomeService {
     const amountStr = Money.toDbString(input.amount);
     const baseAmount = Money.toDbString(Money.convert(amountStr, rate));
 
+    const finalDescription = input.description?.trim() || `${source.title || 'Income'} Revenue`;
+
     return await this.repository.create(userId, {
       date: input.date,
       sourceId: input.sourceId,
-      categoryId: input.categoryId,
+      categoryId,
       amount: amountStr,
       currency: input.currency,
       exchangeRateToBase: rate,
       baseAmount,
-      description: input.description,
+      description: finalDescription,
       notes: input.notes,
     });
   }

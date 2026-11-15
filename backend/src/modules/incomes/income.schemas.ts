@@ -1,18 +1,30 @@
 import { z } from 'zod';
 
-export const createIncomeSchema = z
+const baseIncomeObject = z
   .object({
     date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be formatted YYYY-MM-DD'),
     sourceId: z.string().uuid('Valid source ID is required'),
-    categoryId: z.string().uuid('Valid category ID is required'),
+    categoryId: z.string().uuid('Valid category ID is required').optional().nullable(),
     amount: z.coerce.number().positive('Amount must be positive'),
     currency: z.enum(['MAD', 'USD', 'EUR']),
-    description: z.string().min(1, 'Description is required').max(255).trim(),
-    notes: z.string().max(1000).optional(),
+    description: z.string().max(255).optional().nullable(),
+    notes: z.string().max(1000).optional().nullable(),
   })
-  .strict(); // Strict mode rejects any extraneous fields like wallet_id
+  .strict();
 
-export const updateIncomeSchema = createIncomeSchema.partial();
+export const createIncomeSchema = baseIncomeObject.transform((data) => ({
+  ...data,
+  description: data.description?.trim() || undefined,
+  notes: data.notes?.trim() || undefined,
+  categoryId: data.categoryId || undefined,
+}));
+
+export const updateIncomeSchema = baseIncomeObject.partial().transform((data) => ({
+  ...data,
+  description: data.description !== undefined ? data.description?.trim() || undefined : undefined,
+  notes: data.notes !== undefined ? data.notes?.trim() || undefined : undefined,
+  categoryId: data.categoryId !== undefined ? data.categoryId || undefined : undefined,
+}));
 
 export const incomeFilterSchema = z.object({
   page: z.coerce.number().int().positive().default(1),

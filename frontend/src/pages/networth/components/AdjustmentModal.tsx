@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ResponsiveModal } from '@/components/ui/ResponsiveModal';
 import { Wallet, CreateAdjustmentInput } from '@/api/walletApi';
+import { parsePastedDate } from '@/utils/date';
 
 interface AdjustmentModalProps {
   isOpen: boolean;
@@ -25,6 +26,30 @@ export const AdjustmentModal: React.FC<AdjustmentModalProps> = ({
   if (!wallet) return null;
 
   const currentBal = parseFloat(wallet.currentBalance || '0');
+
+  const handleDatePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    const text = e.clipboardData.getData('text');
+    const parsed = parsePastedDate(text);
+    if (parsed) {
+      e.preventDefault();
+      setDate(parsed);
+    }
+  };
+
+  const handleDateKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'v') {
+      try {
+        const text = await navigator.clipboard.readText();
+        const parsed = parsePastedDate(text);
+        if (parsed) {
+          e.preventDefault();
+          setDate(parsed);
+        }
+      } catch {
+        // Fallback to native onPaste
+      }
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,6 +147,8 @@ export const AdjustmentModal: React.FC<AdjustmentModalProps> = ({
             required
             value={date}
             onChange={(e) => setDate(e.target.value)}
+            onPaste={handleDatePaste}
+            onKeyDown={handleDateKeyDown}
             className="w-full px-3.5 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-ring)] focus:outline-none text-sm"
           />
         </div>

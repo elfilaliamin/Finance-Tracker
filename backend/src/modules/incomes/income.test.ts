@@ -32,4 +32,21 @@ describe('Income Domain & Wallet Isolation Suite', () => {
     const result = createIncomeSchema.safeParse(validPayload);
     assert.equal(result.success, true);
   });
+
+  it('createIncomeSchema should accept payload without categoryId and description', () => {
+    const payload = {
+      date: '2026-05-15',
+      sourceId: randomUUID(),
+      amount: 250,
+      currency: 'USD',
+    };
+
+    const result = createIncomeSchema.safeParse(payload);
+    assert.equal(result.success, true);
+    if (result.success) {
+      assert.equal(result.data.amount, 250);
+      assert.equal(result.data.categoryId, undefined);
+      assert.equal(result.data.description, undefined);
+    }
+  });
 });
