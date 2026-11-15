@@ -291,18 +291,23 @@ export const IncomeSourcesPage: React.FC = () => {
               })}
             </div>
             <div className="flex items-center gap-2">
-              <input
-                type="color"
-                value={color}
-                onChange={(e) => setColor(e.target.value)}
-                className="w-7 h-7 rounded-[var(--radius-base)] border border-[var(--color-border)] cursor-pointer p-0.5 bg-[var(--color-surface)] shrink-0"
+              <label
+                className="relative w-8 h-8 rounded-full border-2 border-[var(--color-border)] shadow-xs cursor-pointer flex items-center justify-center overflow-hidden hover:scale-105 transition-transform shrink-0"
+                style={{ backgroundColor: color }}
                 title="Pick custom color"
-              />
+              >
+                <input
+                  type="color"
+                  value={color}
+                  onChange={(e) => setColor(e.target.value)}
+                  className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+                />
+              </label>
               <input
                 type="text"
                 value={color}
                 onChange={(e) => setColor(e.target.value)}
-                className="w-28 px-3 py-1.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-xs font-mono font-semibold"
+                className="w-28 px-3 py-1.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-xs font-mono font-semibold uppercase"
                 placeholder="#10b981"
               />
             </div>
