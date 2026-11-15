@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import { dashboardApi } from '@/api/dashboardApi';
 import { walletApi } from '@/api/walletApi';
 import { useAuth } from '@/hooks/useAuth';
+import { useDashboardConfig } from '@/hooks/useDashboardConfig';
 import { MetricCardsGrid } from './components/MetricCardsGrid';
 import { DashboardCharts } from './components/DashboardCharts';
 import { SpendingMatrix } from './components/SpendingMatrix';
-import { RiFilterLine, RiCalendarLine } from '@remixicon/react';
+import { RiFilterLine, RiCalendarLine, RiSettings3Line } from '@remixicon/react';
 
 export const DashboardPage: React.FC = () => {
   const { user } = useAuth();
+  const { config } = useDashboardConfig();
   const currentYear = new Date().getFullYear();
   const [selectedYear, setSelectedYear] = useState<number>(currentYear);
   const [selectedWalletId, setSelectedWalletId] = useState<string>('');
@@ -100,38 +103,67 @@ export const DashboardPage: React.FC = () => {
         </div>
       ) : (
         <>
+          {/* Check if everything is hidden */}
+          {!config.showMetricsGrid &&
+            !config.showIncomeTrend &&
+            !config.showNetWorthHistory &&
+            !config.showSpendingMatrix && (
+              <div className="bg-[var(--color-surface)] rounded-[var(--radius-surface)] border border-[var(--color-border)] p-8 text-center shadow-[var(--shadow-sm)]">
+                <p className="text-sm font-semibold text-[var(--color-text)] mb-1">
+                  All dashboard sections are currently hidden
+                </p>
+                <p className="text-xs text-[var(--color-text-muted)] mb-4">
+                  You can enable the KPI cards, charts, and spending matrix in your settings.
+                </p>
+                <Link
+                  to="/settings"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-[var(--radius-base)] bg-[var(--color-primary)] text-white text-xs font-semibold hover:bg-[var(--color-primary-hover)] transition-colors shadow-xs"
+                >
+                  <RiSettings3Line size={16} />
+                  <span>Customize Dashboard</span>
+                </Link>
+              </div>
+            )}
+
           {/* 12 Metric KPI Cards */}
-          <MetricCardsGrid
-            metrics={metrics || {
-              todaysNetWorth: '0.00',
-              currentMonthIncome: '0.00',
-              priorMonthIncome: '0.00',
-              yearIncome: '0.00',
-              lifetimeIncome: '0.00',
-              avgMonthlyIncome: '0.00',
-              highestIncomeMonth: { month: 'N/A', amount: '0.00' },
-              lowestIncomeMonth: { month: 'N/A', amount: '0.00' },
-              largestIncomeSource: { name: 'None', amount: '0.00' },
-              activeIncomeSourcesCount: 0,
-              latestIncome: null,
-              latestNetWorth: null,
-            }}
-            currency={displayCurrency}
-          />
+          {config.showMetricsGrid && (
+            <MetricCardsGrid
+              metrics={metrics || {
+                todaysNetWorth: '0.00',
+                currentMonthIncome: '0.00',
+                priorMonthIncome: '0.00',
+                yearIncome: '0.00',
+                lifetimeIncome: '0.00',
+                avgMonthlyIncome: '0.00',
+                highestIncomeMonth: { month: 'N/A', amount: '0.00' },
+                lowestIncomeMonth: { month: 'N/A', amount: '0.00' },
+                largestIncomeSource: { name: 'None', amount: '0.00' },
+                activeIncomeSourcesCount: 0,
+                latestIncome: null,
+                latestNetWorth: null,
+              }}
+              currency={displayCurrency}
+              visibleCards={config.visibleCards}
+            />
+          )}
 
           {/* Charts: Income Trend & Net Worth Progression */}
           <DashboardCharts
             incomeTrend={incomeTrend}
             netWorthHistory={netWorthHistory}
             currency={displayCurrency}
+            showIncomeTrend={config.showIncomeTrend}
+            showNetWorthHistory={config.showNetWorthHistory}
           />
 
           {/* Category x 12 Months Spending Matrix */}
-          <SpendingMatrix
-            data={spendingMatrix || { categories: [], grandTotal: '0.00' }}
-            currency={displayCurrency}
-            year={selectedYear}
-          />
+          {config.showSpendingMatrix && (
+            <SpendingMatrix
+              data={spendingMatrix || { categories: [], grandTotal: '0.00' }}
+              currency={displayCurrency}
+              year={selectedYear}
+            />
+          )}
         </>
       )}
     </div>

@@ -10,6 +10,7 @@ import { useUserAvatar } from '@/hooks/useUserAvatar';
 import { ExchangeRatesCard } from './components/ExchangeRatesCard';
 import { DangerZoneCard } from './components/DangerZoneCard';
 import { ImportWizardModal } from './components/ImportWizardModal';
+import { DashboardCustomizationCard } from './components/DashboardCustomizationCard';
 import {
   RiUserLine,
   RiLockPasswordLine,
@@ -260,6 +261,9 @@ export const SettingsPage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Dashboard Customization Card */}
+      <DashboardCustomizationCard />
 
       {/* Exchange Rates Live Engine Card */}
       <ExchangeRatesCard />

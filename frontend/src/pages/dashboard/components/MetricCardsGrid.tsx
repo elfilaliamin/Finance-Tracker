@@ -16,64 +16,74 @@ import { DashboardMetrics } from '@/api/dashboardApi';
 interface MetricCardsGridProps {
   metrics: DashboardMetrics;
   currency: string;
+  visibleCards?: Record<string, boolean>;
 }
 
-export const MetricCardsGrid: React.FC<MetricCardsGridProps> = ({ metrics, currency }) => {
+export const MetricCardsGrid: React.FC<MetricCardsGridProps> = ({ metrics, currency, visibleCards }) => {
   const parseVal = (val: string | undefined | null) => {
     const num = parseFloat(val || '0');
     return isNaN(num) ? '0.00' : num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
-  const cards = [
+  const allCards = [
     {
+      id: 'todaysNetWorth',
       title: "Today's Net Worth",
       value: `${parseVal(metrics.todaysNetWorth || metrics.todayNetWorth)} ${currency}`,
       sub: metrics.latestNetWorth ? `Last snapshot: ${metrics.latestNetWorth.date}` : 'No snapshots yet',
       icon: RiWallet3Line,
     },
     {
+      id: 'currentMonthIncome',
       title: 'Current Month Income',
       value: `${parseVal(metrics.currentMonthIncome)} ${currency}`,
       sub: 'This calendar month',
       icon: RiArrowUpCircleLine,
     },
     {
+      id: 'priorMonthIncome',
       title: 'Prior Month Income',
       value: `${parseVal(metrics.priorMonthIncome || metrics.previousMonthIncome)} ${currency}`,
       sub: 'Previous calendar month',
       icon: RiCalendarLine,
     },
     {
+      id: 'yearIncome',
       title: 'Year Income (YTD)',
       value: `${parseVal(metrics.yearIncome)} ${currency}`,
       sub: `Calendar year ${new Date().getFullYear()}`,
       icon: RiAwardLine,
     },
     {
+      id: 'lifetimeIncome',
       title: 'Lifetime Income',
       value: `${parseVal(metrics.lifetimeIncome)} ${currency}`,
       sub: 'All recorded income',
       icon: RiSparklingLine,
     },
     {
+      id: 'avgMonthlyIncome',
       title: 'Average Monthly Income',
       value: `${parseVal(metrics.avgMonthlyIncome || metrics.averageMonthlyIncome)} ${currency}`,
       sub: 'Active months average',
       icon: RiBarChartGroupedLine,
     },
     {
+      id: 'highestIncomeMonth',
       title: 'Highest Income Month',
       value: `${parseVal(metrics.highestIncomeMonth?.amount)} ${currency}`,
       sub: metrics.highestIncomeMonth?.month && metrics.highestIncomeMonth.month !== 'N/A' ? `Month: ${metrics.highestIncomeMonth.month}` : 'None',
       icon: RiArrowRightUpLine,
     },
     {
+      id: 'lowestIncomeMonth',
       title: 'Lowest Income Month',
       value: `${parseVal(metrics.lowestIncomeMonth?.amount)} ${currency}`,
       sub: metrics.lowestIncomeMonth?.month && metrics.lowestIncomeMonth.month !== 'N/A' ? `Month: ${metrics.lowestIncomeMonth.month}` : 'None',
       icon: RiArrowRightDownLine,
     },
     {
+      id: 'largestIncomeSource',
       title: 'Largest Income Source',
       value: metrics.largestIncomeSource?.name || metrics.largestIncomeSource?.title || 'None',
       sub: metrics.largestIncomeSource?.amount && metrics.largestIncomeSource.amount !== '0.00'
@@ -82,12 +92,14 @@ export const MetricCardsGrid: React.FC<MetricCardsGridProps> = ({ metrics, curre
       icon: RiSparklingLine,
     },
     {
+      id: 'activeIncomeSources',
       title: 'Active Income Sources',
       value: String(metrics.activeIncomeSourcesCount || 0),
       sub: 'Revenue streams',
       icon: RiStackLine,
     },
     {
+      id: 'latestIncome',
       title: 'Latest Income',
       value: metrics.latestIncome
         ? `${parseVal(metrics.latestIncome.amount)} ${currency}`
@@ -96,6 +108,7 @@ export const MetricCardsGrid: React.FC<MetricCardsGridProps> = ({ metrics, curre
       icon: RiTimeLine,
     },
     {
+      id: 'latestNetWorth',
       title: 'Latest Net Worth Record',
       value: metrics.latestNetWorth
         ? `${parseVal(metrics.latestNetWorth.amount)} ${currency}`
@@ -104,6 +117,14 @@ export const MetricCardsGrid: React.FC<MetricCardsGridProps> = ({ metrics, curre
       icon: RiWallet3Line,
     },
   ];
+
+  const cards = allCards.filter((card) =>
+    visibleCards ? visibleCards[card.id] !== false : true
+  );
+
+  if (cards.length === 0) {
+    return null;
+  }
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
