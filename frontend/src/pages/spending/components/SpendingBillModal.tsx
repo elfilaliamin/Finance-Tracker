@@ -99,11 +99,11 @@ export const SpendingBillModal: React.FC<SpendingBillModalProps> = ({
           items:
             spending.items && spending.items.length > 0
               ? spending.items.map((i) => ({
-                  name: i.name,
-                  categoryId: i.categoryId || initialCatId || '',
-                  unitPrice: typeof i.unitPrice === 'number' ? i.unitPrice : parseFloat(i.unitPrice as any) || 0,
-                  quantity: typeof i.quantity === 'number' ? i.quantity : parseInt(i.quantity as any, 10) || 1,
-                }))
+                name: i.name,
+                categoryId: i.categoryId || initialCatId || '',
+                unitPrice: typeof i.unitPrice === 'number' ? i.unitPrice : parseFloat(i.unitPrice as any) || 0,
+                quantity: typeof i.quantity === 'number' ? i.quantity : parseInt(i.quantity as any, 10) || 1,
+              }))
               : [{ name: '', categoryId: initialCatId || '', unitPrice: 0, quantity: 1 }],
         });
       } else {
@@ -382,8 +382,8 @@ export const SpendingBillModal: React.FC<SpendingBillModalProps> = ({
                   ? 'Updating...'
                   : 'Recording...'
                 : isEditMode
-                ? 'Update Bill'
-                : 'Record Bill'}
+                  ? 'Update Bill'
+                  : 'Record Bill'}
             </button>
           </div>
         </div>
