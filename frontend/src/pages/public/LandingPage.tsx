@@ -465,7 +465,7 @@ export const LandingPage: React.FC = () => {
                 {/* Visual Image container with flex-1 to fill all vertical height */}
                 <div className="relative flex-1 w-full min-h-[260px] sm:min-h-[320px] overflow-hidden bg-slate-950">
                   <img
-                    src="/reports-insights.jpg"
+                    src="/spending-reports.jpg"
                     alt="Simplified financial reports, category breakdown rings, and wealth trajectory insights"
                     className="w-full h-full object-cover"
                   />
