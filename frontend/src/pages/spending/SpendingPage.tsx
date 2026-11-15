@@ -112,9 +112,11 @@ export const SpendingPage: React.FC = () => {
     },
     {
       key: 'storeMerchant',
-      header: 'Merchant',
+      header: 'Category',
       render: (item) => (
-        <span className="font-semibold text-[var(--color-text)]">{item.storeMerchant || 'General Expense'}</span>
+        <span className="font-semibold text-[var(--color-text)]">
+          {item.items?.[0]?.categoryName || item.storeMerchant || 'General Expense'}
+        </span>
       ),
     },
     {
@@ -193,7 +195,9 @@ export const SpendingPage: React.FC = () => {
   const renderMobileCard = (item: SpendingRecord) => (
     <div onClick={() => setSelectedReceipt(item)}>
       <div className="flex items-center justify-between mb-1.5">
-        <span className="font-bold text-[var(--color-text)] text-sm">{item.storeMerchant || 'Store Expense'}</span>
+        <span className="font-bold text-[var(--color-text)] text-sm">
+          {item.items?.[0]?.categoryName || item.storeMerchant || 'Spending Expense'}
+        </span>
         <span className="text-xs text-[var(--color-text-muted)] font-mono">{item.date}</span>
       </div>
 

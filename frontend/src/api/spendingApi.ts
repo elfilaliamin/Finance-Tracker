@@ -28,6 +28,8 @@ export interface SpendingRecord {
   paidFromWalletId?: string;
   walletName?: string;
   storeMerchant?: string;
+  categoryId?: string;
+  categoryName?: string;
   notes?: string;
   createdAt: string;
   items: SpendingItem[];
@@ -37,6 +39,7 @@ export interface CreateSpendingInput {
   date: string;
   paidFromWalletId?: string;
   storeMerchant?: string;
+  categoryId?: string;
   currency: string;
   notes?: string;
   items: {

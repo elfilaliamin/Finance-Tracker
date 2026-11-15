@@ -9,7 +9,7 @@ import { Wallet } from '@/api/walletApi';
 
 const spendingItemSchema = z.object({
   name: z.string().min(1, 'Item name is required'),
-  categoryId: z.string().uuid().optional().or(z.literal('')),
+  categoryId: z.string().optional().nullable(),
   unitPrice: z.coerce.number().positive('Price must be greater than 0'),
   quantity: z.coerce.number().int().positive('Quantity must be >= 1'),
 });
@@ -18,7 +18,7 @@ const spendingBillSchema = z.object({
   date: z.string().min(1, 'Date is required'),
   currency: z.enum(['MAD', 'USD', 'EUR']),
   paidFromWalletId: z.string().uuid().optional().or(z.literal('')),
-  storeMerchant: z.string().optional(),
+  categoryId: z.string().optional(),
   notes: z.string().optional(),
   items: z.array(spendingItemSchema).min(1, 'At least one item is required'),
 });
@@ -58,7 +58,7 @@ export const SpendingBillModal: React.FC<SpendingBillModalProps> = ({
       date: new Date().toISOString().split('T')[0],
       currency: (defaultCurrency as any) || 'MAD',
       paidFromWalletId: '',
-      storeMerchant: '',
+      categoryId: '',
       notes: '',
       items: [{ name: '', categoryId: '', unitPrice: 0, quantity: 1 }],
     },
@@ -84,47 +84,57 @@ export const SpendingBillModal: React.FC<SpendingBillModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       if (spending) {
+        const initialCatId =
+          spending.categoryId ||
+          spending.items?.find((i) => i.categoryId)?.categoryId ||
+          categories.find((c) => c.name.toLowerCase() === (spending.storeMerchant || '').toLowerCase())?.id ||
+          '';
+
         reset({
           date: spending.date,
           currency: (spending.currency as any) || 'MAD',
           paidFromWalletId: spending.paidFromWalletId || '',
-          storeMerchant: spending.storeMerchant || '',
+          categoryId: initialCatId,
           notes: spending.notes || '',
-          items: spending.items && spending.items.length > 0
-            ? spending.items.map((i) => ({
-                name: i.name,
-                categoryId: i.categoryId || '',
-                unitPrice: typeof i.unitPrice === 'number' ? i.unitPrice : parseFloat(i.unitPrice as any) || 0,
-                quantity: typeof i.quantity === 'number' ? i.quantity : parseInt(i.quantity as any, 10) || 1,
-              }))
-            : [{ name: '', categoryId: '', unitPrice: 0, quantity: 1 }],
+          items:
+            spending.items && spending.items.length > 0
+              ? spending.items.map((i) => ({
+                  name: i.name,
+                  categoryId: i.categoryId || initialCatId || '',
+                  unitPrice: typeof i.unitPrice === 'number' ? i.unitPrice : parseFloat(i.unitPrice as any) || 0,
+                  quantity: typeof i.quantity === 'number' ? i.quantity : parseInt(i.quantity as any, 10) || 1,
+                }))
+              : [{ name: '', categoryId: initialCatId || '', unitPrice: 0, quantity: 1 }],
         });
       } else {
         reset({
           date: new Date().toISOString().split('T')[0],
           currency: (defaultCurrency as any) || 'MAD',
           paidFromWalletId: '',
-          storeMerchant: '',
+          categoryId: categories[0]?.id || '',
           notes: '',
-          items: [{ name: '', categoryId: '', unitPrice: 0, quantity: 1 }],
+          items: [{ name: '', categoryId: categories[0]?.id || '', unitPrice: 0, quantity: 1 }],
         });
       }
       setErrorMessage(null);
     }
-  }, [isOpen, spending, reset, defaultCurrency]);
+  }, [isOpen, spending, reset, defaultCurrency, categories]);
 
   const handleFormSubmit = async (values: SpendingBillFormData) => {
     try {
       setErrorMessage(null);
+      const selectedCat = categories.find((c) => c.id === values.categoryId);
+
       await onSubmit({
         date: values.date,
         currency: values.currency,
         paidFromWalletId: values.paidFromWalletId ? values.paidFromWalletId : undefined,
-        storeMerchant: values.storeMerchant ? values.storeMerchant.trim() : undefined,
+        categoryId: values.categoryId ? values.categoryId : undefined,
+        storeMerchant: selectedCat?.name || undefined,
         notes: values.notes ? values.notes.trim() : undefined,
         items: values.items.map((i) => ({
           name: i.name.trim(),
-          categoryId: i.categoryId && i.categoryId.trim() ? i.categoryId.trim() : undefined,
+          categoryId: values.categoryId ? values.categoryId : undefined,
           unitPrice: i.unitPrice,
           quantity: i.quantity,
         })),
@@ -158,6 +168,7 @@ export const SpendingBillModal: React.FC<SpendingBillModalProps> = ({
             <span>{errorMessage}</span>
           </div>
         )}
+
         {/* Header Details */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 bg-[var(--color-primary-bg)] rounded-[var(--radius-base)] border border-[var(--color-border)]">
           <div>
@@ -191,14 +202,19 @@ export const SpendingBillModal: React.FC<SpendingBillModalProps> = ({
 
           <div>
             <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1">
-              Merchant / Store
+              Category
             </label>
-            <input
-              type="text"
-              placeholder="e.g. Carrefour, Marjane, Amazon"
-              {...register('storeMerchant')}
+            <select
+              {...register('categoryId')}
               className="w-full px-3 py-2 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-ring)] focus:outline-none text-sm"
-            />
+            >
+              <option value="" className="bg-[var(--color-surface)] text-[var(--color-text)]">Select Category...</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id} className="bg-[var(--color-surface)] text-[var(--color-text)]">
+                  {c.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>
@@ -246,25 +262,14 @@ export const SpendingBillModal: React.FC<SpendingBillModalProps> = ({
                   key={field.id}
                   className="p-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-base)] shadow-[var(--shadow-sm)] space-y-2 relative"
                 >
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-bold text-[var(--color-text-muted)]">#{idx + 1}</span>
-                    {fields.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => remove(idx)}
-                        className="text-[var(--color-text-muted)] hover:text-[var(--color-danger)] p-1 touch-target"
-                        title="Remove item"
-                      >
-                        <RiDeleteBinLine className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
+                  {/* Article Name and Quantity Stepper side by side */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-[var(--color-text-muted)] w-5 shrink-0">#{idx + 1}</span>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <div>
+                    <div className="flex-1 min-w-0">
                       <input
                         type="text"
-                        placeholder="Article name (e.g. Milk 1L)"
+                        placeholder="Article name (e.g. Carrots 1KG)"
                         {...register(`items.${idx}.name` as const)}
                         className="w-full px-3 py-2 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-ring)] focus:outline-none text-sm"
                       />
@@ -273,25 +278,8 @@ export const SpendingBillModal: React.FC<SpendingBillModalProps> = ({
                       )}
                     </div>
 
-                    <div>
-                      <select
-                        {...register(`items.${idx}.categoryId` as const)}
-                        className="w-full px-3 py-2 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-ring)] focus:outline-none text-sm"
-                      >
-                        <option value="" className="bg-[var(--color-surface)] text-[var(--color-text)]">Select Category...</option>
-                        {categories.map((c) => (
-                          <option key={c.id} value={c.id} className="bg-[var(--color-surface)] text-[var(--color-text)]">
-                            {c.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Quantity & Unit Price */}
-                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-[var(--color-border)]">
-                    {/* Quantity with +/- touch buttons */}
-                    <div className="flex items-center gap-1.5">
+                    {/* Quantity Stepper right beside the article name */}
+                    <div className="flex items-center gap-1 shrink-0">
                       <button
                         type="button"
                         onClick={() => setValue(`items.${idx}.quantity`, Math.max(1, currentQty - 1))}
@@ -314,8 +302,21 @@ export const SpendingBillModal: React.FC<SpendingBillModalProps> = ({
                       </button>
                     </div>
 
-                    {/* Unit Price */}
-                    <div className="flex items-center gap-1">
+                    {fields.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => remove(idx)}
+                        className="text-[var(--color-text-muted)] hover:text-[var(--color-danger)] p-1.5 rounded-[var(--radius-base)] hover:bg-[var(--color-danger)]/10 touch-target shrink-0"
+                        title="Remove item"
+                      >
+                        <RiDeleteBinLine className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Unit Price & Line Total */}
+                  <div className="flex items-center justify-between gap-2 pt-1.5 border-t border-[var(--color-border)]">
+                    <div className="flex items-center gap-2">
                       <span className="text-xs text-[var(--color-text-muted)] font-medium">Price:</span>
                       <input
                         type="number"
@@ -324,11 +325,13 @@ export const SpendingBillModal: React.FC<SpendingBillModalProps> = ({
                         {...register(`items.${idx}.unitPrice` as const)}
                         className="w-24 px-2.5 py-1.5 border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] rounded-[var(--radius-base)] text-sm font-mono text-right"
                       />
+                      {errors.items?.[idx]?.unitPrice && (
+                        <p className="text-[11px] text-[var(--color-danger)]">{errors.items[idx]?.unitPrice?.message}</p>
+                      )}
                     </div>
 
-                    {/* Line Total */}
                     <div className="text-right min-w-[70px]">
-                      <span className="text-xs font-bold text-[var(--color-text)] font-mono">
+                      <span className="font-mono font-bold text-sm text-[var(--color-text)]">
                         {lineTotal.toFixed(2)} {selectedCurrency}
                       </span>
                     </div>
@@ -388,4 +391,3 @@ export const SpendingBillModal: React.FC<SpendingBillModalProps> = ({
     </ResponsiveModal>
   );
 };
-

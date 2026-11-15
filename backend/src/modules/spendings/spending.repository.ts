@@ -287,6 +287,15 @@ export class SpendingRepository {
       filters.to ? lte(schema.spendings.date, filters.to) : undefined,
       filters.walletId ? eq(schema.spendings.paidFromWalletId, filters.walletId) : undefined,
       filters.currency ? eq(schema.spendings.currency, filters.currency) : undefined,
+      filters.categoryId
+        ? inArray(
+            schema.spendings.id,
+            db
+              .select({ spendingId: schema.spendingItems.spendingId })
+              .from(schema.spendingItems)
+              .where(eq(schema.spendingItems.categoryId, filters.categoryId))
+          )
+        : undefined,
       filters.store ? ilike(schema.spendings.store, `%${filters.store}%`) : undefined,
       filters.search
         ? or(

@@ -1,7 +1,7 @@
 import React from 'react';
 import { ResponsiveModal } from '@/components/ui/ResponsiveModal';
 import { SpendingRecord } from '@/api/spendingApi';
-import { RiStore2Line, RiCalendarLine, RiWallet3Line } from '@remixicon/react';
+import { RiPriceTag3Line, RiCalendarLine, RiWallet3Line } from '@remixicon/react';
 
 interface MiniReceiptModalProps {
   isOpen: boolean;
@@ -54,7 +54,7 @@ export const MiniReceiptModal: React.FC<MiniReceiptModalProps> = ({
           {spending.storeMerchant && (
             <div className="flex items-center justify-between">
               <span className="text-[var(--color-text-muted)] flex items-center gap-1">
-                <RiStore2Line className="w-3.5 h-3.5" /> Merchant:
+                <RiPriceTag3Line className="w-3.5 h-3.5" /> Category:
               </span>
               <span className="font-semibold">{spending.storeMerchant}</span>
             </div>

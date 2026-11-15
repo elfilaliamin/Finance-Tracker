@@ -30,6 +30,7 @@ export const createSpendingSchema = z
     paidFromWalletId: z.string().uuid().optional().nullable(),
     store: z.string().max(150).trim().optional().nullable(),
     storeMerchant: z.string().max(150).trim().optional().nullable(),
+    categoryId: z.string().uuid().optional().nullable(),
     currency: z.enum(['MAD', 'USD', 'EUR']),
     notes: z.string().max(1000).optional().nullable(),
     items: z.array(spendingItemInputSchema).min(1, 'At least one line item is required'),
@@ -38,9 +39,13 @@ export const createSpendingSchema = z
     date: data.date,
     paidFromWalletId: data.paidFromWalletId || undefined,
     store: (data.store || data.storeMerchant)?.trim() || undefined,
+    categoryId: data.categoryId || undefined,
     currency: data.currency,
     notes: data.notes?.trim() || undefined,
-    items: data.items,
+    items: data.items.map((item) => ({
+      ...item,
+      categoryId: item.categoryId || data.categoryId || undefined,
+    })),
   }));
 
 export const updateSpendingSchema = z
@@ -49,6 +54,7 @@ export const updateSpendingSchema = z
     paidFromWalletId: z.string().uuid().optional().nullable(),
     store: z.string().max(150).trim().optional().nullable(),
     storeMerchant: z.string().max(150).trim().optional().nullable(),
+    categoryId: z.string().uuid().optional().nullable(),
     currency: z.enum(['MAD', 'USD', 'EUR']).optional(),
     notes: z.string().max(1000).optional().nullable(),
     items: z.array(spendingItemInputSchema).min(1).optional(),
@@ -59,9 +65,15 @@ export const updateSpendingSchema = z
     store: data.store !== undefined || data.storeMerchant !== undefined
       ? ((data.store || data.storeMerchant)?.trim() || null)
       : undefined,
+    categoryId: data.categoryId !== undefined ? (data.categoryId || null) : undefined,
     currency: data.currency,
     notes: data.notes !== undefined ? (data.notes?.trim() || null) : undefined,
-    items: data.items,
+    items: data.items
+      ? data.items.map((item) => ({
+          ...item,
+          categoryId: item.categoryId || data.categoryId || undefined,
+        }))
+      : undefined,
   }));
 
 export const spendingFilterSchema = z
