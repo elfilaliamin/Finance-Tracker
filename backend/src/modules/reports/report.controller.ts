@@ -8,21 +8,12 @@ import { sendSuccess } from '../../utils/responseEnvelope.js';
 export class ReportController {
   preview = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const filters = req.query as unknown as ReportFilterParams;
-      const type = filters.type || 'spending';
-      let data;
-      if (type === 'income') {
-        data = await reportService.getIncomeReportData(req.userId!, filters);
-      } else {
-        data = await reportService.getSpendingReportData(req.userId!, filters);
-      }
-      sendSuccess(res, {
-        type,
-        grandTotalBase: data.grandTotalBase,
-        totalRows: data.rows.length,
-        headers: data.headers,
-        sampleRows: data.rows.slice(0, 50),
-      });
+      const from = (req.query.from || req.query.startDate) as string | undefined;
+      const to = (req.query.to || req.query.endDate) as string | undefined;
+      const type = (req.query.type as string) || 'all';
+
+      const data = await reportService.getReportPreview(req.userId!, { from, to, type });
+      sendSuccess(res, data);
     } catch (err) {
       next(err);
     }
