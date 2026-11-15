@@ -47,9 +47,9 @@ export const IncomeFilters: React.FC<IncomeFiltersProps> = ({
           className="px-3 py-1.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-xs font-semibold text-[var(--color-text)] focus:ring-1 focus:ring-[var(--color-ring)] focus:outline-none"
         >
           <option value="all" className="bg-[var(--color-surface)] text-[var(--color-text)]">
-            All Years
+            All Times
           </option>
-          {[currentYear + 1, currentYear, currentYear - 1, currentYear - 2, currentYear - 3].map((yr) => (
+          {[currentYear + 1, currentYear, currentYear - 1, currentYear - 2, currentYear - 3, currentYear - 4, currentYear - 5].map((yr) => (
             <option key={yr} value={yr} className="bg-[var(--color-surface)] text-[var(--color-text)]">
               Year: {yr}
             </option>
