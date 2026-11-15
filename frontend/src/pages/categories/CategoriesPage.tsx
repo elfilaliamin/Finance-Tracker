@@ -34,6 +34,7 @@ export const CategoriesPage: React.FC = () => {
 
   // Form State
   const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
   const [color, setColor] = useState('#059669');
 
   // Queries
@@ -44,7 +45,8 @@ export const CategoriesPage: React.FC = () => {
 
   // Mutations
   const createMutation = useMutation({
-    mutationFn: (data: { name: string; color: string }) => spendingApi.createCategory(data),
+    mutationFn: (data: { name: string; description?: string; color: string }) =>
+      spendingApi.createCategory(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['spendingCategories'] });
       handleCloseModal();
@@ -55,8 +57,13 @@ export const CategoriesPage: React.FC = () => {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: { name: string; color: string } }) =>
-      spendingApi.updateCategory(id, data),
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: { name: string; description?: string; color: string };
+    }) => spendingApi.updateCategory(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['spendingCategories'] });
       handleCloseModal();
@@ -79,6 +86,7 @@ export const CategoriesPage: React.FC = () => {
   const handleOpenCreate = () => {
     setEditingCategory(null);
     setName('');
+    setDescription('');
     setColor('#059669');
     setErrorMessage(null);
     setIsModalOpen(true);
@@ -87,6 +95,7 @@ export const CategoriesPage: React.FC = () => {
   const handleOpenEdit = (cat: SpendingCategory) => {
     setEditingCategory(cat);
     setName(cat.name);
+    setDescription(cat.description || '');
     setColor(cat.color || '#059669');
     setErrorMessage(null);
     setIsModalOpen(true);
@@ -95,6 +104,8 @@ export const CategoriesPage: React.FC = () => {
   const handleCloseModal = useCallback(() => {
     setIsModalOpen(false);
     setEditingCategory(null);
+    setName('');
+    setDescription('');
     setErrorMessage(null);
   }, []);
 
@@ -106,10 +117,12 @@ export const CategoriesPage: React.FC = () => {
       return;
     }
 
+    const desc = description.trim() || undefined;
+
     if (editingCategory) {
-      updateMutation.mutate({ id: editingCategory.id, data: { name: trimmed, color } });
+      updateMutation.mutate({ id: editingCategory.id, data: { name: trimmed, description: desc, color } });
     } else {
-      createMutation.mutate({ name: trimmed, color });
+      createMutation.mutate({ name: trimmed, description: desc, color });
     }
   };
 
@@ -138,7 +151,7 @@ export const CategoriesPage: React.FC = () => {
         </button>
       </div>
 
-      {/* Categories Grid */}
+      {/* Categories List (Each in a separate line) */}
       {isLoading ? (
         <div className="p-8 text-center text-sm text-[var(--color-text-muted)]">
           <div className="w-6 h-6 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin mx-auto mb-2" />
@@ -149,37 +162,48 @@ export const CategoriesPage: React.FC = () => {
           No categories found. Click &quot;New Category&quot; to add one.
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5">
+        <div className="space-y-2.5">
           {spendingCategories.map((cat) => (
             <div
               key={cat.id}
-              className="p-4 rounded-[var(--radius-base)] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-[var(--shadow-sm)] flex items-center justify-between gap-3 group hover:border-[var(--color-ring)] transition-all"
+              className="p-3.5 sm:p-4 rounded-[var(--radius-base)] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] flex items-center justify-between gap-4 group hover:border-[var(--color-ring)] transition-all"
             >
-              <div className="flex items-center gap-3 min-w-0">
+              <div className="flex items-center gap-3.5 min-w-0 flex-1">
                 <span
-                  className="w-4 h-4 rounded-full shrink-0 shadow-sm"
+                  className="w-4 h-4 rounded-full shrink-0 shadow-xs"
                   style={{ backgroundColor: cat.color || '#059669' }}
                 />
-                <div className="min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <p className="font-semibold text-sm text-[var(--color-text)] truncate">{cat.name}</p>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="font-heading font-bold text-sm sm:text-base text-[var(--color-text)] truncate">
+                      {cat.name}
+                    </h3>
                     {cat.isSystem && (
                       <span
                         title="Default System Category"
-                        className="inline-flex items-center gap-0.5 text-[10px] uppercase font-bold text-[var(--color-text-muted)] bg-[var(--color-primary-bg)] px-1.5 py-0.5 rounded-[var(--radius-pill)] border border-[var(--color-border)]"
+                        className="inline-flex items-center gap-1 text-[10px] uppercase font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/50 px-2 py-0.5 rounded-[var(--radius-pill)] border border-emerald-200 dark:border-emerald-800 shrink-0"
                       >
                         <RiLockLine className="w-2.5 h-2.5" />
                         System
                       </span>
                     )}
                   </div>
+                  {cat.description ? (
+                    <p className="text-xs text-[var(--color-text-muted)] mt-0.5 line-clamp-1 sm:line-clamp-2">
+                      {cat.description}
+                    </p>
+                  ) : (
+                    <p className="text-xs text-[var(--color-text-muted)]/50 italic mt-0.5">
+                      No description provided
+                    </p>
+                  )}
                 </div>
               </div>
 
               <div className="flex items-center gap-1 shrink-0">
                 <button
                   onClick={() => handleOpenEdit(cat)}
-                  className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-primary)] rounded-[var(--radius-base)] hover:bg-[var(--color-primary-bg)] transition-colors touch-target"
+                  className="p-2 text-emerald-700 dark:text-emerald-400 hover:text-emerald-900 dark:hover:text-emerald-200 rounded-[var(--radius-base)] hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors touch-target"
                   title="Edit Category"
                 >
                   <RiEditLine className="w-4 h-4" />
@@ -195,7 +219,7 @@ export const CategoriesPage: React.FC = () => {
                         deleteMutation.mutate(cat.id);
                       }
                     }}
-                    className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-danger)] rounded-[var(--radius-base)] hover:bg-[var(--color-danger)]/10 transition-colors touch-target"
+                    className="p-2 text-rose-500 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-200 rounded-[var(--radius-base)] hover:bg-rose-100 dark:hover:bg-rose-950/40 transition-colors touch-target"
                     title="Delete Category"
                   >
                     <RiDeleteBinLine className="w-4 h-4" />
@@ -232,6 +256,19 @@ export const CategoriesPage: React.FC = () => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Groceries, Restaurants, Utilities"
+              className="w-full px-3.5 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-ring)] focus:outline-none text-sm"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5">
+              Description (Optional)
+            </label>
+            <input
+              type="text"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="e.g. Daily market items, supermarket groceries"
               className="w-full px-3.5 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-ring)] focus:outline-none text-sm"
             />
           </div>

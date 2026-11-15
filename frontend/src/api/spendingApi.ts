@@ -3,6 +3,7 @@ import { api } from './client';
 export interface SpendingCategory {
   id: string;
   name: string;
+  description?: string | null;
   color: string;
   icon?: string;
   isSystem: boolean;
@@ -77,10 +78,10 @@ export const spendingApi = {
   getCategories: () =>
     api.get<SpendingCategory[]>('/categories/spending'),
 
-  createCategory: (data: { name: string; color: string; icon?: string }) =>
+  createCategory: (data: { name: string; description?: string; color: string; icon?: string }) =>
     api.post<SpendingCategory>('/categories/spending', data),
 
-  updateCategory: (id: string, data: { name?: string; color?: string; icon?: string }) =>
+  updateCategory: (id: string, data: { name?: string; description?: string; color?: string; icon?: string }) =>
     api.put<SpendingCategory>(`/categories/spending/${id}`, data),
 
   deleteCategory: (id: string) =>

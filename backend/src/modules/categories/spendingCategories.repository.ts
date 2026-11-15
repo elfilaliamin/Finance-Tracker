@@ -30,12 +30,19 @@ export class SpendingCategoriesRepository {
     return category || null;
   }
 
-  async create(userId: string, name: string, color: string = '#f43f5e', icon?: string) {
+  async create(
+    userId: string,
+    name: string,
+    color: string = '#f43f5e',
+    icon?: string,
+    description?: string | null
+  ) {
     const [category] = await db
       .insert(schema.spendingCategories)
       .values({
         userId,
         name: name.trim(),
+        description: description ? description.trim() : null,
         color,
         icon,
       })
@@ -43,13 +50,20 @@ export class SpendingCategoriesRepository {
     return category;
   }
 
-  async update(id: string, userId: string, data: { name?: string; color?: string; icon?: string }) {
+  async update(
+    id: string,
+    userId: string,
+    data: { name?: string; color?: string; icon?: string; description?: string | null }
+  ) {
     const [updated] = await db
       .update(schema.spendingCategories)
       .set({
         ...(data.name && { name: data.name.trim() }),
         ...(data.color && { color: data.color }),
         ...(data.icon !== undefined && { icon: data.icon }),
+        ...(data.description !== undefined && {
+          description: data.description ? data.description.trim() : null,
+        }),
         updatedAt: new Date(),
       })
       .where(

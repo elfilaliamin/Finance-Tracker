@@ -9,6 +9,7 @@ const router = Router();
 
 const categorySchema = z.object({
   name: z.string().min(1, 'Name is required').max(100).trim(),
+  description: z.string().max(500).trim().optional().nullable(),
   color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be a valid hex color code (e.g. #3b82f6)').optional(),
   icon: z.string().max(50).optional(),
 });

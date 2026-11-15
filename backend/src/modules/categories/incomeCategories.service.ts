@@ -3,12 +3,14 @@ import { NotFoundError } from '../../errors/AppError.js';
 
 export interface CreateCategoryInput {
   name: string;
+  description?: string | null;
   color?: string;
   icon?: string;
 }
 
 export interface UpdateCategoryInput {
   name?: string;
+  description?: string | null;
   color?: string;
   icon?: string;
 }

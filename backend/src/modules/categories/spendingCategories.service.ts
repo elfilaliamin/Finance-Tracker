@@ -22,7 +22,7 @@ export class SpendingCategoriesService {
   }
 
   async createCategory(userId: string, input: CreateCategoryInput) {
-    return await this.repository.create(userId, input.name, input.color, input.icon);
+    return await this.repository.create(userId, input.name, input.color, input.icon, input.description);
   }
 
   async updateCategory(id: string, userId: string, input: UpdateCategoryInput) {

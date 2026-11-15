@@ -188,6 +188,7 @@ export const spendingCategories = pgTable('spending_categories', {
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
   name: varchar('name', { length: 100 }).notNull(),
+  description: text('description'),
   color: varchar('color', { length: 7 }).notNull().default('#f43f5e'),
   icon: varchar('icon', { length: 50 }),
   isDeleted: boolean('is_deleted').notNull().default(false),
