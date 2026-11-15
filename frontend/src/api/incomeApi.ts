@@ -1,13 +1,5 @@
 import { api } from './client';
 
-export interface IncomeCategory {
-  id: string;
-  name: string;
-  color: string;
-  icon?: string;
-  isSystem: boolean;
-}
-
 export interface IncomeSource {
   id: string;
   name?: string;
@@ -28,8 +20,6 @@ export interface IncomeRecord {
   sourceId: string;
   sourceName?: string;
   sourceColor?: string;
-  categoryId?: string;
-  categoryName?: string;
   description?: string;
   notes?: string;
   createdAt: string;
@@ -40,13 +30,12 @@ export interface CreateIncomeInput {
   amount: number;
   currency: string;
   sourceId: string;
-  categoryId?: string;
   description?: string;
   notes?: string;
 }
 
 export const incomeApi = {
-  getIncomes: (filters?: { year?: number; sourceId?: string; categoryId?: string; currency?: string }) =>
+  getIncomes: (filters?: { year?: number; sourceId?: string; currency?: string }) =>
     api.get<IncomeRecord[]>('/incomes', filters),
 
   createIncome: (data: CreateIncomeInput) =>
@@ -69,17 +58,4 @@ export const incomeApi = {
 
   deleteSource: (id: string) =>
     api.delete<{ success: boolean }>(`/income-sources/${id}`),
-
-  getCategories: () =>
-    api.get<IncomeCategory[]>('/categories/income'),
-
-  createCategory: (data: { name: string; color: string; icon?: string }) =>
-    api.post<IncomeCategory>('/categories/income', data),
-
-  updateCategory: (id: string, data: { name?: string; color?: string; icon?: string }) =>
-    api.put<IncomeCategory>(`/categories/income/${id}`, data),
-
-  deleteCategory: (id: string) =>
-    api.delete<{ success: boolean }>(`/categories/income/${id}`),
 };
-

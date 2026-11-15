@@ -9,7 +9,6 @@ import {
   RiAlertLine,
 } from '@remixicon/react';
 import { spendingApi, SpendingCategory } from '@/api/spendingApi';
-import { incomeApi, IncomeCategory } from '@/api/incomeApi';
 import { ResponsiveModal } from '@/components/ui/ResponsiveModal';
 
 const PRESET_COLORS = [
@@ -29,9 +28,8 @@ const PRESET_COLORS = [
 
 export const CategoriesPage: React.FC = () => {
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<'spending' | 'income'>('spending');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<{ id: string; name: string; color: string; isSystem: boolean } | null>(null);
+  const [editingCategory, setEditingCategory] = useState<SpendingCategory | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Form State
@@ -39,18 +37,13 @@ export const CategoriesPage: React.FC = () => {
   const [color, setColor] = useState('#059669');
 
   // Queries
-  const { data: spendingCategories = [], isLoading: loadingSpending } = useQuery({
+  const { data: spendingCategories = [], isLoading } = useQuery({
     queryKey: ['spendingCategories'],
     queryFn: () => spendingApi.getCategories(),
   });
 
-  const { data: incomeCategories = [], isLoading: loadingIncome } = useQuery({
-    queryKey: ['incomeCategories'],
-    queryFn: () => incomeApi.getCategories(),
-  });
-
-  // Mutations for Spending Categories
-  const createSpendingMutation = useMutation({
+  // Mutations
+  const createMutation = useMutation({
     mutationFn: (data: { name: string; color: string }) => spendingApi.createCategory(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['spendingCategories'] });
@@ -61,7 +54,7 @@ export const CategoriesPage: React.FC = () => {
     },
   });
 
-  const updateSpendingMutation = useMutation({
+  const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: { name: string; color: string } }) =>
       spendingApi.updateCategory(id, data),
     onSuccess: () => {
@@ -73,7 +66,7 @@ export const CategoriesPage: React.FC = () => {
     },
   });
 
-  const deleteSpendingMutation = useMutation({
+  const deleteMutation = useMutation({
     mutationFn: (id: string) => spendingApi.deleteCategory(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['spendingCategories'] });
@@ -83,49 +76,15 @@ export const CategoriesPage: React.FC = () => {
     },
   });
 
-  // Mutations for Income Categories
-  const createIncomeMutation = useMutation({
-    mutationFn: (data: { name: string; color: string }) => incomeApi.createCategory(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['incomeCategories'] });
-      handleCloseModal();
-    },
-    onError: (err: any) => {
-      setErrorMessage(err?.response?.data?.message || err?.message || 'Failed to create category.');
-    },
-  });
-
-  const updateIncomeMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: { name: string; color: string } }) =>
-      incomeApi.updateCategory(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['incomeCategories'] });
-      handleCloseModal();
-    },
-    onError: (err: any) => {
-      setErrorMessage(err?.response?.data?.message || err?.message || 'Failed to update category.');
-    },
-  });
-
-  const deleteIncomeMutation = useMutation({
-    mutationFn: (id: string) => incomeApi.deleteCategory(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['incomeCategories'] });
-    },
-    onError: (err: any) => {
-      alert(err?.response?.data?.message || err?.message || 'Failed to delete category.');
-    },
-  });
-
   const handleOpenCreate = () => {
     setEditingCategory(null);
     setName('');
-    setColor(activeTab === 'spending' ? '#059669' : '#10b981');
+    setColor('#059669');
     setErrorMessage(null);
     setIsModalOpen(true);
   };
 
-  const handleOpenEdit = (cat: SpendingCategory | IncomeCategory) => {
+  const handleOpenEdit = (cat: SpendingCategory) => {
     setEditingCategory(cat);
     setName(cat.name);
     setColor(cat.color || '#059669');
@@ -147,40 +106,26 @@ export const CategoriesPage: React.FC = () => {
       return;
     }
 
-    if (activeTab === 'spending') {
-      if (editingCategory) {
-        updateSpendingMutation.mutate({ id: editingCategory.id, data: { name: trimmed, color } });
-      } else {
-        createSpendingMutation.mutate({ name: trimmed, color });
-      }
+    if (editingCategory) {
+      updateMutation.mutate({ id: editingCategory.id, data: { name: trimmed, color } });
     } else {
-      if (editingCategory) {
-        updateIncomeMutation.mutate({ id: editingCategory.id, data: { name: trimmed, color } });
-      } else {
-        createIncomeMutation.mutate({ name: trimmed, color });
-      }
+      createMutation.mutate({ name: trimmed, color });
     }
   };
 
-  const isSaving =
-    createSpendingMutation.isPending ||
-    updateSpendingMutation.isPending ||
-    createIncomeMutation.isPending ||
-    updateIncomeMutation.isPending;
-
-  const currentCategories = activeTab === 'spending' ? spendingCategories : incomeCategories;
-  const isLoading = activeTab === 'spending' ? loadingSpending : loadingIncome;
+  const isSaving = createMutation.isPending || updateMutation.isPending;
 
   return (
     <div className="space-y-6">
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl sm:text-2xl font-heading font-bold text-[var(--color-text)]">
-            Category Management
+          <h2 className="text-xl sm:text-2xl font-heading font-bold text-[var(--color-text)] flex items-center gap-2">
+            <RiPriceTag3Line className="w-6 h-6 text-[var(--color-primary)]" />
+            <span>Spending Categories</span>
           </h2>
-          <p className="text-xs sm:text-sm text-[var(--color-text-muted)]">
-            Manage categories to classify spending line items and revenue entries.
+          <p className="text-xs sm:text-sm text-[var(--color-text-muted)] mt-1">
+            Classify and organize articles and items across your spending receipts.
           </p>
         </div>
 
@@ -189,33 +134,7 @@ export const CategoriesPage: React.FC = () => {
           className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-[var(--radius-base)] bg-[var(--color-primary)] text-white font-medium text-sm hover:bg-[var(--color-primary-hover)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-all touch-target"
         >
           <RiAddLine className="w-5 h-5" />
-          <span>New {activeTab === 'spending' ? 'Spending' : 'Income'} Category</span>
-        </button>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex border-b border-[var(--color-border)] gap-6">
-        <button
-          onClick={() => setActiveTab('spending')}
-          className={`pb-3 text-sm font-semibold transition-colors relative flex items-center gap-2 ${
-            activeTab === 'spending'
-              ? 'text-[var(--color-primary)] border-b-2 border-[var(--color-primary)]'
-              : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
-          }`}
-        >
-          <RiPriceTag3Line className="w-4 h-4" />
-          <span>Spending Categories ({spendingCategories.length})</span>
-        </button>
-        <button
-          onClick={() => setActiveTab('income')}
-          className={`pb-3 text-sm font-semibold transition-colors relative flex items-center gap-2 ${
-            activeTab === 'income'
-              ? 'text-[var(--color-primary)] border-b-2 border-[var(--color-primary)]'
-              : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
-          }`}
-        >
-          <RiPriceTag3Line className="w-4 h-4" />
-          <span>Income Categories ({incomeCategories.length})</span>
+          <span>New Category</span>
         </button>
       </div>
 
@@ -225,13 +144,13 @@ export const CategoriesPage: React.FC = () => {
           <div className="w-6 h-6 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin mx-auto mb-2" />
           Loading categories...
         </div>
-      ) : currentCategories.length === 0 ? (
+      ) : spendingCategories.length === 0 ? (
         <div className="p-8 text-center text-sm text-[var(--color-text-muted)] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-base)]">
           No categories found. Click &quot;New Category&quot; to add one.
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5">
-          {currentCategories.map((cat) => (
+          {spendingCategories.map((cat) => (
             <div
               key={cat.id}
               className="p-4 rounded-[var(--radius-base)] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-[var(--shadow-sm)] flex items-center justify-between gap-3 group hover:border-[var(--color-ring)] transition-all"
@@ -273,11 +192,7 @@ export const CategoriesPage: React.FC = () => {
                           `Delete category "${cat.name}"? Existing transactions will keep their records.`
                         )
                       ) {
-                        if (activeTab === 'spending') {
-                          deleteSpendingMutation.mutate(cat.id);
-                        } else {
-                          deleteIncomeMutation.mutate(cat.id);
-                        }
+                        deleteMutation.mutate(cat.id);
                       }
                     }}
                     className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-danger)] rounded-[var(--radius-base)] hover:bg-[var(--color-danger)]/10 transition-colors touch-target"
@@ -292,20 +207,12 @@ export const CategoriesPage: React.FC = () => {
         </div>
       )}
 
-      {/* Modal */}
+      {/* Create / Edit Modal */}
       <ResponsiveModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        title={
-          editingCategory
-            ? `Edit ${activeTab === 'spending' ? 'Spending' : 'Income'} Category`
-            : `New ${activeTab === 'spending' ? 'Spending' : 'Income'} Category`
-        }
-        description={
-          activeTab === 'spending'
-            ? 'Categorize items in your spending bills and receipts.'
-            : 'Categorize revenue entries in your income ledger.'
-        }
+        title={editingCategory ? 'Edit Spending Category' : 'New Spending Category'}
+        description="Categorize items in your spending bills and receipts."
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           {errorMessage && (
