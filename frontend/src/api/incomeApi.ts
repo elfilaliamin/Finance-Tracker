@@ -38,6 +38,9 @@ export const incomeApi = {
   getIncomes: (filters?: { year?: number; month?: number; sourceId?: string; currency?: string }) =>
     api.get<IncomeRecord[]>('/incomes', filters),
 
+  getAvailableYears: () =>
+    api.get<number[]>('/incomes/years'),
+
   createIncome: (data: CreateIncomeInput) =>
     api.post<IncomeRecord>('/incomes', data),
 

@@ -190,6 +190,26 @@ export class IncomeRepository {
       .returning();
     return !!deleted;
   }
+
+  async getAvailableYears(userId: string): Promise<number[]> {
+    const result = await db
+      .select({
+        year: sql<number>`DISTINCT EXTRACT(YEAR FROM ${schema.incomes.date})::int`,
+      })
+      .from(schema.incomes)
+      .where(
+        and(
+          eq(schema.incomes.userId, userId),
+          eq(schema.incomes.isDeleted, false)
+        )
+      )
+      .orderBy(desc(sql`EXTRACT(YEAR FROM ${schema.incomes.date})::int`));
+
+    const currentYear = new Date().getFullYear();
+    return result
+      .map((r) => r.year)
+      .filter((y) => typeof y === 'number' && !isNaN(y) && y <= currentYear);
+  }
 }
 
 export const incomeRepository = new IncomeRepository();

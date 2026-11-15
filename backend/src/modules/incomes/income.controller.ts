@@ -59,6 +59,15 @@ export class IncomeController {
       next(err);
     }
   };
+
+  getAvailableYears = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const years = await incomeService.getAvailableYears(req.userId!);
+      sendSuccess(res, years);
+    } catch (err) {
+      next(err);
+    }
+  };
 }
 
 export const incomeController = new IncomeController();

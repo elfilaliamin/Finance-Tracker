@@ -10,6 +10,7 @@ interface IncomeFiltersProps {
   onSelectCurrency: (curr: string) => void;
   selectedPeriod: string;
   onSelectPeriod: (period: string) => void;
+  availableYears?: number[];
   onClear: () => void;
 }
 
@@ -21,18 +22,16 @@ export const IncomeFilters: React.FC<IncomeFiltersProps> = ({
   onSelectCurrency,
   selectedPeriod,
   onSelectPeriod,
+  availableYears = [],
   onClear,
 }) => {
   const currentYear = new Date().getFullYear();
-  const pastYears = [
-    currentYear,
-    currentYear - 1,
-    currentYear - 2,
-    currentYear - 3,
-    currentYear - 4,
-    currentYear - 5,
-    currentYear - 6,
-  ];
+
+  // Only include years older than last year (yr < currentYear - 1)
+  // Exclude future years (yr <= currentYear) and only include years that actually exist in records
+  const olderRecordedYears = Array.from(new Set(availableYears))
+    .filter((yr) => typeof yr === 'number' && !isNaN(yr) && yr < currentYear - 1 && yr <= currentYear)
+    .sort((a, b) => b - a);
 
   let activeCount = 0;
   if (selectedSourceId) activeCount++;
@@ -58,7 +57,13 @@ export const IncomeFilters: React.FC<IncomeFiltersProps> = ({
           <option value="last_month" className="bg-[var(--color-surface)] text-[var(--color-text)]">
             Last Month
           </option>
-          {pastYears.map((yr) => (
+          <option value="this_year" className="bg-[var(--color-surface)] text-[var(--color-text)]">
+            This Year
+          </option>
+          <option value="last_year" className="bg-[var(--color-surface)] text-[var(--color-text)]">
+            Last Year
+          </option>
+          {olderRecordedYears.map((yr) => (
             <option key={yr} value={String(yr)} className="bg-[var(--color-surface)] text-[var(--color-text)]">
               {yr}
             </option>

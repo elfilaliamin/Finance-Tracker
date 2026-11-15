@@ -9,6 +9,7 @@ const router = Router();
 router.use(authenticate);
 
 router.get('/', validateRequest({ query: incomeFilterSchema }), incomeController.list);
+router.get('/years', incomeController.getAvailableYears);
 router.get('/:id', incomeController.getOne);
 router.post('/', validateRequest({ body: createIncomeSchema }), incomeController.create);
 router.put('/:id', validateRequest({ body: updateIncomeSchema }), incomeController.update);

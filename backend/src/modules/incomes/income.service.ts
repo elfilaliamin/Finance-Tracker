@@ -129,6 +129,10 @@ export class IncomeService {
       throw new NotFoundError(`Income record with ID '${id}' not found.`);
     }
   }
+
+  async getAvailableYears(userId: string): Promise<number[]> {
+    return await this.repository.getAvailableYears(userId);
+  }
 }
 
 export const incomeService = new IncomeService();

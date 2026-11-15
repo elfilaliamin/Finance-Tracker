@@ -32,6 +32,12 @@ export const IncomePage: React.FC = () => {
     const lastMonthDate = new Date(currentYear, now.getMonth() - 1, 1);
     queryYear = lastMonthDate.getFullYear();
     queryMonth = lastMonthDate.getMonth() + 1;
+  } else if (selectedPeriod === 'this_year') {
+    queryYear = currentYear;
+    queryMonth = undefined;
+  } else if (selectedPeriod === 'last_year') {
+    queryYear = currentYear - 1;
+    queryMonth = undefined;
   } else if (selectedPeriod !== 'all' && selectedPeriod !== '') {
     const parsedYear = parseInt(selectedPeriod, 10);
     if (!isNaN(parsedYear) && parsedYear > 0) {
@@ -46,6 +52,11 @@ export const IncomePage: React.FC = () => {
     queryFn: () => incomeApi.getSources(),
   });
 
+  const { data: serverAvailableYears = [] } = useQuery({
+    queryKey: ['incomeAvailableYears'],
+    queryFn: () => incomeApi.getAvailableYears(),
+  });
+
   const { data: incomes = [], isLoading } = useQuery({
     queryKey: ['incomes', selectedPeriod, queryYear, queryMonth, selectedSourceId, selectedCurrency],
     queryFn: () =>
@@ -57,11 +68,19 @@ export const IncomePage: React.FC = () => {
       }),
   });
 
+  const recordedYears = Array.from(
+    new Set([
+      ...serverAvailableYears,
+      ...incomes.map((i) => parseInt(i.date.split('-')[0], 10)),
+    ])
+  ).filter((y) => typeof y === 'number' && !isNaN(y) && y <= currentYear);
+
   // Mutations
   const createMutation = useMutation({
     mutationFn: (data: CreateIncomeInput) => incomeApi.createIncome(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['incomes'] });
+      queryClient.invalidateQueries({ queryKey: ['incomeAvailableYears'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     },
   });
@@ -71,6 +90,7 @@ export const IncomePage: React.FC = () => {
       incomeApi.updateIncome(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['incomes'] });
+      queryClient.invalidateQueries({ queryKey: ['incomeAvailableYears'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     },
   });
@@ -79,6 +99,7 @@ export const IncomePage: React.FC = () => {
     mutationFn: (id: string) => incomeApi.deleteIncome(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['incomes'] });
+      queryClient.invalidateQueries({ queryKey: ['incomeAvailableYears'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     },
   });
@@ -280,6 +301,7 @@ export const IncomePage: React.FC = () => {
         onSelectCurrency={setSelectedCurrency}
         selectedPeriod={selectedPeriod}
         onSelectPeriod={setSelectedPeriod}
+        availableYears={recordedYears}
         onClear={handleClearFilters}
       />
 
@@ -315,6 +337,10 @@ export const IncomePage: React.FC = () => {
               if (entryYear === lastMonthDate.getFullYear() && entryMonth === lastMonthDate.getMonth() + 1) {
                 matches = true;
               }
+            } else if (selectedPeriod === 'this_year' && entryYear === currentYear) {
+              matches = true;
+            } else if (selectedPeriod === 'last_year' && entryYear === currentYear - 1) {
+              matches = true;
             } else if (parseInt(selectedPeriod, 10) === entryYear) {
               matches = true;
             }
