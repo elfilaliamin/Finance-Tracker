@@ -13,6 +13,7 @@ import {
 } from '@remixicon/react';
 import { useAuth } from '@/hooks/useAuth';
 import { AppLogo } from '@/components/ui/AppLogo';
+import authBg from '@/assets/auth-bg.jpg';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -53,7 +54,7 @@ export const LoginPage: React.FC = () => {
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat transform scale-105"
         style={{
-          backgroundImage: 'url(/auth-bg.jpg)',
+          backgroundImage: `url(${authBg})`,
         }}
       />
       {/* Deep moody cinematic dark overlay (matching reference design) */}
