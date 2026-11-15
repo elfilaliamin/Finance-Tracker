@@ -358,7 +358,7 @@ export const SpendingBillModal: React.FC<SpendingBillModalProps> = ({
             <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider block">
               Grand Total
             </span>
-            <span className="text-2xl font-heading font-extrabold font-mono text-[var(--color-danger)]">
+            <span className="text-2xl font-extrabold font-mono text-[var(--color-danger)]">
               {grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{' '}
               <span className="text-xs font-semibold text-[var(--color-text-muted)]">{selectedCurrency}</span>
             </span>

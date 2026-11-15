@@ -183,7 +183,7 @@ export const ReportPage: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
           <div className="bg-[var(--color-surface)] rounded-[var(--radius-surface)] border border-[var(--color-border)] p-4 shadow-[var(--shadow-sm)]">
             <span className="text-xs text-[var(--color-text-muted)] font-medium block">Total Income</span>
-            <span className="text-xl font-heading font-bold font-mono text-[var(--color-accent)] mt-0.5 block">
+            <span className="text-xl font-bold font-mono text-[var(--color-accent)] mt-0.5 block">
               +{parseFloat(previewData.summary?.totalIncome || '0').toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{' '}
               <span className="text-xs text-[var(--color-text-muted)]">{defaultCurrency}</span>
             </span>
@@ -191,7 +191,7 @@ export const ReportPage: React.FC = () => {
 
           <div className="bg-[var(--color-surface)] rounded-[var(--radius-surface)] border border-[var(--color-border)] p-4 shadow-[var(--shadow-sm)]">
             <span className="text-xs text-[var(--color-text-muted)] font-medium block">Total Spending</span>
-            <span className="text-xl font-heading font-bold font-mono text-[var(--color-danger)] mt-0.5 block">
+            <span className="text-xl font-bold font-mono text-[var(--color-danger)] mt-0.5 block">
               -{parseFloat(previewData.summary?.totalSpending || '0').toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{' '}
               <span className="text-xs text-[var(--color-text-muted)]">{defaultCurrency}</span>
             </span>
@@ -199,7 +199,7 @@ export const ReportPage: React.FC = () => {
 
           <div className="bg-[var(--color-surface)] rounded-[var(--radius-surface)] border border-[var(--color-border)] p-4 shadow-[var(--shadow-sm)]">
             <span className="text-xs text-[var(--color-text-muted)] font-medium block">Net Savings</span>
-            <span className="text-xl font-heading font-bold font-mono text-[var(--color-text)] mt-0.5 block">
+            <span className="text-xl font-bold font-mono text-[var(--color-text)] mt-0.5 block">
               {parseFloat(previewData.summary?.netSavings || '0').toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{' '}
               <span className="text-xs text-[var(--color-text-muted)]">{defaultCurrency}</span>
             </span>
@@ -207,7 +207,7 @@ export const ReportPage: React.FC = () => {
 
           <div className="bg-[var(--color-surface)] rounded-[var(--radius-surface)] border border-[var(--color-border)] p-4 shadow-[var(--shadow-sm)]">
             <span className="text-xs text-[var(--color-text-muted)] font-medium block">Transactions</span>
-            <span className="text-xl font-heading font-bold font-mono text-[var(--color-text)] mt-0.5 block">
+            <span className="text-xl font-bold font-mono text-[var(--color-text)] mt-0.5 block">
               {previewData.summary?.count ?? previewData.rows?.length ?? 0} records
             </span>
           </div>

@@ -117,7 +117,7 @@ export const WalletTransactionsModal: React.FC<WalletTransactionsModalProps> = (
             </span>
             <div className="flex items-baseline gap-1">
               <span
-                className={`text-xl font-heading font-bold font-mono tracking-wide ${
+                className={`text-xl font-bold font-mono tracking-wide ${
                   isAsset ? 'text-[var(--color-text)]' : 'text-red-600 dark:text-red-400'
                 }`}
               >

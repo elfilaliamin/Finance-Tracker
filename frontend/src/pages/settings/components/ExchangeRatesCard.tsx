@@ -198,7 +198,7 @@ export const ExchangeRatesCard: React.FC = () => {
               <div>
                 <div className="flex items-baseline gap-1.5">
                   <span className="text-xs text-[var(--color-text-muted)] font-mono font-medium">1 {c.base} =</span>
-                  <span className="text-lg sm:text-xl font-heading font-extrabold font-mono text-[var(--color-accent)] tracking-wide">
+                  <span className="text-lg sm:text-xl font-extrabold font-mono text-[var(--color-accent)] tracking-wide">
                     {c.rate < 0.1 ? c.rate.toFixed(6) : c.rate.toFixed(4)}
                   </span>
                   <span className="text-xs font-bold text-[var(--color-text)] font-mono">{c.target}</span>
@@ -248,7 +248,7 @@ export const ExchangeRatesCard: React.FC = () => {
 
           <div className="sm:col-span-7 flex items-center justify-between p-2.5 rounded-[var(--radius-base)] bg-[var(--color-primary-bg)] border border-[var(--color-border)]">
             <div className="flex items-baseline gap-2">
-              <span className="text-base sm:text-lg font-heading font-black font-mono text-[var(--color-text)] tracking-wide">
+              <span className="text-base sm:text-lg font-black font-mono text-[var(--color-text)] tracking-wide">
                 {parseFloat(convertedTotal).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
               <span className="text-xs font-bold text-[var(--color-accent)]">{convertTo}</span>
