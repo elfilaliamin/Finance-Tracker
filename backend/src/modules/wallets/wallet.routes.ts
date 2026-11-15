@@ -1,12 +1,21 @@
 import { Router } from 'express';
 import { walletController } from './wallet.controller.js';
-import { createWalletSchema, updateWalletSchema, createAdjustmentSchema } from './wallet.schemas.js';
+import {
+  createWalletSchema,
+  updateWalletSchema,
+  createAdjustmentSchema,
+  createTransferSchema,
+} from './wallet.schemas.js';
 import { authenticate } from '../../middlewares/authenticate.js';
 import { validateRequest } from '../../middlewares/validateRequest.js';
 
 const router = Router();
 
 router.use(authenticate);
+
+// Wallet Transfers (Money transfer between wallets)
+router.post('/transfer', validateRequest({ body: createTransferSchema }), walletController.transfer);
+router.delete('/transfers/:transferId', walletController.deleteTransfer);
 
 // Wallet CRUD
 router.get('/', walletController.list);

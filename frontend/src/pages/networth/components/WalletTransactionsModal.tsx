@@ -20,6 +20,7 @@ interface WalletTransactionsModalProps {
   onClose: () => void;
   wallet: Wallet | null;
   onOpenAdjust?: (wallet: Wallet) => void;
+  onOpenTransfer?: (wallet: Wallet) => void;
 }
 
 export const WalletTransactionsModal: React.FC<WalletTransactionsModalProps> = ({
@@ -27,8 +28,9 @@ export const WalletTransactionsModal: React.FC<WalletTransactionsModalProps> = (
   onClose,
   wallet,
   onOpenAdjust,
+  onOpenTransfer,
 }) => {
-  const [filterType, setFilterType] = useState<'all' | 'in' | 'spending' | 'adjustment'>('all');
+  const [filterType, setFilterType] = useState<'all' | 'in' | 'spending' | 'transfer' | 'adjustment'>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
   const { data, isLoading } = useQuery({
@@ -50,6 +52,7 @@ export const WalletTransactionsModal: React.FC<WalletTransactionsModalProps> = (
       // Type filtering
       if (filterType === 'in' && t.direction !== 'in') return false;
       if (filterType === 'spending' && t.source !== 'spending') return false;
+      if (filterType === 'transfer' && t.source !== 'transfer') return false;
       if (filterType === 'adjustment' && t.source !== 'adjustment') return false;
 
       // Text search
@@ -59,7 +62,8 @@ export const WalletTransactionsModal: React.FC<WalletTransactionsModalProps> = (
         const matchesDesc = t.description?.toLowerCase().includes(query);
         const matchesNotes = t.notes?.toLowerCase().includes(query);
         const matchesStore = t.spendingDetails?.store?.toLowerCase().includes(query);
-        if (!matchesTitle && !matchesDesc && !matchesNotes && !matchesStore) return false;
+        const matchesTransfer = t.transferDetails?.otherWalletName?.toLowerCase().includes(query);
+        if (!matchesTitle && !matchesDesc && !matchesNotes && !matchesStore && !matchesTransfer) return false;
       }
 
       return true;
@@ -202,6 +206,16 @@ export const WalletTransactionsModal: React.FC<WalletTransactionsModalProps> = (
               <span>Spending (-)</span>
             </button>
             <button
+              onClick={() => setFilterType('transfer')}
+              className={`px-3 py-1.5 rounded-[var(--radius-base)] transition-all shrink-0 flex items-center gap-1 ${
+                filterType === 'transfer'
+                  ? 'bg-[var(--color-surface)] text-blue-600 dark:text-blue-400 shadow-xs'
+                  : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
+              }`}
+            >
+              <span>Transfers</span>
+            </button>
+            <button
               onClick={() => setFilterType('adjustment')}
               className={`px-3 py-1.5 rounded-[var(--radius-base)] transition-all shrink-0 ${
                 filterType === 'adjustment'
@@ -256,9 +270,70 @@ export const WalletTransactionsModal: React.FC<WalletTransactionsModalProps> = (
             </div>
           ) : (
             filteredTransactions.map((t) => {
-              const isAdded = t.direction === 'in';
+              const isTransfer = t.source === 'transfer';
+              const isTransferReceiver = isTransfer && t.direction === 'in';
+              const isTransferSender = isTransfer && t.direction === 'out';
               const isSpending = t.source === 'spending';
               const isReconcile = t.type === 'reconcile';
+              const isAdded = !isTransfer && t.direction === 'in';
+
+              // Visual styling mapping per user requirements:
+              // Receiver: in blue
+              // Sender (wallet that gives): in red
+              // Spending: in red
+              // Regular added: in green
+              let badgeColor = 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20';
+              let badgeLabel = 'Transfer In';
+              let iconColor = 'bg-blue-500/10 text-blue-600 dark:text-blue-400';
+              let amountColor = 'text-blue-600 dark:text-blue-400';
+              let IconComponent = RiArrowRightDownLine;
+
+              if (isTransferReceiver) {
+                // Receiver wallet: in BLUE
+                badgeColor = 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20';
+                badgeLabel = t.transferDetails?.otherWalletName
+                  ? `From ${t.transferDetails.otherWalletName}`
+                  : 'Transfer In';
+                iconColor = 'bg-blue-500/10 text-blue-600 dark:text-blue-400';
+                amountColor = 'text-blue-600 dark:text-blue-400';
+                IconComponent = RiArrowRightDownLine;
+              } else if (isTransferSender) {
+                // Wallet that gives (sender): in RED
+                badgeColor = 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20';
+                badgeLabel = t.transferDetails?.otherWalletName
+                  ? `To ${t.transferDetails.otherWalletName}`
+                  : 'Transfer Out';
+                iconColor = 'bg-rose-500/10 text-rose-600 dark:text-rose-400';
+                amountColor = 'text-rose-600 dark:text-rose-400';
+                IconComponent = RiArrowRightUpLine;
+              } else if (isSpending) {
+                badgeColor = 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20';
+                badgeLabel = 'Spending';
+                iconColor = 'bg-rose-500/10 text-rose-600 dark:text-rose-400';
+                amountColor = 'text-rose-600 dark:text-rose-400';
+                IconComponent = RiShoppingBag3Line;
+              } else if (isReconcile) {
+                badgeColor = 'bg-[var(--color-primary-bg)] text-[var(--color-accent)] border-[var(--color-border)]';
+                badgeLabel = 'Reconciliation';
+                iconColor = 'bg-[var(--color-primary-bg)] text-[var(--color-accent)]';
+                amountColor =
+                  t.direction === 'in'
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : 'text-rose-600 dark:text-rose-400';
+                IconComponent = RiEqualizerLine;
+              } else if (isAdded) {
+                badgeColor = 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20';
+                badgeLabel = 'Money Added';
+                iconColor = 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400';
+                amountColor = 'text-emerald-600 dark:text-emerald-400';
+                IconComponent = RiArrowRightDownLine;
+              } else {
+                badgeColor = 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20';
+                badgeLabel = 'Deduction';
+                iconColor = 'bg-rose-500/10 text-rose-600 dark:text-rose-400';
+                amountColor = 'text-rose-600 dark:text-rose-400';
+                IconComponent = RiArrowRightUpLine;
+              }
 
               return (
                 <div
@@ -267,21 +342,9 @@ export const WalletTransactionsModal: React.FC<WalletTransactionsModalProps> = (
                 >
                   <div className="flex items-start gap-3 min-w-0">
                     <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
-                        isSpending
-                          ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
-                          : isAdded
-                          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                          : 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
-                      }`}
+                      className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${iconColor}`}
                     >
-                      {isSpending ? (
-                        <RiShoppingBag3Line className="w-4 h-4" />
-                      ) : isReconcile ? (
-                        <RiEqualizerLine className="w-4 h-4" />
-                      ) : (
-                        <RiArrowRightDownLine className="w-4 h-4" />
-                      )}
+                      <IconComponent className="w-4 h-4" />
                     </div>
 
                     <div className="min-w-0">
@@ -290,15 +353,9 @@ export const WalletTransactionsModal: React.FC<WalletTransactionsModalProps> = (
                           {t.title}
                         </h4>
                         <span
-                          className={`text-[10px] font-semibold px-2 py-0.2 rounded-[var(--radius-pill)] border ${
-                            isSpending
-                              ? 'bg-rose-500/10 text-rose-600 border-rose-500/20'
-                              : isAdded
-                              ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
-                              : 'bg-blue-500/10 text-blue-600 border-blue-500/20'
-                          }`}
+                          className={`text-[10px] font-semibold px-2 py-0.2 rounded-[var(--radius-pill)] border ${badgeColor}`}
                         >
-                          {isSpending ? 'Spending' : isReconcile ? 'Reconciliation' : 'Money Added'}
+                          {badgeLabel}
                         </span>
                       </div>
 
@@ -318,6 +375,11 @@ export const WalletTransactionsModal: React.FC<WalletTransactionsModalProps> = (
                             Balance: {parseFloat(t.adjustmentDetails.resultingBalance).toFixed(2)} {t.currency}
                           </span>
                         )}
+                        {t.transferDetails?.exchangeRate && t.transferDetails.exchangeRate !== '1' && (
+                          <span className="font-mono text-[10px] text-[var(--color-text-muted)]">
+                            Rate: {parseFloat(t.transferDetails.exchangeRate).toFixed(4)}
+                          </span>
+                        )}
                         {t.notes && t.notes !== t.description && (
                           <span className="italic truncate max-w-[200px]">
                             &ldquo;{t.notes}&rdquo;
@@ -329,13 +391,7 @@ export const WalletTransactionsModal: React.FC<WalletTransactionsModalProps> = (
 
                   <div className="text-right shrink-0">
                     <span
-                      className={`text-sm sm:text-base font-bold font-mono tracking-wide ${
-                        isSpending
-                          ? 'text-rose-600 dark:text-rose-400'
-                          : isAdded
-                          ? 'text-emerald-600 dark:text-emerald-400'
-                          : 'text-blue-600 dark:text-blue-400'
-                      }`}
+                      className={`text-sm sm:text-base font-bold font-mono tracking-wide ${amountColor}`}
                     >
                       {t.signedAmount}{' '}
                       <span className="text-xs font-semibold text-[var(--color-text-muted)]">
@@ -351,18 +407,32 @@ export const WalletTransactionsModal: React.FC<WalletTransactionsModalProps> = (
 
         {/* Modal Footer */}
         <div className="pt-3 border-t border-[var(--color-border)] flex items-center justify-between gap-2">
-          {onOpenAdjust ? (
-            <button
-              onClick={() => {
-                onClose();
-                onOpenAdjust(wallet);
-              }}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-[var(--radius-base)] bg-[var(--color-primary-bg)] hover:bg-[var(--color-primary-bg)]/80 text-[var(--color-accent)] text-xs font-semibold border border-[var(--color-border)] transition-colors touch-target"
-            >
-              <RiSwapLine size={14} />
-              <span>Adjust Balance / Add Money</span>
-            </button>
-          ) : <div />}
+          <div className="flex items-center gap-2">
+            {onOpenAdjust && (
+              <button
+                onClick={() => {
+                  onClose();
+                  onOpenAdjust(wallet);
+                }}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-[var(--radius-base)] bg-[var(--color-primary-bg)] hover:bg-[var(--color-primary-bg)]/80 text-[var(--color-accent)] text-xs font-semibold border border-[var(--color-border)] transition-colors touch-target"
+              >
+                <RiSwapLine size={14} />
+                <span>Adjust Balance</span>
+              </button>
+            )}
+            {onOpenTransfer && (
+              <button
+                onClick={() => {
+                  onClose();
+                  onOpenTransfer(wallet);
+                }}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-[var(--radius-base)] bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-semibold border border-blue-500/20 transition-colors touch-target"
+              >
+                <RiSwapLine size={14} />
+                <span>Transfer Funds</span>
+              </button>
+            )}
+          </div>
 
           <button
             type="button"

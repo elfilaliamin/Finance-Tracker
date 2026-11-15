@@ -84,6 +84,25 @@ export class WalletController {
       next(err);
     }
   };
+
+  transfer = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const result = await walletService.transferFunds(req.userId!, req.body);
+      sendSuccess(res, result, undefined, 201);
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  deleteTransfer = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const transferId = req.params.transferId as string;
+      await walletService.deleteTransfer(transferId, req.userId!);
+      res.status(204).send();
+    } catch (err) {
+      next(err);
+    }
+  };
 }
 
 export const walletController = new WalletController();

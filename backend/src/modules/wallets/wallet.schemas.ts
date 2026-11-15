@@ -47,7 +47,39 @@ export const createAdjustmentSchema = z
     path: ['date'],
   });
 
+export const createTransferSchema = z
+  .object({
+    fromWalletId: z.string().uuid('Source wallet is required'),
+    toWalletId: z.string().uuid('Destination wallet is required'),
+    amount: z.coerce.number().positive('Transfer amount must be greater than 0'),
+    transferDate: z.string().optional(),
+    date: z.string().optional(),
+    notes: z.string().max(500).optional().nullable(),
+  })
+  .transform((data) => {
+    let rawDate = data.transferDate || data.date || new Date().toISOString().split('T')[0];
+    if (rawDate.includes('T')) {
+      rawDate = rawDate.split('T')[0];
+    }
+    return {
+      fromWalletId: data.fromWalletId,
+      toWalletId: data.toWalletId,
+      amount: data.amount,
+      transferDate: rawDate,
+      notes: data.notes || undefined,
+    };
+  })
+  .refine((data) => data.fromWalletId !== data.toWalletId, {
+    message: 'Source and destination wallets must be different',
+    path: ['toWalletId'],
+  })
+  .refine((data) => /^\d{4}-\d{2}-\d{2}$/.test(data.transferDate), {
+    message: 'Date must be formatted YYYY-MM-DD',
+    path: ['date'],
+  });
+
 export type CreateWalletInput = z.infer<typeof createWalletSchema>;
 export type UpdateWalletInput = z.infer<typeof updateWalletSchema>;
 export type CreateAdjustmentInput = z.infer<typeof createAdjustmentSchema>;
+export type CreateTransferInput = z.infer<typeof createTransferSchema>;
 

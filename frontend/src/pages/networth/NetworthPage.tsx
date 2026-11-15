@@ -13,6 +13,7 @@ import { WalletCard } from './components/WalletCard';
 import { WalletModal } from './components/WalletModal';
 import { AdjustmentModal } from './components/AdjustmentModal';
 import { WalletTransactionsModal } from './components/WalletTransactionsModal';
+import { TransferModal } from './components/TransferModal';
 
 export const NetworthPage: React.FC = () => {
   const queryClient = useQueryClient();
@@ -25,6 +26,9 @@ export const NetworthPage: React.FC = () => {
 
   const [isAdjustModalOpen, setIsAdjustModalOpen] = useState(false);
   const [adjustingWallet, setAdjustingWallet] = useState<Wallet | null>(null);
+
+  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+  const [transferDefaultWallet, setTransferDefaultWallet] = useState<Wallet | null>(null);
 
   const [isTransactionsModalOpen, setIsTransactionsModalOpen] = useState(false);
   const [inspectingWallet, setInspectingWallet] = useState<Wallet | null>(null);
@@ -106,6 +110,11 @@ export const NetworthPage: React.FC = () => {
     setIsAdjustModalOpen(true);
   };
 
+  const handleOpenTransfer = (wallet?: Wallet) => {
+    setTransferDefaultWallet(wallet || null);
+    setIsTransferModalOpen(true);
+  };
+
   return (
     <div className="space-y-6">
       {/* Top Header */}
@@ -117,13 +126,24 @@ export const NetworthPage: React.FC = () => {
           </p>
         </div>
 
-        <button
-          onClick={handleOpenCreate}
-          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-[var(--radius-base)] bg-[var(--color-primary)] text-white font-medium text-sm hover:bg-[var(--color-primary-hover)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-all touch-target"
-        >
-          <RiAddLine className="w-5 h-5" />
-          <span>New Wallet</span>
-        </button>
+        <div className="flex items-center gap-2">
+          {wallets.length >= 2 && (
+            <button
+              onClick={() => handleOpenTransfer()}
+              className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-[var(--radius-base)] bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] font-semibold text-xs sm:text-sm hover:bg-[var(--color-primary-bg)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-all touch-target"
+            >
+              <span>Transfer</span>
+            </button>
+          )}
+
+          <button
+            onClick={handleOpenCreate}
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-[var(--radius-base)] bg-[var(--color-primary)] text-white font-medium text-xs sm:text-sm hover:bg-[var(--color-primary-hover)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-all touch-target"
+          >
+            <RiAddLine className="w-5 h-5" />
+            <span>New Wallet</span>
+          </button>
+        </div>
       </div>
 
       {/* Summary KPI Banner */}
@@ -304,8 +324,25 @@ export const NetworthPage: React.FC = () => {
           }}
           wallet={inspectingWallet}
           onOpenAdjust={(w) => handleOpenAdjust(w)}
+          onOpenTransfer={(w) => handleOpenTransfer(w)}
         />
       )}
+
+      {/* Transfer Funds Modal */}
+      <TransferModal
+        isOpen={isTransferModalOpen}
+        onClose={() => {
+          setIsTransferModalOpen(false);
+          setTransferDefaultWallet(null);
+        }}
+        wallets={wallets}
+        defaultFromWalletId={transferDefaultWallet?.id}
+        onTransferSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ['wallets'] });
+          queryClient.invalidateQueries({ queryKey: ['walletTransactions'] });
+          queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+        }}
+      />
     </div>
   );
 };

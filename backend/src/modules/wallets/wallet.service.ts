@@ -1,7 +1,12 @@
 import { WalletRepository, walletRepository } from './wallet.repository.js';
 import { currencyService } from '../currencies/currency.service.js';
-import { CreateWalletInput, UpdateWalletInput, CreateAdjustmentInput } from './wallet.schemas.js';
-import { NotFoundError } from '../../errors/AppError.js';
+import {
+  CreateWalletInput,
+  UpdateWalletInput,
+  CreateAdjustmentInput,
+  CreateTransferInput,
+} from './wallet.schemas.js';
+import { NotFoundError, ValidationError } from '../../errors/AppError.js';
 import { Money } from '../../utils/money.js';
 
 export class WalletService {
@@ -124,6 +129,61 @@ export class WalletService {
       throw new NotFoundError(`Wallet with ID '${walletId}' not found.`);
     }
     return result;
+  }
+
+  async transferFunds(userId: string, input: CreateTransferInput) {
+    if (input.fromWalletId === input.toWalletId) {
+      throw new ValidationError('Source and destination wallets must be different.');
+    }
+
+    const fromWallet = await this.getWallet(input.fromWalletId, userId);
+    const toWallet = await this.getWallet(input.toWalletId, userId);
+
+    const amountMoney = Money.from(input.amount);
+    if (amountMoney.lte(0)) {
+      throw new ValidationError('Transfer amount must be greater than zero.');
+    }
+
+    // Check sufficient balance if asset account
+    const fromBalance = Money.from(fromWallet.currentBalance);
+    if (fromWallet.type === 'asset' && fromBalance.lt(amountMoney)) {
+      throw new ValidationError(
+        `Insufficient funds in source wallet "${fromWallet.name}". Current balance: ${fromWallet.currentBalance} ${fromWallet.defaultCurrency}`
+      );
+    }
+
+    // Calculate target amount in destination wallet currency
+    let exchangeRate = '1.000000';
+    let targetAmount = Money.toDbString(amountMoney);
+
+    if (fromWallet.defaultCurrency !== toWallet.defaultCurrency) {
+      exchangeRate = await currencyService.getRateForDate(
+        fromWallet.defaultCurrency,
+        toWallet.defaultCurrency,
+        input.transferDate
+      );
+      const converted = Money.convert(amountMoney, exchangeRate);
+      targetAmount = Money.toDbString(converted);
+    }
+
+    return await this.repository.recordTransfer(userId, {
+      fromWalletId: fromWallet.id,
+      toWalletId: toWallet.id,
+      amount: Money.toDbString(amountMoney),
+      fromCurrency: fromWallet.defaultCurrency,
+      targetAmount,
+      toCurrency: toWallet.defaultCurrency,
+      exchangeRate,
+      transferDate: input.transferDate,
+      notes: input.notes,
+    });
+  }
+
+  async deleteTransfer(transferId: string, userId: string) {
+    const deleted = await this.repository.deleteTransfer(transferId, userId);
+    if (!deleted) {
+      throw new NotFoundError(`Transfer with ID '${transferId}' not found.`);
+    }
   }
 }
 

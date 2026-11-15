@@ -141,4 +141,100 @@ describe('Wallet & Balance Adjustment Suite', () => {
     assert.equal(result.transactions[0].direction, 'in');
     assert.equal(result.transactions[1].direction, 'out');
   });
+
+  it('should transfer funds successfully between two wallets', async () => {
+    const mockRepo = {
+      findById: async (id: string) => {
+        if (id === 'w-source') {
+          return {
+            id: 'w-source',
+            name: 'Checking',
+            type: 'asset',
+            currentBalance: '1000.00',
+            defaultCurrency: 'MAD',
+          };
+        }
+        return {
+          id: 'w-dest',
+          name: 'Savings',
+          type: 'asset',
+          currentBalance: '500.00',
+          defaultCurrency: 'MAD',
+        };
+      },
+      recordTransfer: async (_userId: string, data: any) => ({
+        transfer: {
+          id: 'tr-1',
+          ...data,
+        },
+        fromWallet: { id: data.fromWalletId, currentBalance: '800.00' },
+        toWallet: { id: data.toWalletId, currentBalance: '700.00' },
+      }),
+    } as any;
+
+    const service = new WalletService(mockRepo);
+    const result = await service.transferFunds('user-1', {
+      fromWalletId: 'w-source',
+      toWalletId: 'w-dest',
+      amount: 200,
+      transferDate: '2026-05-15',
+      notes: 'Transfer to savings',
+    });
+
+    assert.equal(result.transfer.amount, '200.00');
+    assert.equal(result.transfer.targetAmount, '200.00');
+    assert.equal(result.fromWallet.currentBalance, '800.00');
+    assert.equal(result.toWallet.currentBalance, '700.00');
+  });
+
+  it('should reject transfer when source and destination are the same wallet', async () => {
+    const service = new WalletService({} as any);
+    await assert.rejects(
+      async () => {
+        await service.transferFunds('user-1', {
+          fromWalletId: 'w-same',
+          toWalletId: 'w-same',
+          amount: 50,
+          transferDate: '2026-05-15',
+        });
+      },
+      { message: 'Source and destination wallets must be different.' }
+    );
+  });
+
+  it('should reject transfer when asset source wallet has insufficient balance', async () => {
+    const mockRepo = {
+      findById: async (id: string) => {
+        if (id === 'w-source') {
+          return {
+            id: 'w-source',
+            name: 'Cash Pocket',
+            type: 'asset',
+            currentBalance: '50.00',
+            defaultCurrency: 'MAD',
+          };
+        }
+        return {
+          id: 'w-dest',
+          name: 'Savings',
+          type: 'asset',
+          currentBalance: '500.00',
+          defaultCurrency: 'MAD',
+        };
+      },
+    } as any;
+
+    const service = new WalletService(mockRepo);
+    await assert.rejects(
+      async () => {
+        await service.transferFunds('user-1', {
+          fromWalletId: 'w-source',
+          toWalletId: 'w-dest',
+          amount: 200,
+          transferDate: '2026-05-15',
+        });
+      },
+      /Insufficient funds/
+    );
+  });
 });

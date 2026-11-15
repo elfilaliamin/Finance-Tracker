@@ -118,6 +118,42 @@ export const walletAdjustments = pgTable(
   })
 );
 
+// 5b. Wallet Transfers
+export const walletTransfers = pgTable(
+  'wallet_transfers',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    fromWalletId: uuid('from_wallet_id')
+      .notNull()
+      .references(() => wallets.id, { onDelete: 'cascade' }),
+    toWalletId: uuid('to_wallet_id')
+      .notNull()
+      .references(() => wallets.id, { onDelete: 'cascade' }),
+    amount: numeric('amount', { precision: 14, scale: 2 }).notNull(),
+    fromCurrency: varchar('from_currency', { length: 3 })
+      .notNull()
+      .references(() => currencies.code),
+    targetAmount: numeric('target_amount', { precision: 14, scale: 2 }).notNull(),
+    toCurrency: varchar('to_currency', { length: 3 })
+      .notNull()
+      .references(() => currencies.code),
+    exchangeRate: numeric('exchange_rate', { precision: 18, scale: 6 }).notNull().default('1.000000'),
+    transferDate: date('transfer_date').notNull(),
+    notes: text('notes'),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    userIdx: index('wallet_transfers_user_id_idx').on(table.userId),
+    fromWalletIdx: index('wallet_transfers_from_wallet_idx').on(table.fromWalletId),
+    toWalletIdx: index('wallet_transfers_to_wallet_idx').on(table.toWalletId),
+    dateIdx: index('wallet_transfers_date_idx').on(table.transferDate),
+  })
+);
+
 // 6. Income Sources
 export const incomeSources = pgTable('income_sources', {
   id: uuid('id').defaultRandom().primaryKey(),
