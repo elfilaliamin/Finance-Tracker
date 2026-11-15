@@ -34,7 +34,7 @@ export const IncomeFilters: React.FC<IncomeFiltersProps> = ({
   if (selectedSourceId) activeCount++;
   if (selectedCategoryId) activeCount++;
   if (selectedCurrency) activeCount++;
-  if (selectedYear !== currentYear) activeCount++;
+  if (selectedYear > 0) activeCount++;
 
   return (
     <FilterDrawer activeCount={activeCount} onClear={onClear} title="Filter Income Ledger">
@@ -42,11 +42,14 @@ export const IncomeFilters: React.FC<IncomeFiltersProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 w-full sm:w-auto">
         <label className="text-xs text-[var(--color-text-muted)] font-semibold sm:hidden">Year</label>
         <select
-          value={selectedYear}
-          onChange={(e) => onSelectYear(parseInt(e.target.value, 10))}
+          value={selectedYear === 0 ? 'all' : selectedYear}
+          onChange={(e) => onSelectYear(e.target.value === 'all' ? 0 : parseInt(e.target.value, 10))}
           className="px-3 py-1.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-xs font-semibold text-[var(--color-text)] focus:ring-1 focus:ring-[var(--color-ring)] focus:outline-none"
         >
-          {[currentYear - 2, currentYear - 1, currentYear, currentYear + 1].map((yr) => (
+          <option value="all" className="bg-[var(--color-surface)] text-[var(--color-text)]">
+            All Years
+          </option>
+          {[currentYear + 1, currentYear, currentYear - 1, currentYear - 2, currentYear - 3].map((yr) => (
             <option key={yr} value={yr} className="bg-[var(--color-surface)] text-[var(--color-text)]">
               Year: {yr}
             </option>

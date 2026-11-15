@@ -14,7 +14,7 @@ export const IncomePage: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedYear, setSelectedYear] = useState<number>(currentYear);
+  const [selectedYear, setSelectedYear] = useState<number>(0);
   const [selectedSourceId, setSelectedSourceId] = useState<string>('');
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
   const [selectedCurrency, setSelectedCurrency] = useState<string>('');
@@ -34,7 +34,7 @@ export const IncomePage: React.FC = () => {
     queryKey: ['incomes', selectedYear, selectedSourceId, selectedCategoryId, selectedCurrency],
     queryFn: () =>
       incomeApi.getIncomes({
-        year: selectedYear,
+        year: selectedYear > 0 ? selectedYear : undefined,
         sourceId: selectedSourceId || undefined,
         categoryId: selectedCategoryId || undefined,
         currency: selectedCurrency || undefined,
@@ -59,7 +59,7 @@ export const IncomePage: React.FC = () => {
   });
 
   const handleClearFilters = () => {
-    setSelectedYear(currentYear);
+    setSelectedYear(0);
     setSelectedSourceId('');
     setSelectedCategoryId('');
     setSelectedCurrency('');
@@ -74,13 +74,15 @@ export const IncomePage: React.FC = () => {
     {
       key: 'sourceName',
       header: 'Source',
-      render: (item) => (
+      render: (item: any) => (
         <div className="flex items-center gap-2">
           <span
             className="w-2.5 h-2.5 rounded-full shrink-0"
-            style={{ backgroundColor: item.sourceColor || 'var(--color-accent)' }}
+            style={{ backgroundColor: item.sourceColor || item.source?.color || 'var(--color-accent)' }}
           />
-          <span className="font-semibold text-[var(--color-text)]">{item.sourceName || 'Unknown'}</span>
+          <span className="font-semibold text-[var(--color-text)]">
+            {item.sourceName || item.source?.title || 'Unknown'}
+          </span>
         </div>
       ),
     },
@@ -88,27 +90,31 @@ export const IncomePage: React.FC = () => {
       key: 'amount',
       header: 'Amount',
       align: 'right',
-      render: (item) => (
-        <div className="text-right">
-          <span className="font-bold text-[var(--color-accent)] font-mono text-sm">
-            +{parseFloat(item.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{' '}
-            {item.currency}
-          </span>
-          {item.currency !== defaultCurrency && (
-            <p className="text-[11px] text-[var(--color-text-muted)] font-mono">
-              ~{parseFloat(item.amountInBase).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{' '}
-              {defaultCurrency}
-            </p>
-          )}
-        </div>
-      ),
+      render: (item: any) => {
+        const baseAmountStr = item.amountInBase || item.baseAmount;
+        const parsedBase = baseAmountStr ? parseFloat(baseAmountStr) : null;
+        return (
+          <div className="text-right">
+            <span className="font-bold text-[var(--color-accent)] font-mono text-sm">
+              +{parseFloat(item.amount || '0').toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{' '}
+              {item.currency}
+            </span>
+            {item.currency !== defaultCurrency && parsedBase !== null && !isNaN(parsedBase) && (
+              <p className="text-[11px] text-[var(--color-text-muted)] font-mono">
+                ~{parsedBase.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{' '}
+                {defaultCurrency}
+              </p>
+            )}
+          </div>
+        );
+      },
     },
     {
       key: 'categoryName',
       header: 'Category',
-      render: (item) => (
+      render: (item: any) => (
         <span className="inline-flex items-center px-2 py-0.5 rounded-[var(--radius-pill)] text-xs font-medium bg-[var(--color-primary-bg)] text-[var(--color-text)] border border-[var(--color-border)]">
-          {item.categoryName || 'General'}
+          {item.categoryName || item.category?.name || 'General'}
         </span>
       ),
     },
@@ -142,58 +148,65 @@ export const IncomePage: React.FC = () => {
     },
   ];
 
-  const renderMobileCard = (item: IncomeRecord) => (
-    <div>
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
-          <span
-            className="w-3 h-3 rounded-full shrink-0"
-            style={{ backgroundColor: item.sourceColor || 'var(--color-accent)' }}
-          />
-          <span className="font-bold text-[var(--color-text)] text-sm">{item.sourceName || 'Unknown'}</span>
-        </div>
-        <span className="text-xs text-[var(--color-text-muted)] font-mono">{item.date}</span>
-      </div>
+  const renderMobileCard = (item: any) => {
+    const baseAmountStr = item.amountInBase || item.baseAmount;
+    const parsedBase = baseAmountStr ? parseFloat(baseAmountStr) : null;
 
-      <div className="flex items-baseline justify-between mt-1">
-        <span className="inline-flex items-center px-2 py-0.5 rounded-[var(--radius-pill)] text-xs font-medium bg-[var(--color-primary-bg)] text-[var(--color-text)] border border-[var(--color-border)]">
-          {item.categoryName || 'General'}
-        </span>
-        <div className="text-right">
-          <span className="font-bold text-[var(--color-accent)] font-mono text-base">
-            +{parseFloat(item.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{' '}
-            {item.currency}
+    return (
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <span
+              className="w-3 h-3 rounded-full shrink-0"
+              style={{ backgroundColor: item.sourceColor || item.source?.color || 'var(--color-accent)' }}
+            />
+            <span className="font-bold text-[var(--color-text)] text-sm">
+              {item.sourceName || item.source?.title || 'Unknown'}
+            </span>
+          </div>
+          <span className="text-xs text-[var(--color-text-muted)] font-mono">{item.date}</span>
+        </div>
+
+        <div className="flex items-baseline justify-between mt-1">
+          <span className="inline-flex items-center px-2 py-0.5 rounded-[var(--radius-pill)] text-xs font-medium bg-[var(--color-primary-bg)] text-[var(--color-text)] border border-[var(--color-border)]">
+            {item.categoryName || item.category?.name || 'General'}
           </span>
-          {item.currency !== defaultCurrency && (
-            <p className="text-[11px] text-[var(--color-text-muted)] font-mono">
-              ~{parseFloat(item.amountInBase).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{' '}
-              {defaultCurrency}
-            </p>
-          )}
+          <div className="text-right">
+            <span className="font-bold text-[var(--color-accent)] font-mono text-base">
+              +{parseFloat(item.amount || '0').toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{' '}
+              {item.currency}
+            </span>
+            {item.currency !== defaultCurrency && parsedBase !== null && !isNaN(parsedBase) && (
+              <p className="text-[11px] text-[var(--color-text-muted)] font-mono">
+                ~{parsedBase.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{' '}
+                {defaultCurrency}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {(item.description || item.notes) && (
+          <p className="text-xs text-[var(--color-text-muted)] mt-2 border-t border-[var(--color-border)] pt-1.5">
+            {item.description || item.notes}
+          </p>
+        )}
+
+        <div className="mt-2 pt-2 border-t border-[var(--color-border)] flex justify-end">
+          <button
+            onClick={() => {
+              if (confirm('Delete this income record?')) {
+                deleteMutation.mutate(item.id);
+              }
+            }}
+            className="text-xs text-[var(--color-danger)] hover:underline font-medium flex items-center gap-1 touch-target py-1 px-2"
+          >
+            <RiDeleteBinLine className="w-3.5 h-3.5" />
+            <span>Delete</span>
+          </button>
         </div>
       </div>
-
-      {(item.description || item.notes) && (
-        <p className="text-xs text-[var(--color-text-muted)] mt-2 border-t border-[var(--color-border)] pt-1.5">
-          {item.description || item.notes}
-        </p>
-      )}
-
-      <div className="mt-2 pt-2 border-t border-[var(--color-border)] flex justify-end">
-        <button
-          onClick={() => {
-            if (confirm('Delete this income record?')) {
-              deleteMutation.mutate(item.id);
-            }
-          }}
-          className="text-xs text-[var(--color-danger)] hover:underline font-medium flex items-center gap-1 touch-target py-1 px-2"
-        >
-          <RiDeleteBinLine className="w-3.5 h-3.5" />
-          <span>Delete</span>
-        </button>
-      </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="space-y-4">
@@ -246,6 +259,10 @@ export const IncomePage: React.FC = () => {
         onClose={() => setIsModalOpen(false)}
         onSubmit={async (data) => {
           await createMutation.mutateAsync(data);
+          const entryYear = parseInt(data.date.split('-')[0], 10);
+          if (selectedYear !== 0 && selectedYear !== entryYear) {
+            setSelectedYear(0);
+          }
         }}
         sources={sources}
         categories={categories}

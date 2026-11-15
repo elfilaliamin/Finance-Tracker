@@ -8,7 +8,14 @@ export class IncomeController {
     try {
       const filters = req.query as unknown as IncomeFilterInput;
       const result = await incomeService.listIncomes(req.userId!, filters);
-      sendSuccess(res, result.rows, result.meta);
+      const mappedRows = result.rows.map((r: any) => ({
+        ...r,
+        sourceName: r.source?.title || 'Unknown Source',
+        sourceColor: r.source?.color || '#10b981',
+        categoryName: r.category?.name || 'General',
+        amountInBase: r.baseAmount,
+      }));
+      sendSuccess(res, mappedRows, result.meta);
     } catch (err) {
       next(err);
     }

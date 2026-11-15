@@ -63,8 +63,8 @@ export class IncomeRepository {
         },
       })
       .from(schema.incomes)
-      .innerJoin(schema.incomeSources, eq(schema.incomes.sourceId, schema.incomeSources.id))
-      .innerJoin(schema.incomeCategories, eq(schema.incomes.categoryId, schema.incomeCategories.id))
+      .leftJoin(schema.incomeSources, eq(schema.incomes.sourceId, schema.incomeSources.id))
+      .leftJoin(schema.incomeCategories, eq(schema.incomes.categoryId, schema.incomeCategories.id))
       .where(whereConditions)
       .orderBy(desc(schema.incomes.date), desc(schema.incomes.createdAt))
       .limit(limit)
