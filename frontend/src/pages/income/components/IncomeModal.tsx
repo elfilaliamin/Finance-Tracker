@@ -121,7 +121,7 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
             <option value="">Select a source...</option>
             {sources.map((s) => (
               <option key={s.id} value={s.id}>
-                {s.name} {!s.isActive ? '(Inactive)' : ''}
+                {s.name || s.title} {!(s.isActive ?? s.status === 'active') ? '(Inactive)' : ''}
               </option>
             ))}
           </select>

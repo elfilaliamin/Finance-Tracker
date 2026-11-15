@@ -65,7 +65,7 @@ export const IncomeFilters: React.FC<IncomeFiltersProps> = ({
           <option value="" className="bg-[var(--color-surface)] text-[var(--color-text)]">All Sources</option>
           {sources.map((s) => (
             <option key={s.id} value={s.id} className="bg-[var(--color-surface)] text-[var(--color-text)]">
-              {s.name}
+              {s.name || s.title}
             </option>
           ))}
         </select>

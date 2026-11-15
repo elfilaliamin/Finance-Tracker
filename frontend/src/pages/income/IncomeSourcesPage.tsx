@@ -19,6 +19,7 @@ export const IncomeSourcesPage: React.FC = () => {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSource, setEditingSource] = useState<IncomeSource | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Form State
   const [name, setName] = useState('');
@@ -32,11 +33,14 @@ export const IncomeSourcesPage: React.FC = () => {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: { name: string; description?: string; color: string; isActive?: boolean }) =>
+    mutationFn: (data: { name: string; title: string; description?: string; color: string; isActive?: boolean; status?: string }) =>
       incomeApi.createSource(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['incomeSources'] });
       handleCloseModal();
+    },
+    onError: (err: any) => {
+      setErrorMessage(err?.response?.data?.message || err?.message || 'Failed to create income source.');
     },
   });
 
@@ -47,12 +51,18 @@ export const IncomeSourcesPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['incomeSources'] });
       handleCloseModal();
     },
+    onError: (err: any) => {
+      setErrorMessage(err?.response?.data?.message || err?.message || 'Failed to update income source.');
+    },
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => incomeApi.deleteSource(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['incomeSources'] });
+    },
+    onError: (err: any) => {
+      alert(err?.response?.data?.message || err?.message || 'Failed to delete income source.');
     },
   });
 
@@ -62,34 +72,51 @@ export const IncomeSourcesPage: React.FC = () => {
     setDescription('');
     setColor('#10b981');
     setIsActive(true);
+    setErrorMessage(null);
     setIsModalOpen(true);
   };
 
   const handleOpenEdit = (src: IncomeSource) => {
     setEditingSource(src);
-    setName(src.name);
+    setName(src.name || src.title || '');
     setDescription(src.description || '');
-    setColor(src.color);
-    setIsActive(src.isActive);
+    setColor(src.color || '#10b981');
+    setIsActive(src.isActive ?? src.status === 'active');
+    setErrorMessage(null);
     setIsModalOpen(true);
   };
 
   const handleCloseModal = useCallback(() => {
     setIsModalOpen(false);
     setEditingSource(null);
+    setErrorMessage(null);
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return;
+    const trimmedName = name.trim();
+    if (!trimmedName) {
+      setErrorMessage('Source name is required.');
+      return;
+    }
+    setErrorMessage(null);
+
+    const payload = {
+      name: trimmedName,
+      title: trimmedName,
+      description: description.trim() || undefined,
+      color,
+      isActive,
+      status: isActive ? 'active' : 'inactive',
+    };
 
     if (editingSource) {
       updateMutation.mutate({
         id: editingSource.id,
-        data: { name, description, color, isActive },
+        data: payload,
       });
     } else {
-      createMutation.mutate({ name, description, color, isActive });
+      createMutation.mutate(payload);
     }
   };
 
@@ -139,22 +166,22 @@ export const IncomeSourcesPage: React.FC = () => {
                       className="w-4 h-4 rounded-full shrink-0 shadow-xs"
                       style={{ backgroundColor: src.color }}
                     />
-                    <h3 className="font-heading font-bold text-[var(--color-text)] text-base">{src.name}</h3>
+                    <h3 className="font-heading font-bold text-[var(--color-text)] text-base">{src.name || src.title}</h3>
                   </div>
 
                   <span
                     className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-[var(--radius-pill)] text-[11px] font-semibold border ${
-                      src.isActive
+                      (src.isActive ?? src.status === 'active')
                         ? 'bg-[var(--color-primary-bg)] text-[var(--color-accent)] border-[var(--color-border)]'
                         : 'bg-[var(--color-border)]/50 text-[var(--color-text-muted)] border-transparent'
                     }`}
                   >
-                    {src.isActive ? (
+                    {(src.isActive ?? src.status === 'active') ? (
                       <RiCheckboxCircleLine className="w-3.5 h-3.5" />
                     ) : (
                       <RiCloseCircleLine className="w-3.5 h-3.5" />
                     )}
-                    <span>{src.isActive ? 'Active' : 'Inactive'}</span>
+                    <span>{(src.isActive ?? src.status === 'active') ? 'Active' : 'Inactive'}</span>
                   </span>
                 </div>
 
@@ -173,7 +200,8 @@ export const IncomeSourcesPage: React.FC = () => {
                 </button>
                 <button
                   onClick={() => {
-                    if (confirm(`Delete source "${src.name}"? Historical income will retain this source name.`)) {
+                    const displayName = src.name || src.title || 'this source';
+                    if (confirm(`Delete source "${displayName}"? Historical income will retain this source name.`)) {
                       deleteMutation.mutate(src.id);
                     }
                   }}
@@ -196,6 +224,18 @@ export const IncomeSourcesPage: React.FC = () => {
         description="Used to categorize and color-code revenues."
       >
         <form onSubmit={handleSubmit} className="space-y-4">
+          {errorMessage && (
+            <div className="p-3 rounded-[var(--radius-base)] bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-xs flex items-center justify-between">
+              <span>{errorMessage}</span>
+              <button
+                type="button"
+                onClick={() => setErrorMessage(null)}
+                className="font-medium underline ml-2 hover:opacity-80"
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
           <div>
             <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5">
               Source Name *
@@ -285,15 +325,26 @@ export const IncomeSourcesPage: React.FC = () => {
             <button
               type="button"
               onClick={handleCloseModal}
-              className="px-4 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] text-[var(--color-text)] text-sm font-medium hover:bg-[var(--color-primary-bg)] touch-target"
+              disabled={createMutation.isPending || updateMutation.isPending}
+              className="px-4 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] text-[var(--color-text)] text-sm font-medium hover:bg-[var(--color-primary-bg)] touch-target disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-5 py-2.5 rounded-[var(--radius-base)] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-sm font-semibold shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] touch-target"
+              disabled={createMutation.isPending || updateMutation.isPending}
+              className="px-5 py-2.5 rounded-[var(--radius-base)] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-sm font-semibold shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] touch-target disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
-              {editingSource ? 'Update Source' : 'Create Source'}
+              {(createMutation.isPending || updateMutation.isPending) && (
+                <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              )}
+              <span>
+                {createMutation.isPending || updateMutation.isPending
+                  ? 'Saving...'
+                  : editingSource
+                  ? 'Update Source'
+                  : 'Create Source'}
+              </span>
             </button>
           </div>
         </form>

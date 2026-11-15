@@ -10,11 +10,13 @@ export interface IncomeCategory {
 
 export interface IncomeSource {
   id: string;
-  name: string;
+  name?: string;
+  title?: string;
   description?: string;
   color: string;
-  isActive: boolean;
-  createdAt: string;
+  isActive?: boolean;
+  status?: string;
+  createdAt?: string;
 }
 
 export interface IncomeRecord {
@@ -59,10 +61,10 @@ export const incomeApi = {
   getSources: () =>
     api.get<IncomeSource[]>('/income-sources'),
 
-  createSource: (data: { name: string; description?: string; color: string; isActive?: boolean }) =>
+  createSource: (data: { name?: string; title?: string; description?: string; color: string; isActive?: boolean; status?: string }) =>
     api.post<IncomeSource>('/income-sources', data),
 
-  updateSource: (id: string, data: Partial<{ name: string; description?: string; color: string; isActive?: boolean }>) =>
+  updateSource: (id: string, data: Partial<{ name?: string; title?: string; description?: string; color: string; isActive?: boolean; status?: string }>) =>
     api.put<IncomeSource>(`/income-sources/${id}`, data),
 
   deleteSource: (id: string) =>
