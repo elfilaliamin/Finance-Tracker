@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import {
   RiReceiptLine,
   RiShieldCheckLine,
@@ -16,13 +16,14 @@ import {
   RiSparkling2Fill,
   RiMenuLine,
   RiCloseLine,
+  RiDashboardLine,
 } from '@remixicon/react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/hooks/useTheme';
 import { AppLogo } from '@/components/ui/AppLogo';
 
 export const LandingPage: React.FC = () => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { isDark, toggleTheme } = useTheme();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
@@ -48,10 +49,6 @@ export const LandingPage: React.FC = () => {
 
     return () => observer.disconnect();
   }, []);
-
-  if (!isLoading && isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
-  }
 
   const bigThree = [
     {
@@ -208,19 +205,33 @@ export const LandingPage: React.FC = () => {
             >
               {isDark ? <RiSunLine size={20} /> : <RiMoonLine size={20} />}
             </button>
-            <Link
-              to="/login"
-              className="px-4 py-2.5 text-base font-semibold text-[color:var(--color-text)] hover:text-[color:var(--color-primary-text)] transition-colors touch-target"
-            >
-              Sign In
-            </Link>
-            <Link
-              to="/register"
-              className="inline-flex items-center gap-2 px-5 py-2.5 text-base font-bold text-[color:var(--color-on-primary)] bg-[var(--color-primary)] hover:brightness-110 rounded-[var(--radius-base)] shadow-[var(--shadow-sm)] transition-all touch-target"
-            >
-              <span>Start Free</span>
-              <RiArrowRightLine size={18} />
-            </Link>
+
+            {isAuthenticated ? (
+              <Link
+                to="/dashboard"
+                className="inline-flex items-center gap-2 px-5 py-2.5 text-base font-bold text-[color:var(--color-on-primary)] bg-[var(--color-primary)] hover:brightness-110 rounded-[var(--radius-base)] shadow-[var(--shadow-sm)] transition-all touch-target"
+              >
+                <RiDashboardLine size={19} />
+                <span>Dashboard</span>
+                <RiArrowRightLine size={18} />
+              </Link>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="px-4 py-2.5 text-base font-semibold text-[color:var(--color-text)] hover:text-[color:var(--color-primary-text)] transition-colors touch-target"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  to="/register"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 text-base font-bold text-[color:var(--color-on-primary)] bg-[var(--color-primary)] hover:brightness-110 rounded-[var(--radius-base)] shadow-[var(--shadow-sm)] transition-all touch-target"
+                >
+                  <span>Start Free</span>
+                  <RiArrowRightLine size={18} />
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Hamburger & Theme Toggle Button */}
@@ -277,20 +288,34 @@ export const LandingPage: React.FC = () => {
             </nav>
 
             <div className="pt-4 border-t border-[var(--color-border)] flex flex-col gap-3">
-              <Link
-                to="/login"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full text-center py-3 text-base font-bold text-[color:var(--color-text)] bg-[var(--color-background)] border border-[var(--color-border)] rounded-[var(--radius-base)] hover:bg-[var(--color-border)]/40 transition-colors"
-              >
-                Sign In
-              </Link>
-              <Link
-                to="/register"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full text-center py-3 text-base font-bold text-[color:var(--color-on-primary)] bg-[var(--color-primary)] rounded-[var(--radius-base)] shadow-[var(--shadow-sm)] hover:brightness-110 transition-all"
-              >
-                Start Free
-              </Link>
+              {isAuthenticated ? (
+                <Link
+                  to="/dashboard"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full inline-flex items-center justify-center gap-2 py-3 text-base font-bold text-[color:var(--color-on-primary)] bg-[var(--color-primary)] rounded-[var(--radius-base)] shadow-[var(--shadow-sm)] hover:brightness-110 transition-all"
+                >
+                  <RiDashboardLine size={20} />
+                  <span>Dashboard</span>
+                  <RiArrowRightLine size={18} />
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full text-center py-3 text-base font-bold text-[color:var(--color-text)] bg-[var(--color-background)] border border-[var(--color-border)] rounded-[var(--radius-base)] hover:bg-[var(--color-border)]/40 transition-colors"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    to="/register"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full text-center py-3 text-base font-bold text-[color:var(--color-on-primary)] bg-[var(--color-primary)] rounded-[var(--radius-base)] shadow-[var(--shadow-sm)] hover:brightness-110 transition-all"
+                  >
+                    Start Free
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         )}
@@ -314,13 +339,14 @@ export const LandingPage: React.FC = () => {
               No complicated spreadsheets and no confusing financial jargon. See all your bank accounts and cash in one simple dashboard, track where your money goes every day, and build lasting savings with clean visual reports.
             </p>
 
-            {/* Hero CTA: Only Primary "Create Free Account" button (Sign In kept in navbar) */}
+            {/* Hero CTA */}
             <div className="w-full sm:w-auto mb-8">
               <Link
-                to="/register"
+                to={isAuthenticated ? '/dashboard' : '/register'}
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4.5 rounded-[var(--radius-base)] bg-[var(--color-primary)] text-[color:var(--color-on-primary)] font-bold text-lg hover:brightness-110 shadow-[var(--shadow-base)] hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 touch-target"
               >
-                <span>Create Free Account</span>
+                {isAuthenticated && <RiDashboardLine size={22} />}
+                <span>{isAuthenticated ? 'Open Dashboard' : 'Create Free Account'}</span>
                 <RiArrowRightLine size={20} className="transition-transform duration-200 group-hover:translate-x-1" />
               </Link>
             </div>
@@ -546,10 +572,11 @@ export const LandingPage: React.FC = () => {
 
               <div className="pt-2">
                 <Link
-                  to="/register"
+                  to={isAuthenticated ? '/dashboard' : '/register'}
                   className="inline-flex items-center gap-2 px-6 py-3.5 rounded-[var(--radius-base)] bg-[var(--color-primary)] text-[color:var(--color-on-primary)] text-base font-bold shadow-[var(--shadow-sm)] hover:brightness-110 transition-all"
                 >
-                  <span>See your reports for free</span>
+                  {isAuthenticated && <RiDashboardLine size={18} />}
+                  <span>{isAuthenticated ? 'Open Dashboard' : 'See your reports for free'}</span>
                   <RiArrowRightLine size={18} />
                 </Link>
               </div>
@@ -659,10 +686,11 @@ export const LandingPage: React.FC = () => {
           </p>
           <div className="flex justify-center">
             <Link
-              to="/register"
+              to={isAuthenticated ? '/dashboard' : '/register'}
               className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-9 py-4.5 rounded-[var(--radius-base)] bg-[var(--color-primary)] text-[color:var(--color-on-primary)] font-bold text-lg hover:brightness-110 shadow-[var(--shadow-base)] hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 touch-target"
             >
-              <span>Create Your Free Account</span>
+              {isAuthenticated && <RiDashboardLine size={22} />}
+              <span>{isAuthenticated ? 'Go to Your Dashboard' : 'Create Your Free Account'}</span>
               <RiArrowRightLine size={20} />
             </Link>
           </div>

@@ -35,7 +35,15 @@ export const LoginPage: React.FC = () => {
     resolver: zodResolver(loginSchema),
   });
 
-  if (!isLoading && isAuthenticated) {
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[var(--color-background)]">
+        <div className="w-8 h-8 border-3 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
   }
 
