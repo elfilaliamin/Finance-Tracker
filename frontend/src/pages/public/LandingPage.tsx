@@ -279,9 +279,9 @@ export const LandingPage: React.FC = () => {
       <section className="py-12 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 max-w-[var(--breakpoint-wide)] mx-auto w-full">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
           {/* Left Text */}
-          <div className="lg:col-span-6 flex flex-col items-start text-left">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-[var(--radius-pill)] bg-[var(--color-primary-bg)] border border-[var(--color-border)] text-sm font-bold text-[color:var(--color-primary-text)] mb-6">
-              <RiSparkling2Fill size={16} className="text-amber-500" />
+          <div className="lg:col-span-6 flex flex-col items-start text-left animate-fade-in-up">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-[var(--radius-pill)] bg-[var(--color-primary-bg)] border border-[var(--color-border)] text-sm font-bold text-[color:var(--color-primary-text)] mb-6 transition-all duration-300 hover:scale-105">
+              <RiSparkling2Fill size={16} className="text-amber-500 animate-pulse" />
               <span>Simple Personal Finance &bull; 100% Free</span>
             </div>
 
@@ -297,10 +297,10 @@ export const LandingPage: React.FC = () => {
             <div className="w-full sm:w-auto mb-8">
               <Link
                 to="/register"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4.5 rounded-[var(--radius-base)] bg-[var(--color-primary)] text-[color:var(--color-on-primary)] font-bold text-lg hover:brightness-110 shadow-[var(--shadow-base)] hover:-translate-y-0.5 transition-all touch-target"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4.5 rounded-[var(--radius-base)] bg-[var(--color-primary)] text-[color:var(--color-on-primary)] font-bold text-lg hover:brightness-110 shadow-[var(--shadow-base)] hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 touch-target"
               >
                 <span>Create Free Account</span>
-                <RiArrowRightLine size={20} />
+                <RiArrowRightLine size={20} className="transition-transform duration-200 group-hover:translate-x-1" />
               </Link>
             </div>
 
@@ -322,17 +322,17 @@ export const LandingPage: React.FC = () => {
           </div>
 
           {/* Right Visual: Money Saving & Growth Image (Clean Solid Frame, No Glass) */}
-          <div className="lg:col-span-6 w-full">
-            <div className="rounded-[20px] overflow-hidden border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-hover)]">
+          <div className="lg:col-span-6 w-full animate-fade-in">
+            <div className="rounded-[20px] overflow-hidden border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-hover)] transition-card hover:shadow-xl group">
               {/* Card top banner */}
               <div className="px-5 py-3.5 bg-[var(--color-surface)] border-b border-[var(--color-border)] flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 inline-block" />
+                  <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 inline-block animate-pulse" />
                   <span className="text-sm font-bold text-[color:var(--color-text)]">
                     Smart Wealth Growth & Savings
                   </span>
                 </div>
-                <span className="text-xs sm:text-sm font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+                <span className="text-xs sm:text-sm font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 animate-float-gentle">
                   +24% Saved This Year
                 </span>
               </div>
@@ -342,13 +342,13 @@ export const LandingPage: React.FC = () => {
                 <img
                   src="/growing-money.jpg"
                   alt="Personal savings and money growing with piggy bank and financial chart"
-                  className="w-full h-auto object-cover max-h-[440px]"
+                  className="w-full h-auto object-cover max-h-[440px] transition-transform duration-700 ease-out group-hover:scale-[1.02]"
                 />
 
                 {/* Solid bottom status card */}
                 <div className="p-4 sm:p-5 bg-[var(--color-surface)] border-t border-[var(--color-border)] flex items-center justify-between">
                   <div className="flex items-center gap-3.5">
-                    <div className="w-11 h-11 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
+                    <div className="w-11 h-11 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold transition-transform duration-300 group-hover:scale-105">
                       <RiLineChartLine size={22} />
                     </div>
                     <div>
@@ -367,17 +367,17 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* 3. The 3 Cards: Perfectly consistent, aligned view */}
+      {/* 3. The 3 Cards: Perfectly consistent, aligned view with smooth hover */}
       <section className="border-y border-[var(--color-border)] bg-[var(--color-surface)] py-8 sm:py-10">
         <div className="max-w-[var(--breakpoint-wide)] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
             {bigThree.map((item) => (
               <div
                 key={item.num}
-                className="p-6 sm:p-7 rounded-[var(--radius-base)] bg-[var(--color-background)] border border-[var(--color-border)] text-left flex flex-col justify-between h-full shadow-[var(--shadow-sm)]"
+                className="p-6 sm:p-7 rounded-[var(--radius-base)] bg-[var(--color-background)] border border-[var(--color-border)] text-left flex flex-col justify-between h-full shadow-[var(--shadow-sm)] transition-card hover:border-[var(--color-primary)]/40 hover:shadow-md group cursor-default"
               >
                 <div>
-                  <span className="text-2xl sm:text-3xl font-black font-mono tracking-tight text-[color:var(--color-primary-text)] mb-3 block">
+                  <span className="text-2xl sm:text-3xl font-black font-mono tracking-tight text-[color:var(--color-primary-text)] mb-3 block group-hover:translate-x-1 transition-transform duration-200">
                     {item.num}
                   </span>
                   <h3 className="text-xl sm:text-2xl font-bold font-[family-name:var(--font-heading)] text-[color:var(--color-text)] mb-3 leading-snug whitespace-nowrap">
@@ -393,7 +393,7 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* 4. How It Works: 3 Simple Steps (Text Left & Readable) */}
+      {/* 4. How It Works: 3 Simple Steps (Text Left & Readable with hover transitions) */}
       <section id="how-it-works" className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-[var(--breakpoint-wide)] mx-auto w-full">
         <div className="text-left max-w-3xl mb-14">
           <span className="text-sm font-bold uppercase tracking-wider text-[color:var(--color-primary-text)] mb-2 block">
@@ -411,11 +411,11 @@ export const LandingPage: React.FC = () => {
           {steps.map((item, index) => (
             <div
               key={item.step}
-              className="p-6 sm:p-7 rounded-[var(--radius-surface)] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-sm)] flex flex-col justify-between text-left h-full"
+              className="p-6 sm:p-7 rounded-[var(--radius-surface)] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-sm)] flex flex-col justify-between text-left h-full transition-card hover:border-[var(--color-primary)]/40 hover:shadow-md group"
             >
               <div>
                 <div className="flex items-center justify-between mb-5">
-                  <span className="w-9 h-9 rounded-full bg-[var(--color-primary)] text-[color:var(--color-on-primary)] font-black text-sm flex items-center justify-center">
+                  <span className="w-9 h-9 rounded-full bg-[var(--color-primary)] text-[color:var(--color-on-primary)] font-black text-sm flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
                     {index + 1}
                   </span>
                   <span className="px-3 py-1 rounded-full text-xs font-bold bg-[var(--color-background)] border border-[var(--color-border)] text-[color:var(--color-primary-text)]">
@@ -537,7 +537,7 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* 6. Feature Grid: The 6 Core Essentials (Bigger, readable text) */}
+      {/* 6. Feature Grid: The 6 Core Essentials (Bigger, readable text with smooth hover transitions) */}
       <section id="features" className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-[var(--breakpoint-wide)] mx-auto w-full">
         <div className="text-left max-w-3xl mb-14">
           <span className="text-sm font-bold uppercase tracking-wider text-[color:var(--color-primary-text)] mb-2 block">
@@ -557,10 +557,10 @@ export const LandingPage: React.FC = () => {
             return (
               <div
                 key={feat.title}
-                className="p-6 sm:p-7 rounded-[var(--radius-surface)] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-base)] transition-all flex flex-col justify-between text-left"
+                className="p-6 sm:p-7 rounded-[var(--radius-surface)] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-sm)] hover:shadow-md transition-card hover:border-[var(--color-primary)]/40 flex flex-col justify-between text-left group"
               >
                 <div>
-                  <div className="w-12 h-12 rounded-[var(--radius-base)] bg-[var(--color-primary-bg)] text-[color:var(--color-primary-text)] flex items-center justify-center mb-5">
+                  <div className="w-12 h-12 rounded-[var(--radius-base)] bg-[var(--color-primary-bg)] text-[color:var(--color-primary-text)] flex items-center justify-center mb-5 group-hover:scale-110 group-hover:bg-[var(--color-primary)] group-hover:text-[color:var(--color-on-primary)] transition-all duration-300 shadow-sm">
                     <Icon size={24} />
                   </div>
                   <h3 className="text-xl sm:text-2xl font-bold font-[family-name:var(--font-heading)] text-[color:var(--color-text)] mb-3 leading-snug">
@@ -600,24 +600,24 @@ export const LandingPage: React.FC = () => {
             return (
               <div
                 key={idx}
-                className="rounded-[var(--radius-surface)] border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden shadow-[var(--shadow-sm)] text-left"
+                className="rounded-[var(--radius-surface)] border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden shadow-[var(--shadow-sm)] text-left transition-all duration-200 hover:border-[var(--color-primary)]/40"
               >
                 <button
                   type="button"
                   onClick={() => setOpenFaq(isOpen ? null : idx)}
-                  className="w-full flex items-center justify-between p-5 sm:p-6 text-left font-bold text-lg sm:text-xl text-[color:var(--color-text)] hover:bg-[var(--color-background)] transition-colors touch-target gap-4"
+                  className="w-full flex items-center justify-between p-5 sm:p-6 text-left font-bold text-lg sm:text-xl text-[color:var(--color-text)] hover:bg-[var(--color-background)] transition-colors duration-150 touch-target gap-4"
                 >
                   <span className="text-left flex-1">{faq.q}</span>
-                  <span className="shrink-0 p-1 rounded-full bg-[var(--color-background)] text-[color:var(--color-primary-text)] border border-[var(--color-border)]">
+                  <span className={`shrink-0 p-1.5 rounded-full bg-[var(--color-background)] text-[color:var(--color-primary-text)] border border-[var(--color-border)] transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
                     {isOpen ? (
-                      <RiSubtractLine size={22} className="shrink-0" />
+                      <RiSubtractLine size={20} className="shrink-0" />
                     ) : (
-                      <RiAddLine size={22} className="shrink-0" />
+                      <RiAddLine size={20} className="shrink-0" />
                     )}
                   </span>
                 </button>
                 {isOpen && (
-                  <div className="px-5 sm:px-6 pb-6 pt-2 text-base sm:text-lg text-[color:var(--color-muted)] leading-relaxed text-left border-t border-[var(--color-border)] bg-[var(--color-background)]/40">
+                  <div className="px-5 sm:px-6 pb-6 pt-2 text-base sm:text-lg text-[color:var(--color-muted)] leading-relaxed text-left border-t border-[var(--color-border)] bg-[var(--color-background)]/40 animate-fade-in">
                     {faq.a}
                   </div>
                 )}
@@ -639,7 +639,7 @@ export const LandingPage: React.FC = () => {
           <div className="flex justify-center">
             <Link
               to="/register"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-9 py-4.5 rounded-[var(--radius-base)] bg-[var(--color-primary)] text-[color:var(--color-on-primary)] font-bold text-lg hover:brightness-110 shadow-[var(--shadow-base)] hover:-translate-y-0.5 transition-all touch-target"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-9 py-4.5 rounded-[var(--radius-base)] bg-[var(--color-primary)] text-[color:var(--color-on-primary)] font-bold text-lg hover:brightness-110 shadow-[var(--shadow-base)] hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 touch-target"
             >
               <span>Create Your Free Account</span>
               <RiArrowRightLine size={20} />
