@@ -8,11 +8,16 @@ interface SpendingLimitCardProps {
 }
 
 export const SpendingLimitCard: React.FC<SpendingLimitCardProps> = ({ budget, onDelete }) => {
-  const progress = budget.progress || {
-    currentAmount: '0',
-    percentage: 0,
-    status: 'normal',
-    remainingAmount: budget.targetAmount,
+  const currentAmountStr = budget.currentAmount ?? budget.spentAmount ?? budget.progress?.currentAmount ?? '0';
+  const percentageNum = budget.percentage ?? budget.progress?.percentage ?? 0;
+  const statusStr = budget.status ?? budget.progress?.status ?? 'normal';
+  const remainingStr = budget.remainingAmount ?? budget.progress?.remainingAmount ?? budget.targetAmount;
+
+  const progress = {
+    currentAmount: currentAmountStr,
+    percentage: percentageNum,
+    status: statusStr,
+    remainingAmount: remainingStr,
   };
 
   const pct = Math.min(progress.percentage, 100);

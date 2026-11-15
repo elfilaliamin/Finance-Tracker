@@ -243,7 +243,14 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
               </label>
               <select
                 value={walletId}
-                onChange={(e) => setWalletId(e.target.value)}
+                onChange={(e) => {
+                  const selId = e.target.value;
+                  setWalletId(selId);
+                  const selWallet = wallets.find((w) => w.id === selId);
+                  if (selWallet?.defaultCurrency) {
+                    setCurrency(selWallet.defaultCurrency);
+                  }
+                }}
                 className="w-full px-3.5 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-ring)] focus:outline-none text-sm"
               >
                 <option value="" className="bg-[var(--color-surface)] text-[var(--color-text)]">Select a wallet...</option>

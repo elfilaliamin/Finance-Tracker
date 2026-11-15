@@ -1,6 +1,7 @@
 import { BudgetRepository, budgetRepository } from './budget.repository.js';
 import { walletRepository } from '../wallets/wallet.repository.js';
 import { spendingCategoriesRepository } from '../categories/spendingCategories.repository.js';
+import { currencyService } from '../currencies/currency.service.js';
 import { CreateBudgetInput, UpdateBudgetInput, BudgetFilterInput } from './budget.schemas.js';
 import { NotFoundError, ValidationError } from '../../errors/AppError.js';
 import { Money } from '../../utils/money.js';
@@ -24,12 +25,20 @@ export interface BudgetProgressDto {
     id: string;
     name: string;
     currentBalance: string;
+    defaultCurrency?: string;
   } | null;
   category?: {
     id: string;
     name: string;
     color: string;
   } | null;
+  progress?: {
+    currentAmount: string;
+    remainingAmount: string;
+    percentage: number;
+    status: 'normal' | 'warning' | 'exceeded';
+    requiredMonthlySavings?: string;
+  };
 }
 
 export class BudgetService {
@@ -79,11 +88,37 @@ export class BudgetService {
           status,
           wallet: budget.wallet,
           category: budget.category,
+          progress: {
+            currentAmount: Money.toDbString(spent),
+            remainingAmount: Money.toDbString(remaining),
+            percentage,
+            status,
+          },
         });
       } else {
-        // Saving Goal
+        // Saving Goal - Progress strictly mirrors money in the linked wallet
         const currentBalanceStr = budget.wallet?.currentBalance || '0.00';
-        const currentBalance = Money.from(currentBalanceStr);
+        let currentBalance = Money.from(currentBalanceStr);
+
+        // Convert balance to goal currency if wallet currency is different
+        if (
+          budget.wallet?.defaultCurrency &&
+          budget.currency &&
+          budget.wallet.defaultCurrency !== budget.currency
+        ) {
+          try {
+            const today = new Date().toISOString().split('T')[0];
+            const rate = await currencyService.getRateForDate(
+              budget.wallet.defaultCurrency,
+              budget.currency,
+              today
+            );
+            currentBalance = Money.convert(currentBalance, rate);
+          } catch {
+            // Keep original if conversion fails
+          }
+        }
+
         const target = Money.from(budget.targetAmount);
         const remaining = Money.subtract(target, currentBalance);
 
@@ -124,6 +159,14 @@ export class BudgetService {
           status,
           requiredMonthlySavings,
           wallet: budget.wallet,
+          category: null,
+          progress: {
+            currentAmount: Money.toDbString(currentBalance),
+            remainingAmount: Money.toDbString(remaining.gt(0) ? remaining : 0),
+            percentage,
+            status,
+            requiredMonthlySavings: requiredMonthlySavings || undefined,
+          },
         });
       }
     }

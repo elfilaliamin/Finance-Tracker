@@ -15,6 +15,23 @@ export interface Budget {
   isActive: boolean;
   notes?: string;
   createdAt: string;
+  currentAmount?: string;
+  spentAmount?: string;
+  remainingAmount?: string;
+  percentage?: number;
+  status?: 'normal' | 'warning' | 'exceeded';
+  requiredMonthlySavings?: string;
+  wallet?: {
+    id: string;
+    name: string;
+    currentBalance: string;
+    defaultCurrency?: string;
+  };
+  category?: {
+    id: string;
+    name: string;
+    color: string;
+  };
   progress?: {
     currentAmount: string;
     percentage: number;
