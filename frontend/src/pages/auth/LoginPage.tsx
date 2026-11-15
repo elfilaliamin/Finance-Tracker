@@ -44,7 +44,11 @@ export const LoginPage: React.FC = () => {
       setErrorMessage(null);
       await login(data);
     } catch (err: any) {
-      setErrorMessage(err.message || 'Invalid email or password.');
+      if (err.details && Array.isArray(err.details) && err.details.length > 0) {
+        setErrorMessage(err.details.map((d: any) => d.issue || d.message).join(', '));
+      } else {
+        setErrorMessage(err.message || 'Invalid email or password.');
+      }
     }
   };
 

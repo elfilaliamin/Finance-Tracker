@@ -49,9 +49,20 @@ export const RegisterPage: React.FC = () => {
   const onSubmit = async (data: RegisterFormValues) => {
     try {
       setErrorMessage(null);
-      await registerUser(data);
+      const chosenName = data.name?.trim() || data.email.split('@')[0];
+      await registerUser({
+        email: data.email,
+        password: data.password,
+        displayName: chosenName,
+        name: chosenName,
+        baseCurrency: data.baseCurrency,
+      });
     } catch (err: any) {
-      setErrorMessage(err.message || 'Registration failed.');
+      if (err.details && Array.isArray(err.details) && err.details.length > 0) {
+        setErrorMessage(err.details.map((d: any) => d.issue || d.message).join(', '));
+      } else {
+        setErrorMessage(err.message || 'Registration failed.');
+      }
     }
   };
 

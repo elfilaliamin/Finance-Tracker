@@ -40,7 +40,12 @@ export class AuthService {
     }
 
     const passwordHash = await argon2.hash(input.password);
-    const user = await this.repository.createUser(input.email, passwordHash, input.displayName);
+    const user = await this.repository.createUser(
+      input.email,
+      passwordHash,
+      input.displayName,
+      input.baseCurrency
+    );
     const token = this.generateToken(user.id, user.email);
 
     return { user, token };

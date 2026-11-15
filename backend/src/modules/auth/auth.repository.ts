@@ -32,7 +32,12 @@ export class AuthRepository {
     return user || null;
   }
 
-  async createUser(email: string, passwordHash: string, displayName: string) {
+  async createUser(
+    email: string,
+    passwordHash: string,
+    displayName: string,
+    baseCurrency: string = 'MAD'
+  ) {
     return await db.transaction(async (tx) => {
       const [newUser] = await tx
         .insert(schema.users)
@@ -51,7 +56,7 @@ export class AuthRepository {
       // Automatically provision default settings for new user
       await tx.insert(schema.userSettings).values({
         userId: newUser.id,
-        displayCurrency: 'MAD',
+        displayCurrency: baseCurrency,
         conversionMode: 'historical',
         exchangeRateFrequency: 'daily',
         theme: 'system',
