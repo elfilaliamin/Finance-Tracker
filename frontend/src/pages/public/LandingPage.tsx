@@ -437,16 +437,20 @@ export const LandingPage: React.FC = () => {
       {/* 5. Simplified Dashboard & Reports Showcase */}
       <section id="reports" className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-[var(--color-surface)] border-y border-[var(--color-border)] w-full">
         <div className="max-w-[var(--breakpoint-wide)] mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
-            {/* Left Image: Saving and Growing Money */}
-            <div className="lg:col-span-6">
-              <div className="rounded-[18px] overflow-hidden border border-[var(--color-border)] bg-[var(--color-background)] shadow-[var(--shadow-md)]">
-                <img
-                  src="/money-saving-growth.jpg"
-                  alt="Growing savings jar with green plant sprout"
-                  className="w-full h-auto object-cover max-h-[400px]"
-                />
-                <div className="p-5 sm:p-6 bg-[var(--color-surface)] border-t border-[var(--color-border)] text-left">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-stretch">
+            {/* Left Image Card: Matched height with right narrative */}
+            <div className="lg:col-span-6 flex flex-col h-full">
+              <div className="h-full flex flex-col justify-between rounded-[18px] overflow-hidden border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-md)]">
+                {/* Visual Image container with flex-1 to fill all vertical height */}
+                <div className="relative flex-1 w-full min-h-[260px] sm:min-h-[320px] overflow-hidden bg-slate-950">
+                  <img
+                    src="/reports-insights.jpg"
+                    alt="Simplified financial reports, category breakdown rings, and wealth trajectory insights"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                {/* Spending breakdown card footer */}
+                <div className="p-5 sm:p-6 bg-[var(--color-surface)] border-t border-[var(--color-border)] text-left shrink-0">
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-sm font-bold text-[color:var(--color-text)] uppercase tracking-wide">
                       Monthly Spending Breakdown
@@ -472,45 +476,49 @@ export const LandingPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Right Narrative (Text Left & Bigger) */}
-            <div className="lg:col-span-6 space-y-6 text-left">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-bold bg-[var(--color-primary-bg)] text-[color:var(--color-primary-text)] border border-[var(--color-border)]">
-                <RiPieChartLine size={16} />
-                <span>Simplified Reports & Insights</span>
-              </div>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black font-[family-name:var(--font-heading)] text-[color:var(--color-text)] leading-tight">
-                Clear reports that actually help you save money
-              </h2>
-              <p className="text-base sm:text-lg text-[color:var(--color-muted)] leading-relaxed">
-                Most budgeting apps overload you with complicated tables and confusing graphs. Finance Tracker gives you simple, easy-to-read reports that answer the only two questions that matter:
-              </p>
-
-              <div className="space-y-4">
-                <div className="p-5 rounded-[var(--radius-base)] bg-[var(--color-background)] border border-[var(--color-border)] flex items-start gap-3.5 text-left">
-                  <div className="w-7 h-7 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-sm shrink-0 mt-0.5">
-                    ✓
+            {/* Right Narrative (Text Left, Smaller Subtitles & Height-Matched) */}
+            <div className="lg:col-span-6 flex flex-col justify-between space-y-6 text-left h-full">
+              <div className="space-y-6">
+                <div>
+                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-bold bg-[var(--color-primary-bg)] text-[color:var(--color-primary-text)] border border-[var(--color-border)] mb-3">
+                    <RiPieChartLine size={16} />
+                    <span>Simplified Reports & Insights</span>
                   </div>
-                  <div>
-                    <h4 className="text-base sm:text-lg font-bold text-[color:var(--color-text)]">
-                      "Where did my money go this month?"
-                    </h4>
-                    <p className="text-sm sm:text-base text-[color:var(--color-muted)] mt-1 leading-relaxed">
-                      Visual category charts reveal exactly which categories take up most of your income.
-                    </p>
-                  </div>
+                  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black font-[family-name:var(--font-heading)] text-[color:var(--color-text)] leading-tight">
+                    Clear reports that actually help you save money
+                  </h2>
                 </div>
+                <p className="text-base sm:text-lg text-[color:var(--color-muted)] leading-relaxed">
+                  Most budgeting apps overload you with complicated tables and confusing graphs. Finance Tracker gives you simple, easy-to-read reports that answer the only two questions that matter:
+                </p>
 
-                <div className="p-5 rounded-[var(--radius-base)] bg-[var(--color-background)] border border-[var(--color-border)] flex items-start gap-3.5 text-left">
-                  <div className="w-7 h-7 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-sm shrink-0 mt-0.5">
-                    ✓
+                <div className="space-y-3.5">
+                  <div className="p-4 sm:p-4.5 rounded-[var(--radius-base)] bg-[var(--color-background)] border border-[var(--color-border)] flex items-start gap-3.5 text-left">
+                    <div className="w-6 h-6 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                      ✓
+                    </div>
+                    <div>
+                      <h4 className="text-base sm:text-lg font-bold text-[color:var(--color-text)]">
+                        "Where did my money go this month?"
+                      </h4>
+                      <p className="text-xs sm:text-sm text-[color:var(--color-muted)] mt-0.5 leading-relaxed">
+                        Visual category charts reveal exactly which categories take up most of your income.
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="text-base sm:text-lg font-bold text-[color:var(--color-text)]">
-                      "Is my total net worth going up or down?"
-                    </h4>
-                    <p className="text-sm sm:text-base text-[color:var(--color-muted)] mt-1 leading-relaxed">
-                      Track your wealth trajectory over time and celebrate every milestone as your debts shrink and savings grow.
-                    </p>
+
+                  <div className="p-4 sm:p-4.5 rounded-[var(--radius-base)] bg-[var(--color-background)] border border-[var(--color-border)] flex items-start gap-3.5 text-left">
+                    <div className="w-6 h-6 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                      ✓
+                    </div>
+                    <div>
+                      <h4 className="text-base sm:text-lg font-bold text-[color:var(--color-text)]">
+                        "Is my total net worth going up or down?"
+                      </h4>
+                      <p className="text-xs sm:text-sm text-[color:var(--color-muted)] mt-0.5 leading-relaxed">
+                        Track your wealth trajectory over time and celebrate every milestone as your debts shrink and savings grow.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
