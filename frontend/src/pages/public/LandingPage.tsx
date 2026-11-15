@@ -153,7 +153,7 @@ export const LandingPage: React.FC = () => {
     <div className="min-h-screen bg-[var(--color-background)] text-[color:var(--color-text)] font-[family-name:var(--font-body)] flex flex-col text-base">
       {/* 1. Header (Spacious Navbar + AppLogo, Desktop + Mobile Hamburger Menu) */}
       <header className="border-b border-[var(--color-border)] bg-[var(--color-surface)] sticky top-0 z-[var(--z-sticky)]">
-        <div className="max-w-[var(--breakpoint-wide)] mx-auto px-4 sm:px-6 lg:px-8 h-20 sm:h-24 flex items-center justify-between">
+        <div className="max-w-[var(--breakpoint-wide)] mx-auto px-4 sm:px-6 lg:px-8 h-18 sm:h-24 flex items-center justify-between">
           {/* Logo & Brand Title */}
           <Link to="/" className="flex items-center gap-3.5 group">
             <AppLogo size={44} className="group-hover:scale-105 transition-transform shadow-[var(--shadow-sm)]" />
