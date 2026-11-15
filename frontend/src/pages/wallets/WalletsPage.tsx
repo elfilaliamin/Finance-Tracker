@@ -1,0 +1,469 @@
+import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  RiAddLine,
+  RiWallet3Line,
+  RiArrowRightUpLine,
+  RiArrowRightDownLine,
+  RiEditLine,
+  RiDeleteBinLine,
+  RiSwapLine,
+  RiSearchLine,
+  RiBankCardLine,
+  RiFilterLine,
+} from '@remixicon/react';
+import { walletApi, Wallet, CreateWalletInput, CreateAdjustmentInput } from '@/api/walletApi';
+import { useAuth } from '@/hooks/useAuth';
+import { WalletModal } from '../networth/components/WalletModal';
+import { AdjustmentModal } from '../networth/components/AdjustmentModal';
+
+export const WalletsPage: React.FC = () => {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const baseCurrency = user?.baseCurrency || 'MAD';
+
+  // Modals state
+  const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
+  const [editingWallet, setEditingWallet] = useState<Wallet | null>(null);
+
+  const [isAdjustModalOpen, setIsAdjustModalOpen] = useState(false);
+  const [adjustingWallet, setAdjustingWallet] = useState<Wallet | null>(null);
+
+  // Filters state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [typeFilter, setTypeFilter] = useState<'all' | 'asset' | 'liability'>('all');
+  const [currencyFilter, setCurrencyFilter] = useState<string>('all');
+
+  // Queries
+  const { data: wallets = [], isLoading } = useQuery({
+    queryKey: ['wallets'],
+    queryFn: () => walletApi.getWallets(),
+  });
+
+  // Mutations
+  const createWalletMutation = useMutation({
+    mutationFn: (data: CreateWalletInput) => walletApi.createWallet(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['wallets'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      setIsWalletModalOpen(false);
+    },
+  });
+
+  const updateWalletMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<CreateWalletInput> }) =>
+      walletApi.updateWallet(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['wallets'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      setIsWalletModalOpen(false);
+      setEditingWallet(null);
+    },
+  });
+
+  const deleteWalletMutation = useMutation({
+    mutationFn: (id: string) => walletApi.deleteWallet(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['wallets'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    },
+  });
+
+  const adjustmentMutation = useMutation({
+    mutationFn: ({ walletId, data }: { walletId: string; data: CreateAdjustmentInput }) =>
+      walletApi.createAdjustment(walletId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['wallets'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      setIsAdjustModalOpen(false);
+      setAdjustingWallet(null);
+    },
+  });
+
+  // Calculate high-level stats
+  const assetWallets = wallets.filter((w) => w.type === 'asset');
+  const liabilityWallets = wallets.filter((w) => w.type === 'liability');
+  const totalAssets = assetWallets.reduce((sum, w) => sum + parseFloat(w.currentBalance || '0'), 0);
+  const totalLiabilities = liabilityWallets.reduce((sum, w) => sum + parseFloat(w.currentBalance || '0'), 0);
+  const netWorth = totalAssets - totalLiabilities;
+
+  // Filtered wallets
+  const filteredWallets = wallets.filter((w) => {
+    const matchesSearch =
+      w.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (w.description && w.description.toLowerCase().includes(searchQuery.toLowerCase()));
+    const matchesType = typeFilter === 'all' || w.type === typeFilter;
+    const matchesCurrency = currencyFilter === 'all' || w.defaultCurrency === currencyFilter;
+    return matchesSearch && matchesType && matchesCurrency;
+  });
+
+  // Handlers
+  const handleOpenCreate = () => {
+    setEditingWallet(null);
+    setIsWalletModalOpen(true);
+  };
+
+  const handleOpenEdit = (w: Wallet) => {
+    setEditingWallet(w);
+    setIsWalletModalOpen(true);
+  };
+
+  const handleOpenAdjust = (w: Wallet) => {
+    setAdjustingWallet(w);
+    setIsAdjustModalOpen(true);
+  };
+
+  const handleWalletSubmit = async (data: CreateWalletInput) => {
+    if (editingWallet) {
+      await updateWalletMutation.mutateAsync({ id: editingWallet.id, data });
+    } else {
+      await createWalletMutation.mutateAsync(data);
+    }
+  };
+
+  const handleAdjustmentSubmit = async (data: CreateAdjustmentInput) => {
+    if (adjustingWallet) {
+      await adjustmentMutation.mutateAsync({ walletId: adjustingWallet.id, data });
+    }
+  };
+
+  // Available currencies across existing wallets
+  const existingCurrencies = Array.from(new Set(wallets.map((w) => w.defaultCurrency)));
+
+  return (
+    <div className="space-y-6">
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h2 className="text-xl sm:text-2xl font-heading font-bold text-[var(--color-text)]">
+            Wallets Management
+          </h2>
+          <p className="text-xs sm:text-sm text-[var(--color-text-muted)]">
+            Add, remove, and manage your real-world bank accounts, cash reserves, and liabilities.
+          </p>
+        </div>
+
+        <button
+          onClick={handleOpenCreate}
+          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-[var(--radius-base)] bg-[var(--color-primary)] text-white font-medium text-sm hover:bg-[var(--color-primary-hover)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-all touch-target"
+        >
+          <RiAddLine className="w-5 h-5" />
+          <span>New Wallet</span>
+        </button>
+      </div>
+
+      {/* KPI Stats Overview Banner */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Total Wallets Count */}
+        <div className="bg-[var(--color-surface)] rounded-[var(--radius-surface)] border border-[var(--color-border)] p-4 shadow-[var(--shadow-sm)]">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+              Total Wallets
+            </span>
+            <div className="w-8 h-8 rounded-[var(--radius-base)] bg-[var(--color-primary-bg)] text-[var(--color-accent)] border border-[var(--color-border)] flex items-center justify-center">
+              <RiBankCardLine className="w-4 h-4" />
+            </div>
+          </div>
+          <p className="text-2xl font-heading font-bold text-[var(--color-text)]">{wallets.length}</p>
+          <p className="text-xs text-[var(--color-text-muted)] mt-1">
+            {assetWallets.length} assets, {liabilityWallets.length} liabilities
+          </p>
+        </div>
+
+        {/* Total Assets */}
+        <div className="bg-[var(--color-surface)] rounded-[var(--radius-surface)] border border-[var(--color-border)] p-4 shadow-[var(--shadow-sm)]">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+              Asset Accounts
+            </span>
+            <div className="w-8 h-8 rounded-[var(--radius-base)] bg-[var(--color-primary-bg)] text-[var(--color-accent)] border border-[var(--color-border)] flex items-center justify-center">
+              <RiArrowRightUpLine className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-2xl font-heading font-bold font-mono text-[var(--color-accent)] tracking-wider">
+              +{totalAssets.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </span>
+            <span className="text-xs font-semibold text-[var(--color-text-muted)]">{baseCurrency}</span>
+          </div>
+          <p className="text-xs text-[var(--color-text-muted)] mt-1">{assetWallets.length} active asset accounts</p>
+        </div>
+
+        {/* Total Liabilities */}
+        <div className="bg-[var(--color-surface)] rounded-[var(--radius-surface)] border border-[var(--color-border)] p-4 shadow-[var(--shadow-sm)]">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+              Liabilities & Debts
+            </span>
+            <div className="w-8 h-8 rounded-[var(--radius-base)] bg-[var(--color-danger)]/10 text-[var(--color-danger)] border border-[var(--color-danger)]/20 flex items-center justify-center">
+              <RiArrowRightDownLine className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-2xl font-heading font-bold font-mono text-[var(--color-danger)] tracking-wider">
+              -{totalLiabilities.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </span>
+            <span className="text-xs font-semibold text-[var(--color-text-muted)]">{baseCurrency}</span>
+          </div>
+          <p className="text-xs text-[var(--color-text-muted)] mt-1">{liabilityWallets.length} active debt accounts</p>
+        </div>
+
+        {/* Consolidated Net Balance */}
+        <div className="bg-[var(--color-surface)] rounded-[var(--radius-surface)] border border-[var(--color-border)] p-4 shadow-[var(--shadow-sm)]">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+              Net Balance
+            </span>
+            <div className="w-8 h-8 rounded-[var(--radius-base)] bg-[var(--color-primary-bg)] text-[var(--color-accent)] border border-[var(--color-border)] flex items-center justify-center">
+              <RiWallet3Line className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-2xl font-heading font-bold font-mono text-[var(--color-text)] tracking-wider">
+              {netWorth.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </span>
+            <span className="text-xs font-semibold text-[var(--color-text-muted)]">{baseCurrency}</span>
+          </div>
+          <p className="text-xs text-[var(--color-text-muted)] mt-1">Consolidated holdings</p>
+        </div>
+      </div>
+
+      {/* Search and Filters Bar */}
+      <div className="bg-[var(--color-surface)] p-3.5 rounded-[var(--radius-surface)] border border-[var(--color-border)] shadow-[var(--shadow-sm)] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+        {/* Search Input */}
+        <div className="relative flex-1">
+          <RiSearchLine className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted)]" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search wallet name or description..."
+            className="w-full pl-9 pr-3.5 py-2 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-primary-bg)]/30 text-[var(--color-text)] text-xs focus:ring-1 focus:ring-[var(--color-ring)] focus:outline-none"
+          />
+        </div>
+
+        {/* Filter Controls */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Type Filter Buttons */}
+          <div className="inline-flex rounded-[var(--radius-base)] border border-[var(--color-border)] p-0.5 bg-[var(--color-primary-bg)]/40 text-xs font-semibold">
+            <button
+              type="button"
+              onClick={() => setTypeFilter('all')}
+              className={`px-3 py-1.5 rounded-[calc(var(--radius-base)-2px)] transition-colors ${
+                typeFilter === 'all'
+                  ? 'bg-[var(--color-surface)] text-[var(--color-accent)] shadow-xs'
+                  : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
+              }`}
+            >
+              All ({wallets.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setTypeFilter('asset')}
+              className={`px-3 py-1.5 rounded-[calc(var(--radius-base)-2px)] transition-colors ${
+                typeFilter === 'asset'
+                  ? 'bg-[var(--color-surface)] text-[var(--color-accent)] shadow-xs'
+                  : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
+              }`}
+            >
+              Assets ({assetWallets.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setTypeFilter('liability')}
+              className={`px-3 py-1.5 rounded-[calc(var(--radius-base)-2px)] transition-colors ${
+                typeFilter === 'liability'
+                  ? 'bg-[var(--color-surface)] text-[var(--color-danger)] shadow-xs'
+                  : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
+              }`}
+            >
+              Debts ({liabilityWallets.length})
+            </button>
+          </div>
+
+          {/* Currency Filter Dropdown */}
+          {existingCurrencies.length > 1 && (
+            <div className="flex items-center gap-1.5 bg-[var(--color-primary-bg)]/40 border border-[var(--color-border)] rounded-[var(--radius-base)] px-2.5 py-1.5">
+              <RiFilterLine className="w-3.5 h-3.5 text-[var(--color-text-muted)]" />
+              <select
+                value={currencyFilter}
+                onChange={(e) => setCurrencyFilter(e.target.value)}
+                className="bg-transparent text-xs font-semibold text-[var(--color-text)] focus:outline-none"
+              >
+                <option value="all" className="bg-[var(--color-surface)] text-[var(--color-text)]">
+                  All Currencies
+                </option>
+                {existingCurrencies.map((c) => (
+                  <option key={c} value={c} className="bg-[var(--color-surface)] text-[var(--color-text)]">
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Wallets List / Grid */}
+      {isLoading ? (
+        <div className="py-16 flex flex-col items-center justify-center text-[var(--color-text-muted)]">
+          <div className="w-8 h-8 border-3 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin mb-3" />
+          <p className="text-xs">Loading wallets...</p>
+        </div>
+      ) : filteredWallets.length === 0 ? (
+        <div className="bg-[var(--color-surface)] rounded-[var(--radius-surface)] border border-[var(--color-border)] p-10 text-center shadow-[var(--shadow-sm)]">
+          <div className="w-12 h-12 rounded-[var(--radius-base)] bg-[var(--color-primary-bg)] text-[var(--color-accent)] border border-[var(--color-border)] flex items-center justify-center mx-auto mb-3">
+            <RiWallet3Line className="w-6 h-6" />
+          </div>
+          <h3 className="text-base font-heading font-bold text-[var(--color-text)]">
+            {wallets.length === 0 ? 'No Wallets Found' : 'No matching wallets'}
+          </h3>
+          <p className="text-xs text-[var(--color-text-muted)] mt-1 max-w-sm mx-auto">
+            {wallets.length === 0
+              ? 'Get started by creating your first bank account, cash wallet, or debt liability.'
+              : 'Try clearing your search query or changing the filter options above.'}
+          </p>
+          {wallets.length === 0 && (
+            <button
+              onClick={handleOpenCreate}
+              className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-[var(--radius-base)] bg-[var(--color-primary)] text-white text-xs font-semibold hover:bg-[var(--color-primary-hover)] transition-colors shadow-xs"
+            >
+              <RiAddLine size={16} />
+              <span>Create Your First Wallet</span>
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredWallets.map((wallet) => {
+            const isAsset = wallet.type === 'asset';
+            const balanceNum = parseFloat(wallet.currentBalance || '0');
+
+            return (
+              <div
+                key={wallet.id}
+                className="bg-[var(--color-surface)] rounded-[var(--radius-surface)] border border-[var(--color-border)] p-5 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-all flex flex-col justify-between"
+              >
+                <div>
+                  {/* Top Card Bar */}
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span
+                        className="w-4 h-4 rounded-full shrink-0 shadow-xs"
+                        style={{ backgroundColor: wallet.color || '#047857' }}
+                      />
+                      <h3 className="font-heading font-bold text-[var(--color-text)] text-base truncate">
+                        {wallet.name}
+                      </h3>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded-[var(--radius-pill)] text-[10px] font-bold uppercase tracking-wider border ${
+                          isAsset
+                            ? 'bg-[var(--color-primary-bg)] text-[var(--color-accent)] border-[var(--color-border)]'
+                            : 'bg-[var(--color-danger)]/10 text-[var(--color-danger)] border-[var(--color-danger)]/20'
+                        }`}
+                      >
+                        {isAsset ? 'Asset' : 'Liability'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  {wallet.description && (
+                    <p className="text-xs text-[var(--color-text-muted)] mb-3 line-clamp-2">
+                      {wallet.description}
+                    </p>
+                  )}
+
+                  {/* Balance Display */}
+                  <div className="my-3 p-3 rounded-[var(--radius-base)] bg-[var(--color-primary-bg)]/40 border border-[var(--color-border)]">
+                    <span className="text-[10px] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider block">
+                      Current Balance
+                    </span>
+                    <div className="flex items-baseline gap-1.5 mt-0.5">
+                      <span
+                        className={`text-2xl font-heading font-bold font-mono tracking-wider ${
+                          isAsset ? 'text-[var(--color-text)]' : 'text-[var(--color-danger)]'
+                        }`}
+                      >
+                        {isAsset ? '' : '-'}
+                        {Math.abs(balanceNum).toLocaleString(undefined, {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </span>
+                      <span className="text-xs font-bold text-[var(--color-text-muted)]">
+                        {wallet.defaultCurrency}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card Actions Footer */}
+                <div className="pt-3 border-t border-[var(--color-border)] flex items-center justify-between gap-2">
+                  <button
+                    onClick={() => handleOpenAdjust(wallet)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-base)] bg-[var(--color-primary-bg)] hover:bg-[var(--color-primary-bg)]/80 text-[var(--color-accent)] text-xs font-semibold border border-[var(--color-border)] transition-colors touch-target"
+                    title="Record balance adjustment"
+                  >
+                    <RiSwapLine size={14} />
+                    <span>Adjust Balance</span>
+                  </button>
+
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => handleOpenEdit(wallet)}
+                      className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-accent)] rounded-[var(--radius-base)] hover:bg-[var(--color-primary-bg)] transition-colors touch-target"
+                      title="Edit wallet"
+                    >
+                      <RiEditLine className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (
+                          confirm(
+                            `Delete wallet "${wallet.name}"? Transactions assigned to this wallet will remain in records.`
+                          )
+                        ) {
+                          deleteWalletMutation.mutate(wallet.id);
+                        }
+                      }}
+                      className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-danger)] rounded-[var(--radius-base)] hover:bg-[var(--color-danger)]/10 transition-colors touch-target"
+                      title="Delete wallet"
+                    >
+                      <RiDeleteBinLine className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Create / Edit Wallet Modal */}
+      <WalletModal
+        isOpen={isWalletModalOpen}
+        onClose={() => setIsWalletModalOpen(false)}
+        wallet={editingWallet}
+        onSubmit={handleWalletSubmit}
+        defaultCurrency={baseCurrency}
+      />
+
+      {/* Adjust Balance Modal */}
+      {adjustingWallet && (
+        <AdjustmentModal
+          isOpen={isAdjustModalOpen}
+          onClose={() => {
+            setIsAdjustModalOpen(false);
+            setAdjustingWallet(null);
+          }}
+          wallet={adjustingWallet}
+          onSubmit={handleAdjustmentSubmit}
+        />
+      )}
+    </div>
+  );
+};

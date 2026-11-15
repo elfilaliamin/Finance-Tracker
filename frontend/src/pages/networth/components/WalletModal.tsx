@@ -148,19 +148,28 @@ export const WalletModal: React.FC<WalletModalProps> = ({
           <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-2">
             Wallet Color
           </label>
-          <div className="flex flex-wrap items-center gap-2">
-            {WALLET_COLORS.map((c) => (
-              <button
-                key={c}
-                type="button"
-                onClick={() => setColor(c)}
-                className={`w-7 h-7 rounded-full transition-transform ${
-                  color === c ? 'scale-125 ring-2 ring-[var(--color-ring)] ring-offset-2 ring-offset-[var(--color-surface)]' : 'hover:scale-110'
-                }`}
-                style={{ backgroundColor: c }}
-                aria-label={`Select color ${c}`}
-              />
-            ))}
+          <div className="flex flex-wrap items-center gap-3.5 py-1.5">
+            {WALLET_COLORS.map((c) => {
+              const isSelected = color.toLowerCase() === c.toLowerCase();
+              return (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setColor(c)}
+                  className={`w-7 h-7 rounded-full transition-all flex items-center justify-center shrink-0 ${
+                    isSelected
+                      ? 'ring-2 ring-[var(--color-ring)] ring-offset-2 ring-offset-[var(--color-surface)] shadow-xs scale-110'
+                      : 'hover:scale-105 opacity-80 hover:opacity-100'
+                  }`}
+                  style={{ backgroundColor: c }}
+                  aria-label={`Select color ${c}`}
+                >
+                  {isSelected && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-white shadow-xs" />
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
 

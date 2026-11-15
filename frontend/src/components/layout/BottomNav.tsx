@@ -26,6 +26,7 @@ const primaryNav = [
 ];
 
 const secondaryNav = [
+  { path: '/wallets', label: 'Wallets', icon: RiWallet3Line },
   { path: '/income-sources', label: 'Income Sources', icon: RiBriefcaseLine },
   { path: '/budgets', label: 'Budgets & Goals', icon: RiFocus3Line },
   { path: '/reports', label: 'Reports', icon: RiFileChartLine },
