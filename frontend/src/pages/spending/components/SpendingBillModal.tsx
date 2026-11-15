@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { RiAddLine, RiDeleteBinLine, RiReceiptLine, RiSubtractLine } from '@remixicon/react';
+import { RiAddLine, RiDeleteBinLine, RiReceiptLine, RiSubtractLine, RiAlertLine } from '@remixicon/react';
 import { ResponsiveModal } from '@/components/ui/ResponsiveModal';
 import { SpendingCategory, CreateSpendingInput } from '@/api/spendingApi';
 import { Wallet } from '@/api/walletApi';
@@ -77,22 +77,35 @@ export const SpendingBillModal: React.FC<SpendingBillModalProps> = ({
     return sum + price * qty;
   }, 0);
 
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setErrorMessage(null);
+    }
+  }, [isOpen]);
+
   const handleFormSubmit = async (values: SpendingBillFormData) => {
-    await onSubmit({
-      date: values.date,
-      currency: values.currency,
-      paidFromWalletId: values.paidFromWalletId ? values.paidFromWalletId : undefined,
-      storeMerchant: values.storeMerchant ? values.storeMerchant.trim() : undefined,
-      notes: values.notes ? values.notes.trim() : undefined,
-      items: values.items.map((i) => ({
-        name: i.name.trim(),
-        categoryId: i.categoryId ? i.categoryId : undefined,
-        unitPrice: i.unitPrice,
-        quantity: i.quantity,
-      })),
-    });
-    reset();
-    onClose();
+    try {
+      setErrorMessage(null);
+      await onSubmit({
+        date: values.date,
+        currency: values.currency,
+        paidFromWalletId: values.paidFromWalletId ? values.paidFromWalletId : undefined,
+        storeMerchant: values.storeMerchant ? values.storeMerchant.trim() : undefined,
+        notes: values.notes ? values.notes.trim() : undefined,
+        items: values.items.map((i) => ({
+          name: i.name.trim(),
+          categoryId: i.categoryId && i.categoryId.trim() ? i.categoryId.trim() : undefined,
+          unitPrice: i.unitPrice,
+          quantity: i.quantity,
+        })),
+      });
+      reset();
+      onClose();
+    } catch (err: any) {
+      setErrorMessage(err?.message || 'Failed to save spending bill. Please check your inputs.');
+    }
   };
 
   return (
@@ -104,6 +117,13 @@ export const SpendingBillModal: React.FC<SpendingBillModalProps> = ({
       maxWidth="2xl"
     >
       <form onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col space-y-4">
+        {/* Error notification banner */}
+        {errorMessage && (
+          <div className="p-3 rounded-[var(--radius-base)] bg-[var(--color-danger)]/10 border border-[var(--color-danger)]/30 flex items-center gap-2.5 text-[var(--color-danger)] text-xs sm:text-sm">
+            <RiAlertLine className="w-4 h-4 shrink-0" />
+            <span>{errorMessage}</span>
+          </div>
+        )}
         {/* Header Details */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 bg-[var(--color-primary-bg)] rounded-[var(--radius-base)] border border-[var(--color-border)]">
           <div>

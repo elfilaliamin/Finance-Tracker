@@ -2,6 +2,7 @@ import { and, desc, eq, gte, inArray, lte } from 'drizzle-orm';
 import { db } from '../../db/index.js';
 import * as schema from '../../db/schema.js';
 import { Money } from '../../utils/money.js';
+import { currencyService } from '../currencies/currency.service.js';
 
 export class WalletRepository {
   async listByUser(userId: string, status?: 'active' | 'archived') {
@@ -358,7 +359,15 @@ export class WalletRepository {
       const totalAmountStr = sp.totalAmount;
       const totalNum = parseFloat(totalAmountStr);
 
-      totalSpent = Money.add(totalSpent, totalAmountStr);
+      let spendingInWalletCurrency = Money.from(totalAmountStr);
+      if (sp.currency !== wallet.defaultCurrency) {
+        try {
+          const rate = await currencyService.getRateForDate(sp.currency, wallet.defaultCurrency, sp.date);
+          spendingInWalletCurrency = Money.convert(spendingInWalletCurrency, rate);
+        } catch {}
+      }
+
+      totalSpent = Money.add(totalSpent, spendingInWalletCurrency);
 
       const itemsSummary =
         spItems.length > 0

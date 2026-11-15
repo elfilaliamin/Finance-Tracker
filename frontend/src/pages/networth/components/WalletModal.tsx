@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ResponsiveModal } from '@/components/ui/ResponsiveModal';
 import { Wallet, CreateWalletInput } from '@/api/walletApi';
+import { RiAlertLine } from '@remixicon/react';
 
 interface WalletModalProps {
   isOpen: boolean;
@@ -27,21 +28,26 @@ export const WalletModal: React.FC<WalletModalProps> = ({
   const [color, setColor] = useState('#047857');
   const [type, setType] = useState<'asset' | 'liability'>('asset');
   const [currency, setCurrency] = useState(defaultCurrency);
+  const [initialBalance, setInitialBalance] = useState('0');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
+    setErrorMessage(null);
     if (wallet) {
       setName(wallet.name);
       setDescription(wallet.description || '');
       setColor(wallet.color || '#047857');
       setType(wallet.type);
       setCurrency(wallet.defaultCurrency);
+      setInitialBalance('0');
     } else {
       setName('');
       setDescription('');
       setColor('#047857');
       setType('asset');
       setCurrency(defaultCurrency);
+      setInitialBalance('0');
     }
   }, [wallet, defaultCurrency, isOpen]);
 
@@ -51,14 +57,19 @@ export const WalletModal: React.FC<WalletModalProps> = ({
 
     try {
       setIsSubmitting(true);
+      setErrorMessage(null);
+      const parsedInitial = parseFloat(initialBalance || '0');
       await onSubmit({
         name: name.trim(),
         description: description.trim() || undefined,
         color,
         type,
         defaultCurrency: currency,
+        initialBalance: !wallet && !isNaN(parsedInitial) ? parsedInitial : undefined,
       });
       onClose();
+    } catch (err: any) {
+      setErrorMessage(err?.message || 'Failed to save wallet.');
     } finally {
       setIsSubmitting(false);
     }
@@ -72,6 +83,13 @@ export const WalletModal: React.FC<WalletModalProps> = ({
       description="Wallets represent named financial pools used by Net Worth, Spending, and Budgets."
     >
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Error notification banner */}
+        {errorMessage && (
+          <div className="p-3 rounded-[var(--radius-base)] bg-[var(--color-danger)]/10 border border-[var(--color-danger)]/30 flex items-center gap-2.5 text-[var(--color-danger)] text-xs sm:text-sm">
+            <RiAlertLine className="w-4 h-4 shrink-0" />
+            <span>{errorMessage}</span>
+          </div>
+        )}
         {/* Type: Asset vs Liability */}
         <div className="flex rounded-[var(--radius-base)] bg-[var(--color-primary-bg)] p-1 border border-[var(--color-border)]">
           <button
@@ -128,6 +146,31 @@ export const WalletModal: React.FC<WalletModalProps> = ({
             <option value="EUR" className="bg-[var(--color-surface)] text-[var(--color-text)]">EUR - Euro</option>
           </select>
         </div>
+
+        {/* Initial Balance (only on new wallet creation) */}
+        {!wallet && (
+          <div>
+            <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5">
+              Initial Starting Balance (Optional)
+            </label>
+            <div className="relative">
+              <input
+                type="number"
+                step="0.01"
+                placeholder="0.00"
+                value={initialBalance}
+                onChange={(e) => setInitialBalance(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-ring)] focus:outline-none text-sm font-mono pr-14"
+              />
+              <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-semibold text-[var(--color-text-muted)]">
+                {currency}
+              </span>
+            </div>
+            <p className="text-[11px] text-[var(--color-text-muted)] mt-1">
+              Starting funds will be logged as an initial balance adjustment.
+            </p>
+          </div>
+        )}
 
         {/* Description */}
         <div>

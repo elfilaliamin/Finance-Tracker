@@ -14,6 +14,7 @@ import {
   RiHistoryLine,
 } from '@remixicon/react';
 import { walletApi, Wallet, CreateWalletInput, CreateAdjustmentInput } from '@/api/walletApi';
+import { dashboardApi } from '@/api/dashboardApi';
 import { useAuth } from '@/hooks/useAuth';
 import { WalletModal } from '../networth/components/WalletModal';
 import { AdjustmentModal } from '../networth/components/AdjustmentModal';
@@ -43,6 +44,11 @@ export const WalletsPage: React.FC = () => {
   const { data: wallets = [], isLoading } = useQuery({
     queryKey: ['wallets'],
     queryFn: () => walletApi.getWallets(),
+  });
+
+  const { data: metrics } = useQuery({
+    queryKey: ['dashboard', 'metrics'],
+    queryFn: () => dashboardApi.getMetrics(),
   });
 
   // Mutations
@@ -86,12 +92,19 @@ export const WalletsPage: React.FC = () => {
     },
   });
 
-  // Calculate high-level stats
+  // Calculate high-level stats (converted to base currency via backend metrics engine)
   const assetWallets = wallets.filter((w) => w.type === 'asset');
   const liabilityWallets = wallets.filter((w) => w.type === 'liability');
-  const totalAssets = assetWallets.reduce((sum, w) => sum + parseFloat(w.currentBalance || '0'), 0);
-  const totalLiabilities = liabilityWallets.reduce((sum, w) => sum + parseFloat(w.currentBalance || '0'), 0);
-  const netWorth = totalAssets - totalLiabilities;
+  const totalAssets = metrics?.totalAssets
+    ? parseFloat(metrics.totalAssets)
+    : assetWallets.reduce((sum, w) => sum + parseFloat(w.currentBalance || '0'), 0);
+  const totalLiabilities = metrics?.totalLiabilities
+    ? parseFloat(metrics.totalLiabilities)
+    : liabilityWallets.reduce((sum, w) => sum + parseFloat(w.currentBalance || '0'), 0);
+  const netWorthVal = metrics?.todayNetWorth || metrics?.todaysNetWorth;
+  const netWorth = netWorthVal
+    ? parseFloat(netWorthVal)
+    : totalAssets - totalLiabilities;
 
   // Filtered wallets
   const filteredWallets = wallets.filter((w) => {

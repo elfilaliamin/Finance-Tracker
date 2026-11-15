@@ -21,13 +21,23 @@ export class ReportController {
 
   exportCsv = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const filters = req.query as unknown as ReportFilterParams;
-      const type = filters.type || 'spending';
+      const from = (req.query.from || req.query.startDate) as string | undefined;
+      const to = (req.query.to || req.query.endDate) as string | undefined;
+      const type = ((req.query.type as string) || 'spending') as 'income' | 'spending' | 'all';
+      const filters: ReportFilterParams = {
+        ...req.query,
+        from,
+        to,
+        type: type === 'all' ? 'summary' : type,
+      };
+
       const timestamp = new Date().toISOString().split('T')[0];
       const filename = `finance_tracker_${type}_report_${timestamp}.csv`;
 
       let data;
-      if (type === 'income') {
+      if (type === 'all') {
+        data = await reportService.getUnifiedReportData(req.userId!, filters);
+      } else if (type === 'income') {
         data = await reportService.getIncomeReportData(req.userId!, filters);
       } else {
         data = await reportService.getSpendingReportData(req.userId!, filters);
@@ -41,13 +51,23 @@ export class ReportController {
 
   exportXlsx = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const filters = req.query as unknown as ReportFilterParams;
-      const type = filters.type || 'spending';
+      const from = (req.query.from || req.query.startDate) as string | undefined;
+      const to = (req.query.to || req.query.endDate) as string | undefined;
+      const type = ((req.query.type as string) || 'spending') as 'income' | 'spending' | 'all';
+      const filters: ReportFilterParams = {
+        ...req.query,
+        from,
+        to,
+        type: type === 'all' ? 'summary' : type,
+      };
+
       const timestamp = new Date().toISOString().split('T')[0];
       const filename = `finance_tracker_${type}_report_${timestamp}.xlsx`;
 
       let data;
-      if (type === 'income') {
+      if (type === 'all') {
+        data = await reportService.getUnifiedReportData(req.userId!, filters);
+      } else if (type === 'income') {
         data = await reportService.getIncomeReportData(req.userId!, filters);
       } else {
         data = await reportService.getSpendingReportData(req.userId!, filters);
@@ -67,13 +87,23 @@ export class ReportController {
 
   exportPdf = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const filters = req.query as unknown as ReportFilterParams;
-      const type = filters.type || 'spending';
+      const from = (req.query.from || req.query.startDate) as string | undefined;
+      const to = (req.query.to || req.query.endDate) as string | undefined;
+      const type = ((req.query.type as string) || 'spending') as 'income' | 'spending' | 'all';
+      const filters: ReportFilterParams = {
+        ...req.query,
+        from,
+        to,
+        type: type === 'all' ? 'summary' : type,
+      };
+
       const timestamp = new Date().toISOString().split('T')[0];
       const filename = `finance_tracker_${type}_report_${timestamp}.pdf`;
 
       let data;
-      if (type === 'income') {
+      if (type === 'all') {
+        data = await reportService.getUnifiedReportData(req.userId!, filters);
+      } else if (type === 'income') {
         data = await reportService.getIncomeReportData(req.userId!, filters);
       } else {
         data = await reportService.getSpendingReportData(req.userId!, filters);

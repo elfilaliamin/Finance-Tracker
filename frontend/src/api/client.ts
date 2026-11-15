@@ -42,9 +42,11 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     credentials: 'include',
   });
 
-  // Handle blob or stream downloads (e.g. CSV, XLSX, PDF exports)
+  // Handle blob or stream downloads (e.g. CSV, XLSX, PDF exports, or attachment downloads like JSON backups)
   const contentType = response.headers.get('content-type') || '';
+  const contentDisposition = response.headers.get('content-disposition') || '';
   if (
+    contentDisposition.includes('attachment') ||
     contentType.includes('text/csv') ||
     contentType.includes('application/vnd.openxmlformats') ||
     contentType.includes('application/pdf') ||
@@ -66,8 +68,17 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     return {} as T;
   }
 
-  if (!response.ok || json.status === 'error') {
-    const errorMsg = json.error?.message || `Request failed with status ${response.status}`;
+  if (!response.ok || json.status === 'error' || (json as any).success === false) {
+    let errorMsg = json.error?.message || `Request failed with status ${response.status}`;
+    if (json.error?.details && Array.isArray(json.error.details) && json.error.details.length > 0) {
+      const detailsStr = json.error.details
+        .map((d: any) => (d.issue ? (d.field ? `${d.field}: ${d.issue}` : d.issue) : ''))
+        .filter(Boolean)
+        .join(', ');
+      if (detailsStr) {
+        errorMsg = detailsStr;
+      }
+    }
     const errorCode = json.error?.code || 'UNKNOWN_ERROR';
     throw new ApiError(errorMsg, errorCode, response.status, json.error?.details);
   }

@@ -7,6 +7,7 @@ export interface Budget {
   targetAmount: string;
   currency: string;
   walletId?: string;
+  categoryId?: string;
   spendingCategoryId?: string;
   period: 'monthly' | 'yearly' | 'custom';
   startDate?: string;
@@ -29,6 +30,7 @@ export interface CreateBudgetInput {
   targetAmount: number;
   currency: string;
   walletId?: string;
+  categoryId?: string;
   spendingCategoryId?: string;
   period: 'monthly' | 'yearly' | 'custom';
   startDate?: string;

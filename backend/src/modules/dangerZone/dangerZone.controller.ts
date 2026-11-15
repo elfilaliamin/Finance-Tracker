@@ -24,6 +24,15 @@ export class DangerZoneController {
     }
   };
 
+  executeImport = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const result = await dangerZoneService.executeImport(req.userId!, req.body);
+      sendSuccess(res, result);
+    } catch (err) {
+      next(err);
+    }
+  };
+
   purge = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { module, typedConfirmation } = req.body;

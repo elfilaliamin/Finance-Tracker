@@ -3,6 +3,7 @@ import { db } from '../../db/index.js';
 import * as schema from '../../db/schema.js';
 import { SpendingFilterInput } from './spending.schemas.js';
 import { Money } from '../../utils/money.js';
+import { currencyService } from '../currencies/currency.service.js';
 
 export interface CalculatedSpendingItem {
   articleName: string;
@@ -63,15 +64,23 @@ export class SpendingRepository {
         )
         .returning();
 
-      // 3. Atomically decrement wallet balance if paidFromWalletId is specified
+      // 3. Atomically decrement wallet balance if paidFromWalletId is specified (with currency conversion)
       if (header.paidFromWalletId) {
         const [wallet] = await tx
-          .select({ currentBalance: schema.wallets.currentBalance })
+          .select({
+            currentBalance: schema.wallets.currentBalance,
+            defaultCurrency: schema.wallets.defaultCurrency,
+          })
           .from(schema.wallets)
           .where(and(eq(schema.wallets.id, header.paidFromWalletId), eq(schema.wallets.userId, userId)));
 
         if (wallet) {
-          const newBalance = Money.subtract(wallet.currentBalance, header.totalAmount);
+          let deductionAmount = header.totalAmount;
+          if (wallet.defaultCurrency !== header.currency) {
+            const rate = await currencyService.getRateForDate(header.currency, wallet.defaultCurrency, header.date);
+            deductionAmount = Money.toDbString(Money.convert(header.totalAmount, rate));
+          }
+          const newBalance = Money.subtract(wallet.currentBalance, deductionAmount);
           await tx
             .update(schema.wallets)
             .set({
@@ -137,7 +146,19 @@ export class SpendingRepository {
       .leftJoin(schema.spendingCategories, eq(schema.spendingItems.categoryId, schema.spendingCategories.id))
       .where(eq(schema.spendingItems.spendingId, id));
 
-    return { ...spending, items };
+    const mappedItems = items.map((i) => ({
+      ...i,
+      name: i.articleName,
+      categoryName: i.category?.name,
+    }));
+
+    return {
+      ...spending,
+      storeMerchant: spending.store,
+      walletName: spending.wallet?.name,
+      totalAmountInBase: spending.baseTotalAmount,
+      items: mappedItems,
+    };
   }
 
   async listByUser(userId: string, filters: SpendingFilterInput) {
@@ -221,10 +242,22 @@ export class SpendingRepository {
         );
     }
 
-    const rowsWithItems = rows.map((r) => ({
-      ...r,
-      items: allItems.filter((i) => i.spendingId === r.id),
-    }));
+    const rowsWithItems = rows.map((r) => {
+      const spItems = allItems
+        .filter((i) => i.spendingId === r.id)
+        .map((i) => ({
+          ...i,
+          name: i.articleName,
+          categoryName: i.category?.name,
+        }));
+      return {
+        ...r,
+        storeMerchant: r.store,
+        walletName: r.wallet?.name,
+        totalAmountInBase: r.baseTotalAmount,
+        items: spItems,
+      };
+    });
 
     return {
       rows: rowsWithItems,
@@ -258,15 +291,23 @@ export class SpendingRepository {
         .set({ isDeleted: true, updatedAt: new Date() })
         .where(eq(schema.spendings.id, id));
 
-      // 2. Restore balance on wallet if it was paid from a wallet
+      // 2. Restore balance on wallet if it was paid from a wallet (with currency conversion)
       if (spending.paidFromWalletId) {
         const [wallet] = await tx
-          .select({ currentBalance: schema.wallets.currentBalance })
+          .select({
+            currentBalance: schema.wallets.currentBalance,
+            defaultCurrency: schema.wallets.defaultCurrency,
+          })
           .from(schema.wallets)
           .where(eq(schema.wallets.id, spending.paidFromWalletId));
 
         if (wallet) {
-          const restoredBalance = Money.add(wallet.currentBalance, spending.totalAmount);
+          let restoreAmount = spending.totalAmount;
+          if (wallet.defaultCurrency !== spending.currency) {
+            const rate = await currencyService.getRateForDate(spending.currency, wallet.defaultCurrency, spending.date);
+            restoreAmount = Money.toDbString(Money.convert(spending.totalAmount, rate));
+          }
+          const restoredBalance = Money.add(wallet.currentBalance, restoreAmount);
           await tx
             .update(schema.wallets)
             .set({

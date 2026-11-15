@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ResponsiveModal } from '@/components/ui/ResponsiveModal';
 import { CreateBudgetInput } from '@/api/budgetApi';
 import { SpendingCategory } from '@/api/spendingApi';
 import { Wallet } from '@/api/walletApi';
+import { RiAlertLine } from '@remixicon/react';
 
 interface BudgetModalProps {
   isOpen: boolean;
@@ -26,11 +27,19 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
   const [targetAmount, setTargetAmount] = useState('');
   const [currency, setCurrency] = useState(defaultCurrency);
   const [period, setPeriod] = useState<'monthly' | 'yearly' | 'custom'>('monthly');
+  const [startDate, setStartDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
   const [categoryId, setCategoryId] = useState('');
   const [walletId, setWalletId] = useState('');
   const [endDate, setEndDate] = useState('');
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setErrorMessage(null);
+    }
+  }, [isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,14 +48,17 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
 
     try {
       setIsSubmitting(true);
+      setErrorMessage(null);
       await onSubmit({
         name: name.trim(),
         type,
         targetAmount: amount,
         currency,
         period,
+        categoryId: categoryId || undefined,
         spendingCategoryId: categoryId || undefined,
         walletId: walletId || undefined,
+        startDate,
         endDate: endDate || undefined,
         notes: notes.trim() || undefined,
       });
@@ -54,6 +66,8 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
       setTargetAmount('');
       setNotes('');
       onClose();
+    } catch (err: any) {
+      setErrorMessage(err?.message || 'Failed to create budget plan.');
     } finally {
       setIsSubmitting(false);
     }
@@ -67,6 +81,14 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
       description="Plan your financial boundaries and future milestones."
     >
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Error notification banner */}
+        {errorMessage && (
+          <div className="p-3 rounded-[var(--radius-base)] bg-[var(--color-danger)]/10 border border-[var(--color-danger)]/30 flex items-center gap-2.5 text-[var(--color-danger)] text-xs sm:text-sm">
+            <RiAlertLine className="w-4 h-4 shrink-0" />
+            <span>{errorMessage}</span>
+          </div>
+        )}
+
         {/* Type Toggle */}
         <div className="flex rounded-[var(--radius-base)] bg-[var(--color-primary-bg)] p-1 border border-[var(--color-border)]">
           <button
@@ -143,7 +165,7 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
 
         {type === 'spending_limit' ? (
           <>
-            {/* Period */}
+            {/* Period & Start Date */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5">
@@ -162,6 +184,21 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
 
               <div>
                 <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5">
+                  Start Date *
+                </label>
+                <input
+                  type="date"
+                  required
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-ring)] focus:outline-none text-sm"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5">
                   Spending Category (Optional)
                 </label>
                 <select
@@ -177,24 +214,24 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
                   ))}
                 </select>
               </div>
-            </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5">
-                Restricted to Wallet (Optional)
-              </label>
-              <select
-                value={walletId}
-                onChange={(e) => setWalletId(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-ring)] focus:outline-none text-sm"
-              >
-                <option value="" className="bg-[var(--color-surface)] text-[var(--color-text)]">All Wallets</option>
-                {wallets.map((w) => (
-                  <option key={w.id} value={w.id} className="bg-[var(--color-surface)] text-[var(--color-text)]">
-                    {w.name}
-                  </option>
-                ))}
-              </select>
+              <div>
+                <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5">
+                  Restricted to Wallet (Optional)
+                </label>
+                <select
+                  value={walletId}
+                  onChange={(e) => setWalletId(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-ring)] focus:outline-none text-sm"
+                >
+                  <option value="" className="bg-[var(--color-surface)] text-[var(--color-text)]">All Wallets</option>
+                  {wallets.map((w) => (
+                    <option key={w.id} value={w.id} className="bg-[var(--color-surface)] text-[var(--color-text)]">
+                      {w.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           </>
         ) : (
@@ -220,17 +257,32 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
               </select>
             </div>
 
-            {/* Target Date */}
-            <div>
-              <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5">
-                Target Date (Optional)
-              </label>
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-ring)] focus:outline-none text-sm"
-              />
+            {/* Start Date & Target Date */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5">
+                  Start Date *
+                </label>
+                <input
+                  type="date"
+                  required
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-ring)] focus:outline-none text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5">
+                  Target Date (Optional)
+                </label>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-ring)] focus:outline-none text-sm"
+                />
+              </div>
             </div>
           </>
         )}

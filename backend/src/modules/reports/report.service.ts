@@ -261,6 +261,43 @@ export class ReportService {
       sampleRows: rows.slice(0, 50),
     };
   }
+
+  async getUnifiedReportData(userId: string, filters: ReportFilterParams) {
+    const preview = await this.getReportPreview(userId, {
+      from: filters.from,
+      to: filters.to,
+      type: 'all',
+    });
+
+    const headers = [
+      'date',
+      'type',
+      'category',
+      'sourceOrWallet',
+      'originalAmount',
+      'currency',
+      'convertedBaseAmount',
+      'description',
+    ];
+
+    const formattedRows = preview.rows.map((r) => ({
+      date: r.date,
+      type: r.type.toUpperCase(),
+      category: r.category || 'N/A',
+      sourceOrWallet: r.sourceOrWallet || 'N/A',
+      originalAmount: Money.format(r.amount, r.currency),
+      currency: r.currency,
+      convertedBaseAmount: Money.format(r.baseAmount, 'MAD'),
+      description: r.description || '',
+    }));
+
+    return {
+      headers,
+      rows: formattedRows,
+      grandTotalBase: preview.summary.totalSpending,
+      summary: preview.summary,
+    };
+  }
 }
 
 export const reportService = new ReportService();

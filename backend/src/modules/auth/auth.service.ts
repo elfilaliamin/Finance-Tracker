@@ -54,12 +54,12 @@ export class AuthService {
   async login(input: LoginInput) {
     const user = await this.repository.findByEmail(input.email);
     if (!user) {
-      throw new UnauthorizedError('Invalid email or password');
+      throw new UnauthorizedError('No account found with this email');
     }
 
     const isMatch = await argon2.verify(user.passwordHash, input.password);
     if (!isMatch) {
-      throw new UnauthorizedError('Invalid email or password');
+      throw new UnauthorizedError('Incorrect password');
     }
 
     const token = this.generateToken(user.id, user.email);

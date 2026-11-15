@@ -33,6 +33,7 @@ export interface CreateWalletInput {
   icon?: string;
   type: 'asset' | 'liability';
   defaultCurrency: string;
+  initialBalance?: number;
 }
 
 export interface CreateAdjustmentInput {

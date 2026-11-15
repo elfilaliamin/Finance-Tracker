@@ -36,11 +36,24 @@ export class DashboardService {
 
     const activeWallets = await walletsQuery;
 
+    const [userSetting] = await db
+      .select({ displayCurrency: schema.userSettings.displayCurrency })
+      .from(schema.userSettings)
+      .where(eq(schema.userSettings.userId, userId));
+    const baseCurrency = userSetting?.displayCurrency || 'MAD';
+    const todayStr = now.toISOString().split('T')[0];
+
     let totalAssets = Money.from(0);
     let totalLiabilities = Money.from(0);
 
     for (const w of activeWallets) {
-      const balance = Money.from(w.currentBalance);
+      let balance = Money.from(w.currentBalance);
+      if (w.defaultCurrency && w.defaultCurrency !== baseCurrency) {
+        try {
+          const rate = await currencyService.getRateForDate(w.defaultCurrency, baseCurrency, todayStr);
+          balance = Money.convert(balance, rate);
+        } catch {}
+      }
       if (w.type === 'asset') {
         totalAssets = Money.add(totalAssets, balance);
       } else {

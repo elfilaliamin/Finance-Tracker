@@ -7,6 +7,7 @@ import {
   RiArrowRightUpLine,
 } from '@remixicon/react';
 import { walletApi, Wallet, CreateWalletInput, CreateAdjustmentInput } from '@/api/walletApi';
+import { dashboardApi } from '@/api/dashboardApi';
 import { useAuth } from '@/hooks/useAuth';
 import { WalletCard } from './components/WalletCard';
 import { WalletModal } from './components/WalletModal';
@@ -32,6 +33,11 @@ export const NetworthPage: React.FC = () => {
   const { data: wallets = [], isLoading } = useQuery({
     queryKey: ['wallets'],
     queryFn: () => walletApi.getWallets(),
+  });
+
+  const { data: metrics } = useQuery({
+    queryKey: ['dashboard', 'metrics'],
+    queryFn: () => dashboardApi.getMetrics(),
   });
 
   // Mutations
@@ -73,10 +79,17 @@ export const NetworthPage: React.FC = () => {
   const assetWallets = wallets.filter((w) => w.type === 'asset');
   const liabilityWallets = wallets.filter((w) => w.type === 'liability');
 
-  // Compute Totals in base currency
-  const totalAssets = assetWallets.reduce((sum, w) => sum + parseFloat(w.currentBalance || '0'), 0);
-  const totalLiabilities = liabilityWallets.reduce((sum, w) => sum + parseFloat(w.currentBalance || '0'), 0);
-  const netWorth = totalAssets - totalLiabilities;
+  // Compute Totals in base currency (converted via backend metrics engine)
+  const totalAssets = metrics?.totalAssets
+    ? parseFloat(metrics.totalAssets)
+    : assetWallets.reduce((sum, w) => sum + parseFloat(w.currentBalance || '0'), 0);
+  const totalLiabilities = metrics?.totalLiabilities
+    ? parseFloat(metrics.totalLiabilities)
+    : liabilityWallets.reduce((sum, w) => sum + parseFloat(w.currentBalance || '0'), 0);
+  const netWorthVal = metrics?.todayNetWorth || metrics?.todaysNetWorth;
+  const netWorth = netWorthVal
+    ? parseFloat(netWorthVal)
+    : totalAssets - totalLiabilities;
 
   const handleOpenCreate = () => {
     setEditingWallet(null);
