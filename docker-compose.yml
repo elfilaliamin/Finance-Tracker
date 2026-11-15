@@ -118,25 +118,3 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  watchtower:
-    image: nickfedor/watchtower
-    container_name: ft-watchtower
-    restart: unless-stopped
-    networks:
-      - finance-tracker-net
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      WATCHTOWER_LABEL_ENABLE: "true"
-      WATCHTOWER_POLL_INTERVAL: 60
-      WATCHTOWER_CLEANUP: "true"
-    deploy:
-      resources:
-        limits:
-          memory: 64M
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-
