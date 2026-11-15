@@ -140,6 +140,7 @@ export const IncomeSourcesPage: React.FC = () => {
         </button>
       </div>
 
+      {/* Sources List (Each in a separate line) */}
       {isLoading ? (
         <div className="py-12 flex justify-center text-[var(--color-text-muted)]">Loading sources...</div>
       ) : sources.length === 0 ? (
@@ -153,66 +154,79 @@ export const IncomeSourcesPage: React.FC = () => {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {sources.map((src) => (
-            <div
-              key={src.id}
-              className="bg-[var(--color-surface)] rounded-[var(--radius-surface)] border border-[var(--color-border)] p-5 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-shadow flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <div className="flex items-center gap-2.5">
-                    <span
-                      className="w-4 h-4 rounded-full shrink-0 shadow-xs"
-                      style={{ backgroundColor: src.color }}
-                    />
-                    <h3 className="font-heading font-bold text-[var(--color-text)] text-base">{src.name || src.title}</h3>
-                  </div>
+        <div className="space-y-2.5">
+          {sources.map((src) => {
+            const isSrcActive = src.isActive ?? src.status === 'active';
+            const displayName = src.name || src.title || 'Untitled Source';
 
+            return (
+              <div
+                key={src.id}
+                className="p-3.5 sm:p-4 rounded-[var(--radius-base)] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] flex items-center justify-between gap-4 group hover:border-[var(--color-ring)] transition-all"
+              >
+                <div className="flex items-center gap-3.5 min-w-0 flex-1">
                   <span
-                    className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-[var(--radius-pill)] text-[11px] font-semibold border ${
-                      (src.isActive ?? src.status === 'active')
-                        ? 'bg-[var(--color-primary-bg)] text-[var(--color-accent)] border-[var(--color-border)]'
-                        : 'bg-[var(--color-border)]/50 text-[var(--color-text-muted)] border-transparent'
-                    }`}
-                  >
-                    {(src.isActive ?? src.status === 'active') ? (
-                      <RiCheckboxCircleLine className="w-3.5 h-3.5" />
+                    className="w-4 h-4 rounded-full shrink-0 shadow-xs"
+                    style={{ backgroundColor: src.color }}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="font-heading font-bold text-sm sm:text-base text-[var(--color-text)] truncate">
+                        {displayName}
+                      </h3>
+                      <span
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-[var(--radius-pill)] text-[10px] font-bold uppercase tracking-wider border shrink-0 ${
+                          isSrcActive
+                            ? 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+                            : 'bg-slate-100 dark:bg-slate-900/50 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800'
+                        }`}
+                      >
+                        {isSrcActive ? (
+                          <RiCheckboxCircleLine className="w-3 h-3" />
+                        ) : (
+                          <RiCloseCircleLine className="w-3 h-3" />
+                        )}
+                        <span>{isSrcActive ? 'Active' : 'Inactive'}</span>
+                      </span>
+                    </div>
+
+                    {src.description ? (
+                      <p className="text-xs text-[var(--color-text-muted)] mt-0.5 line-clamp-1 sm:line-clamp-2">
+                        {src.description}
+                      </p>
                     ) : (
-                      <RiCloseCircleLine className="w-3.5 h-3.5" />
+                      <p className="text-xs text-[var(--color-text-muted)]/50 italic mt-0.5">
+                        No description provided.
+                      </p>
                     )}
-                    <span>{(src.isActive ?? src.status === 'active') ? 'Active' : 'Inactive'}</span>
-                  </span>
+                  </div>
                 </div>
 
-                <p className="text-xs text-[var(--color-text-muted)] line-clamp-2 min-h-[2rem]">
-                  {src.description || 'No description provided.'}
-                </p>
+                <div className="flex items-center gap-1 shrink-0">
+                  <button
+                    onClick={() => handleOpenEdit(src)}
+                    className="p-2 text-emerald-700 dark:text-emerald-400 hover:text-emerald-900 dark:hover:text-emerald-200 rounded-[var(--radius-base)] hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors touch-target"
+                    title="Edit source"
+                  >
+                    <RiEditLine className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (
+                        confirm(`Delete source "${displayName}"? Historical income will retain this source name.`)
+                      ) {
+                        deleteMutation.mutate(src.id);
+                      }
+                    }}
+                    className="p-2 text-rose-500 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-200 rounded-[var(--radius-base)] hover:bg-rose-100 dark:hover:bg-rose-950/40 transition-colors touch-target"
+                    title="Delete source"
+                  >
+                    <RiDeleteBinLine className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-
-              <div className="mt-4 pt-3 border-t border-[var(--color-border)] flex items-center justify-end gap-2">
-                <button
-                  onClick={() => handleOpenEdit(src)}
-                  className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-accent)] rounded-[var(--radius-base)] hover:bg-[var(--color-primary-bg)] transition-colors touch-target"
-                  title="Edit source"
-                >
-                  <RiEditLine className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => {
-                    const displayName = src.name || src.title || 'this source';
-                    if (confirm(`Delete source "${displayName}"? Historical income will retain this source name.`)) {
-                      deleteMutation.mutate(src.id);
-                    }
-                  }}
-                  className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-danger)] rounded-[var(--radius-base)] hover:bg-[var(--color-danger)]/10 transition-colors touch-target"
-                  title="Delete source"
-                >
-                  <RiDeleteBinLine className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
