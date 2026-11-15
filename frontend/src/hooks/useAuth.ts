@@ -77,7 +77,7 @@ export function useAuth() {
     onSuccess: () => {
       queryClient.setQueryData(['auth', 'me'], null);
       queryClient.clear();
-      navigate('/login', { replace: true });
+      navigate('/', { replace: true });
     },
   });
 

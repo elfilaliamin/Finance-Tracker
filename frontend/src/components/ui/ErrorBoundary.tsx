@@ -1,5 +1,5 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { RiAlertLine, RiRefreshLine } from '@remixicon/react';
+import { RiAlertLine, RiRefreshLine, RiHome4Line } from '@remixicon/react';
 
 interface Props {
   children: ReactNode;
@@ -47,13 +47,22 @@ export class ErrorBoundary extends Component<Props, State> {
                 {this.state.error.message}
               </pre>
             )}
-            <button
-              onClick={this.handleReload}
-              className="inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl text-sm font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md transition-all"
-            >
-              <RiRefreshLine size={18} />
-              Reload Page
-            </button>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={this.handleReload}
+                className="inline-flex items-center justify-center gap-2 flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md transition-all"
+              >
+                <RiRefreshLine size={18} />
+                Reload Page
+              </button>
+              <a
+                href="/"
+                className="inline-flex items-center justify-center gap-2 flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition-all"
+              >
+                <RiHome4Line size={18} />
+                Landing Page
+              </a>
+            </div>
           </div>
         </div>
       );

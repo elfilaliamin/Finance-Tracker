@@ -30,13 +30,19 @@ export const NotFoundPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="pt-4 flex items-center justify-center gap-3">
+        <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
           <Link
-            to="/dashboard"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-[var(--radius-base)] bg-[var(--color-primary)] text-white font-medium text-sm hover:bg-[var(--color-primary-hover)] shadow-[var(--shadow-base)] hover:shadow-[var(--shadow-hover)] transition-all touch-target"
+            to="/"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-[var(--radius-base)] bg-[var(--color-primary)] text-white font-medium text-sm hover:bg-[var(--color-primary-hover)] shadow-[var(--shadow-base)] hover:shadow-[var(--shadow-hover)] transition-all touch-target w-full sm:w-auto"
           >
             <RiHome4Line className="w-5 h-5" />
-            <span>Return to Dashboard</span>
+            <span>Return to Landing Page</span>
+          </Link>
+          <Link
+            to="/dashboard"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-[var(--radius-base)] bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] font-medium text-sm hover:bg-[var(--color-primary-bg)] shadow-[var(--shadow-sm)] transition-all touch-target w-full sm:w-auto"
+          >
+            <span>Dashboard</span>
           </Link>
         </div>
       </div>
