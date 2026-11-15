@@ -8,8 +8,8 @@ interface IncomeFiltersProps {
   onSelectSourceId: (id: string) => void;
   selectedCurrency: string;
   onSelectCurrency: (curr: string) => void;
-  selectedYear: number;
-  onSelectYear: (year: number) => void;
+  selectedPeriod: string;
+  onSelectPeriod: (period: string) => void;
   onClear: () => void;
 }
 
@@ -19,32 +19,48 @@ export const IncomeFilters: React.FC<IncomeFiltersProps> = ({
   onSelectSourceId,
   selectedCurrency,
   onSelectCurrency,
-  selectedYear,
-  onSelectYear,
+  selectedPeriod,
+  onSelectPeriod,
   onClear,
 }) => {
   const currentYear = new Date().getFullYear();
+  const pastYears = [
+    currentYear,
+    currentYear - 1,
+    currentYear - 2,
+    currentYear - 3,
+    currentYear - 4,
+    currentYear - 5,
+    currentYear - 6,
+  ];
+
   let activeCount = 0;
   if (selectedSourceId) activeCount++;
   if (selectedCurrency) activeCount++;
-  if (selectedYear > 0) activeCount++;
+  if (selectedPeriod && selectedPeriod !== 'all') activeCount++;
 
   return (
     <FilterDrawer activeCount={activeCount} onClear={onClear} title="Filter Income Ledger">
-      {/* Year */}
+      {/* Time Period Filter */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 w-full sm:w-auto">
-        <label className="text-xs text-[var(--color-text-muted)] font-semibold sm:hidden">Year</label>
+        <label className="text-xs text-[var(--color-text-muted)] font-semibold sm:hidden">Period</label>
         <select
-          value={selectedYear === 0 ? 'all' : selectedYear}
-          onChange={(e) => onSelectYear(e.target.value === 'all' ? 0 : parseInt(e.target.value, 10))}
+          value={selectedPeriod}
+          onChange={(e) => onSelectPeriod(e.target.value)}
           className="px-3 py-1.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-xs font-semibold text-[var(--color-text)] focus:ring-1 focus:ring-[var(--color-ring)] focus:outline-none"
         >
           <option value="all" className="bg-[var(--color-surface)] text-[var(--color-text)]">
             All Times
           </option>
-          {[currentYear + 1, currentYear, currentYear - 1, currentYear - 2, currentYear - 3, currentYear - 4, currentYear - 5].map((yr) => (
-            <option key={yr} value={yr} className="bg-[var(--color-surface)] text-[var(--color-text)]">
-              Year: {yr}
+          <option value="this_month" className="bg-[var(--color-surface)] text-[var(--color-text)]">
+            This Month
+          </option>
+          <option value="last_month" className="bg-[var(--color-surface)] text-[var(--color-text)]">
+            Last Month
+          </option>
+          {pastYears.map((yr) => (
+            <option key={yr} value={String(yr)} className="bg-[var(--color-surface)] text-[var(--color-text)]">
+              {yr}
             </option>
           ))}
         </select>

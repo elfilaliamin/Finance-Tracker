@@ -35,7 +35,7 @@ export interface CreateIncomeInput {
 }
 
 export const incomeApi = {
-  getIncomes: (filters?: { year?: number; sourceId?: string; currency?: string }) =>
+  getIncomes: (filters?: { year?: number; month?: number; sourceId?: string; currency?: string }) =>
     api.get<IncomeRecord[]>('/incomes', filters),
 
   createIncome: (data: CreateIncomeInput) =>

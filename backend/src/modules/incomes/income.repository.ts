@@ -13,7 +13,8 @@ export class IncomeRepository {
     if (filters.year && filters.month) {
       const monthStr = filters.month.toString().padStart(2, '0');
       const start = `${filters.year}-${monthStr}-01`;
-      const end = `${filters.year}-${monthStr}-31`;
+      const lastDay = new Date(filters.year, filters.month, 0).getDate();
+      const end = `${filters.year}-${monthStr}-${lastDay.toString().padStart(2, '0')}`;
       dateConditions.push(gte(schema.incomes.date, start));
       dateConditions.push(lte(schema.incomes.date, end));
     } else if (filters.year) {

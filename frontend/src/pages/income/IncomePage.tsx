@@ -14,9 +14,31 @@ export const IncomePage: React.FC = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingIncome, setEditingIncome] = useState<IncomeRecord | null>(null);
-  const [selectedYear, setSelectedYear] = useState<number>(0);
+  const [selectedPeriod, setSelectedPeriod] = useState<string>('all');
   const [selectedSourceId, setSelectedSourceId] = useState<string>('');
   const [selectedCurrency, setSelectedCurrency] = useState<string>('');
+
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1;
+
+  let queryYear: number | undefined = undefined;
+  let queryMonth: number | undefined = undefined;
+
+  if (selectedPeriod === 'this_month') {
+    queryYear = currentYear;
+    queryMonth = currentMonth;
+  } else if (selectedPeriod === 'last_month') {
+    const lastMonthDate = new Date(currentYear, now.getMonth() - 1, 1);
+    queryYear = lastMonthDate.getFullYear();
+    queryMonth = lastMonthDate.getMonth() + 1;
+  } else if (selectedPeriod !== 'all' && selectedPeriod !== '') {
+    const parsedYear = parseInt(selectedPeriod, 10);
+    if (!isNaN(parsedYear) && parsedYear > 0) {
+      queryYear = parsedYear;
+      queryMonth = undefined;
+    }
+  }
 
   // Queries
   const { data: sources = [] } = useQuery({
@@ -25,10 +47,11 @@ export const IncomePage: React.FC = () => {
   });
 
   const { data: incomes = [], isLoading } = useQuery({
-    queryKey: ['incomes', selectedYear, selectedSourceId, selectedCurrency],
+    queryKey: ['incomes', selectedPeriod, queryYear, queryMonth, selectedSourceId, selectedCurrency],
     queryFn: () =>
       incomeApi.getIncomes({
-        year: selectedYear > 0 ? selectedYear : undefined,
+        year: queryYear,
+        month: queryMonth,
         sourceId: selectedSourceId || undefined,
         currency: selectedCurrency || undefined,
       }),
@@ -61,7 +84,7 @@ export const IncomePage: React.FC = () => {
   });
 
   const handleClearFilters = () => {
-    setSelectedYear(0);
+    setSelectedPeriod('all');
     setSelectedSourceId('');
     setSelectedCurrency('');
   };
@@ -255,8 +278,8 @@ export const IncomePage: React.FC = () => {
         onSelectSourceId={setSelectedSourceId}
         selectedCurrency={selectedCurrency}
         onSelectCurrency={setSelectedCurrency}
-        selectedYear={selectedYear}
-        onSelectYear={setSelectedYear}
+        selectedPeriod={selectedPeriod}
+        onSelectPeriod={setSelectedPeriod}
         onClear={handleClearFilters}
       />
 
@@ -282,8 +305,22 @@ export const IncomePage: React.FC = () => {
             await createMutation.mutateAsync(data);
           }
           const entryYear = parseInt(data.date.split('-')[0], 10);
-          if (selectedYear !== 0 && selectedYear !== entryYear) {
-            setSelectedYear(0);
+          const entryMonth = parseInt(data.date.split('-')[1], 10);
+          if (selectedPeriod !== 'all') {
+            let matches = false;
+            if (selectedPeriod === 'this_month' && entryYear === currentYear && entryMonth === currentMonth) {
+              matches = true;
+            } else if (selectedPeriod === 'last_month') {
+              const lastMonthDate = new Date(currentYear, now.getMonth() - 1, 1);
+              if (entryYear === lastMonthDate.getFullYear() && entryMonth === lastMonthDate.getMonth() + 1) {
+                matches = true;
+              }
+            } else if (parseInt(selectedPeriod, 10) === entryYear) {
+              matches = true;
+            }
+            if (!matches) {
+              setSelectedPeriod('all');
+            }
           }
         }}
         sources={sources}
