@@ -24,38 +24,52 @@ export const ResponsiveModal: React.FC<ResponsiveModalProps> = ({
   const { isMobile } = useBreakpoint();
   const dialogRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
+  const onCloseRef = useRef(onClose);
 
   useEffect(() => {
-    if (isOpen) {
-      triggerRef.current = document.activeElement as HTMLElement;
-      document.body.style.overflow = 'hidden';
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
-      const handleKeyDown = (e: KeyboardEvent) => {
-        if (e.key === 'Escape') {
-          onClose();
-        }
-      };
-      window.addEventListener('keydown', handleKeyDown);
+  useEffect(() => {
+    if (!isOpen) return;
 
-      // Focus first focusable element
-      setTimeout(() => {
-        const focusable = dialogRef.current?.querySelectorAll<HTMLElement>(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    triggerRef.current = document.activeElement as HTMLElement;
+    document.body.style.overflow = 'hidden';
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onCloseRef.current();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+
+    // Focus first input field when modal opens (don't focus close button)
+    const timer = setTimeout(() => {
+      if (!dialogRef.current) return;
+      const firstInput = dialogRef.current.querySelector<HTMLElement>(
+        'input:not([type="hidden"]):not([disabled]), textarea:not([disabled]), select:not([disabled])'
+      );
+      if (firstInput) {
+        firstInput.focus();
+      } else {
+        const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
         );
         if (focusable && focusable.length > 0) {
           focusable[0].focus();
         }
-      }, 50);
+      }
+    }, 50);
 
-      return () => {
-        document.body.style.overflow = '';
-        window.removeEventListener('keydown', handleKeyDown);
-        if (triggerRef.current) {
-          triggerRef.current.focus();
-        }
-      };
-    }
-  }, [isOpen, onClose]);
+    return () => {
+      clearTimeout(timer);
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleKeyDown);
+      if (triggerRef.current) {
+        triggerRef.current.focus();
+      }
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 

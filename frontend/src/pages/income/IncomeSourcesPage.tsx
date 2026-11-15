@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   RiAddLine,
@@ -74,10 +74,10 @@ export const IncomeSourcesPage: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setIsModalOpen(false);
     setEditingSource(null);
-  };
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -227,26 +227,45 @@ export const IncomeSourcesPage: React.FC = () => {
             <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-2">
               Color Swatch
             </label>
-            <div className="flex flex-wrap items-center gap-2 mb-2">
-              {PRESET_COLORS.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => setColor(c)}
-                  className={`w-7 h-7 rounded-full transition-transform ${
-                    color === c ? 'scale-125 ring-2 ring-[var(--color-ring)] ring-offset-2 ring-offset-[var(--color-surface)]' : 'hover:scale-110'
-                  }`}
-                  style={{ backgroundColor: c }}
-                  aria-label={`Select color ${c}`}
-                />
-              ))}
+            <div className="flex flex-wrap items-center gap-3.5 py-2 mb-3">
+              {PRESET_COLORS.map((c) => {
+                const isSelected = color.toLowerCase() === c.toLowerCase();
+                return (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setColor(c)}
+                    className={`w-7 h-7 rounded-full transition-all flex items-center justify-center shrink-0 ${
+                      isSelected
+                        ? 'ring-2 ring-[var(--color-ring)] ring-offset-2 ring-offset-[var(--color-surface)] shadow-xs scale-110'
+                        : 'hover:scale-105 opacity-80 hover:opacity-100'
+                    }`}
+                    style={{ backgroundColor: c }}
+                    aria-label={`Select color ${c}`}
+                  >
+                    {isSelected && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-white shadow-xs" />
+                    )}
+                  </button>
+                );
+              })}
             </div>
-            <input
-              type="text"
-              value={color}
-              onChange={(e) => setColor(e.target.value)}
-              className="w-32 px-3 py-1.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-xs font-mono"
-            />
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={color}
+                onChange={(e) => setColor(e.target.value)}
+                className="w-7 h-7 rounded-[var(--radius-base)] border border-[var(--color-border)] cursor-pointer p-0.5 bg-[var(--color-surface)] shrink-0"
+                title="Pick custom color"
+              />
+              <input
+                type="text"
+                value={color}
+                onChange={(e) => setColor(e.target.value)}
+                className="w-28 px-3 py-1.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-xs font-mono font-semibold"
+                placeholder="#10b981"
+              />
+            </div>
           </div>
 
           <div className="flex items-center gap-3 pt-2">
