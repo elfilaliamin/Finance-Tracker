@@ -35,21 +35,21 @@ export const LandingPage: React.FC = () => {
   const bigThree = [
     {
       num: '01',
-      title: 'Know Your True Net Worth',
+      title: 'Know Your Net Worth',
       description:
-        'See all your bank accounts, cash in your pocket, and savings combined in one honest, real-time total.',
+        'See all your bank accounts, cash in hand, and savings combined in one honest, real-time total.',
     },
     {
       num: '02',
-      title: 'Stop Guessing Your Spending',
+      title: 'Track Your Spending',
       description:
-        'Record daily expenses and itemized receipts in seconds so you know exactly where every dollar, dirham, or euro went.',
+        'Log daily expenses and itemized receipts in seconds so you know exactly where every dollar goes.',
     },
     {
       num: '03',
-      title: 'Build Lasting Savings',
+      title: 'Grow Your Savings',
       description:
-        'Easy-to-read visual reports reveal your spending habits and show your net worth climbing toward your financial goals.',
+        'Clear visual reports show your habits and celebrate hitting your financial targets month after month.',
     },
   ];
 
@@ -151,12 +151,12 @@ export const LandingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[var(--color-background)] text-[color:var(--color-text)] font-[family-name:var(--font-body)] flex flex-col text-base">
-      {/* 1. Header (Spacious Navbar + AppLogo, Desktop + Mobile Hamburger Menu) */}
+      {/* 1. Header (Navbar + AppLogo, Desktop + Mobile Hamburger Menu) */}
       <header className="border-b border-[var(--color-border)] bg-[var(--color-surface)] sticky top-0 z-[var(--z-sticky)]">
-        <div className="max-w-[var(--breakpoint-wide)] mx-auto px-4 sm:px-6 lg:px-8 h-18 sm:h-24 flex items-center justify-between">
+        <div className="max-w-[var(--breakpoint-wide)] mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
           {/* Logo & Brand Title */}
-          <Link to="/" className="flex items-center gap-3.5 group">
-            <AppLogo size={44} className="group-hover:scale-105 transition-transform shadow-[var(--shadow-sm)]" />
+          <Link to="/" className="flex items-center gap-3 group">
+            <AppLogo size={38} className="group-hover:scale-105 transition-transform shadow-[var(--shadow-sm)]" />
             <span className="font-extrabold text-xl sm:text-2xl font-[family-name:var(--font-heading)] tracking-tight text-[color:var(--color-text)]">
               Finance Tracker
             </span>
@@ -367,20 +367,20 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* 3. The 3 Cards: Text to the Left & Small Text Made Bigger to Match Others */}
-      <section className="border-y border-[var(--color-border)] bg-[var(--color-surface)] py-10">
+      {/* 3. The 3 Cards: Perfectly consistent, aligned view */}
+      <section className="border-y border-[var(--color-border)] bg-[var(--color-surface)] py-8 sm:py-10">
         <div className="max-w-[var(--breakpoint-wide)] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
             {bigThree.map((item) => (
               <div
                 key={item.num}
-                className="p-6 sm:p-7 rounded-[var(--radius-base)] bg-[var(--color-background)] border border-[var(--color-border)] text-left flex flex-col justify-between"
+                className="p-6 sm:p-7 rounded-[var(--radius-base)] bg-[var(--color-background)] border border-[var(--color-border)] text-left flex flex-col justify-between h-full shadow-[var(--shadow-sm)]"
               >
                 <div>
-                  <span className="text-xs font-black uppercase tracking-widest text-[color:var(--color-primary-text)] mb-2 block">
+                  <span className="text-xs font-black uppercase tracking-widest text-[color:var(--color-primary-text)] mb-2.5 block">
                     {item.num}
                   </span>
-                  <h3 className="text-xl sm:text-2xl font-bold font-[family-name:var(--font-heading)] text-[color:var(--color-text)] mb-3 leading-snug">
+                  <h3 className="text-xl sm:text-2xl font-bold font-[family-name:var(--font-heading)] text-[color:var(--color-text)] mb-3 leading-snug whitespace-nowrap">
                     {item.title}
                   </h3>
                   <p className="text-base sm:text-lg text-[color:var(--color-muted)] leading-relaxed">
@@ -407,11 +407,11 @@ export const LandingPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
           {steps.map((item, index) => (
             <div
               key={item.step}
-              className="p-6 sm:p-7 rounded-[var(--radius-surface)] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-sm)] flex flex-col justify-between text-left"
+              className="p-6 sm:p-7 rounded-[var(--radius-surface)] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-sm)] flex flex-col justify-between text-left h-full"
             >
               <div>
                 <div className="flex items-center justify-between mb-5">
