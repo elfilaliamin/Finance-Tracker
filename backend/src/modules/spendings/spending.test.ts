@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { SpendingService } from './spending.service.js';
-import { createSpendingSchema } from './spending.schemas.js';
+import { createSpendingSchema, updateSpendingSchema } from './spending.schemas.js';
 import { Money } from '../../utils/money.js';
 
 describe('Spending & Line Items Suite', () => {
@@ -27,6 +27,26 @@ describe('Spending & Line Items Suite', () => {
 
     const result = createSpendingSchema.safeParse(validBill);
     assert.equal(result.success, true);
+  });
+
+  it('updateSpendingSchema should validate partial update with modified items', () => {
+    const updatePayload = {
+      storeMerchant: 'Updated Merchant',
+      items: [
+        {
+          name: 'Updated Item',
+          unitPrice: 20,
+          quantity: 3,
+        },
+      ],
+    };
+
+    const result = updateSpendingSchema.safeParse(updatePayload);
+    assert.equal(result.success, true);
+    if (result.success) {
+      assert.equal(result.data.store, 'Updated Merchant');
+      assert.equal(result.data.items?.[0].articleName, 'Updated Item');
+    }
   });
 
   it('SpendingService should calculate line totals and grand totals correctly', async () => {

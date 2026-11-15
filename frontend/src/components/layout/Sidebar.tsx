@@ -15,6 +15,7 @@ import {
   RiSunLine,
   RiMoonLine,
   RiLineChartLine,
+  RiPriceTag3Line,
 } from '@remixicon/react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/hooks/useTheme';
@@ -49,6 +50,7 @@ export const navGroups: NavGroup[] = [
     group: 'Planning & Audit',
     items: [
       { path: '/wallets', label: 'Wallets', icon: RiWallet3Line },
+      { path: '/categories', label: 'Categories', icon: RiPriceTag3Line },
       { path: '/income-sources', label: 'Income Sources', icon: RiBriefcaseLine },
       { path: '/budgets', label: 'Budgets & Goals', icon: RiFocus3Line },
       { path: '/reports', label: 'Reports', icon: RiFileChartLine },

@@ -7,12 +7,14 @@ interface MiniReceiptModalProps {
   isOpen: boolean;
   onClose: () => void;
   spending: SpendingRecord | null;
+  onEdit?: () => void;
 }
 
 export const MiniReceiptModal: React.FC<MiniReceiptModalProps> = ({
   isOpen,
   onClose,
   spending,
+  onEdit,
 }) => {
   if (!spending) return null;
 
@@ -106,7 +108,18 @@ export const MiniReceiptModal: React.FC<MiniReceiptModalProps> = ({
         )}
       </div>
 
-      <div className="mt-4 flex justify-end">
+      <div className="mt-4 flex items-center justify-end gap-3">
+        {onEdit && (
+          <button
+            onClick={() => {
+              onClose();
+              onEdit();
+            }}
+            className="px-4 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] text-[var(--color-text)] text-sm font-medium hover:bg-[var(--color-primary-bg)] touch-target"
+          >
+            Edit Bill
+          </button>
+        )}
         <button
           onClick={onClose}
           className="px-5 py-2.5 rounded-[var(--radius-base)] bg-[var(--color-primary)] text-white text-sm font-semibold hover:bg-[var(--color-primary-hover)] touch-target"

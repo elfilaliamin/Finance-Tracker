@@ -95,6 +95,120 @@ export class SpendingRepository {
     });
   }
 
+  async update(
+    id: string,
+    userId: string,
+    header: CalculatedSpendingHeader,
+    items: CalculatedSpendingItem[]
+  ) {
+    return await db.transaction(async (tx) => {
+      const [existing] = await tx
+        .select()
+        .from(schema.spendings)
+        .where(
+          and(
+            eq(schema.spendings.id, id),
+            eq(schema.spendings.userId, userId),
+            eq(schema.spendings.isDeleted, false)
+          )
+        );
+
+      if (!existing) return false;
+
+      // 1. Revert old wallet balance deduction if previously paid from a wallet
+      if (existing.paidFromWalletId) {
+        const [oldWallet] = await tx
+          .select({
+            currentBalance: schema.wallets.currentBalance,
+            defaultCurrency: schema.wallets.defaultCurrency,
+          })
+          .from(schema.wallets)
+          .where(eq(schema.wallets.id, existing.paidFromWalletId));
+
+        if (oldWallet) {
+          let restoreAmount = existing.totalAmount;
+          if (oldWallet.defaultCurrency !== existing.currency) {
+            const rate = await currencyService.getRateForDate(existing.currency, oldWallet.defaultCurrency, existing.date);
+            restoreAmount = Money.toDbString(Money.convert(existing.totalAmount, rate));
+          }
+          const restoredBalance = Money.add(oldWallet.currentBalance, restoreAmount);
+          await tx
+            .update(schema.wallets)
+            .set({
+              currentBalance: Money.toDbString(restoredBalance),
+              updatedAt: new Date(),
+            })
+            .where(eq(schema.wallets.id, existing.paidFromWalletId));
+        }
+      }
+
+      // 2. Apply new wallet balance deduction if now paid from a wallet
+      if (header.paidFromWalletId) {
+        const [newWallet] = await tx
+          .select({
+            currentBalance: schema.wallets.currentBalance,
+            defaultCurrency: schema.wallets.defaultCurrency,
+          })
+          .from(schema.wallets)
+          .where(eq(schema.wallets.id, header.paidFromWalletId));
+
+        if (newWallet) {
+          let deductionAmount = header.totalAmount;
+          if (newWallet.defaultCurrency !== header.currency) {
+            const rate = await currencyService.getRateForDate(header.currency, newWallet.defaultCurrency, header.date);
+            deductionAmount = Money.toDbString(Money.convert(header.totalAmount, rate));
+          }
+          const newBalance = Money.subtract(newWallet.currentBalance, deductionAmount);
+          await tx
+            .update(schema.wallets)
+            .set({
+              currentBalance: Money.toDbString(newBalance),
+              updatedAt: new Date(),
+            })
+            .where(eq(schema.wallets.id, header.paidFromWalletId));
+        }
+      }
+
+      // 3. Update spending header
+      await tx
+        .update(schema.spendings)
+        .set({
+          date: header.date,
+          paidFromWalletId: header.paidFromWalletId,
+          store: header.store,
+          currency: header.currency,
+          exchangeRateToBase: header.exchangeRateToBase,
+          totalAmount: header.totalAmount,
+          baseTotalAmount: header.baseTotalAmount,
+          notes: header.notes,
+          updatedAt: new Date(),
+        })
+        .where(eq(schema.spendings.id, id));
+
+      // 4. Delete old line items
+      await tx
+        .delete(schema.spendingItems)
+        .where(eq(schema.spendingItems.spendingId, id));
+
+      // 5. Insert new line items
+      await tx
+        .insert(schema.spendingItems)
+        .values(
+          items.map((item) => ({
+            spendingId: id,
+            categoryId: item.categoryId,
+            articleName: item.articleName,
+            unitPrice: item.unitPrice,
+            quantity: item.quantity,
+            lineTotal: item.lineTotal,
+            baseLineTotal: item.baseLineTotal,
+          }))
+        );
+
+      return true;
+    });
+  }
+
   async findById(id: string, userId: string) {
     const [spending] = await db
       .select({

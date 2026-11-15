@@ -75,5 +75,11 @@ export const incomeApi = {
 
   createCategory: (data: { name: string; color: string; icon?: string }) =>
     api.post<IncomeCategory>('/categories/income', data),
+
+  updateCategory: (id: string, data: { name?: string; color?: string; icon?: string }) =>
+    api.put<IncomeCategory>(`/categories/income/${id}`, data),
+
+  deleteCategory: (id: string) =>
+    api.delete<{ success: boolean }>(`/categories/income/${id}`),
 };
 

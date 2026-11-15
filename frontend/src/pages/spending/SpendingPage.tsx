@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { RiAddLine, RiDeleteBinLine, RiReceiptLine } from '@remixicon/react';
+import { RiAddLine, RiEditLine, RiDeleteBinLine, RiReceiptLine } from '@remixicon/react';
 import { spendingApi, SpendingRecord, CreateSpendingInput } from '@/api/spendingApi';
 import { walletApi } from '@/api/walletApi';
 import { useAuth } from '@/hooks/useAuth';
@@ -16,6 +16,7 @@ export const SpendingPage: React.FC = () => {
 
   // Modal State
   const [isBillModalOpen, setIsBillModalOpen] = useState(false);
+  const [editingSpending, setEditingSpending] = useState<SpendingRecord | null>(null);
   const [selectedReceipt, setSelectedReceipt] = useState<SpendingRecord | null>(null);
 
   // Filter State
@@ -59,6 +60,17 @@ export const SpendingPage: React.FC = () => {
     },
   });
 
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<CreateSpendingInput> }) =>
+      spendingApi.updateSpending(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['spendings'] });
+      queryClient.invalidateQueries({ queryKey: ['wallets'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['budgets'] });
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: (id: string) => spendingApi.deleteSpending(id),
     onSuccess: () => {
@@ -75,6 +87,21 @@ export const SpendingPage: React.FC = () => {
     setSelectedMerchant('');
     setSelectedCurrency('');
     setSearch('');
+  };
+
+  const handleOpenCreate = () => {
+    setEditingSpending(null);
+    setIsBillModalOpen(true);
+  };
+
+  const handleOpenEdit = (item: SpendingRecord) => {
+    setEditingSpending(item);
+    setIsBillModalOpen(true);
+  };
+
+  const handleCloseBillModal = () => {
+    setIsBillModalOpen(false);
+    setEditingSpending(null);
   };
 
   const columns: Column<SpendingRecord>[] = [
@@ -141,6 +168,13 @@ export const SpendingPage: React.FC = () => {
             <RiReceiptLine className="w-4 h-4" />
           </button>
           <button
+            onClick={() => handleOpenEdit(item)}
+            className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-primary)] rounded-[var(--radius-base)] hover:bg-[var(--color-primary-bg)] transition-colors touch-target"
+            title="Edit Spending Bill"
+          >
+            <RiEditLine className="w-4 h-4" />
+          </button>
+          <button
             onClick={() => {
               if (confirm('Delete this spending record? If it was paid from a wallet, the balance will be restored.')) {
                 deleteMutation.mutate(item.id);
@@ -199,17 +233,26 @@ export const SpendingPage: React.FC = () => {
           <span>View Receipt</span>
         </button>
 
-        <button
-          onClick={() => {
-            if (confirm('Delete this spending record? If it was paid from a wallet, the balance will be restored.')) {
-              deleteMutation.mutate(item.id);
-            }
-          }}
-          className="text-xs text-[var(--color-danger)] hover:underline font-medium flex items-center gap-1 touch-target py-1 px-2"
-        >
-          <RiDeleteBinLine className="w-3.5 h-3.5" />
-          <span>Delete</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => handleOpenEdit(item)}
+            className="text-xs text-[var(--color-primary)] hover:underline font-medium flex items-center gap-1 touch-target py-1 px-2"
+          >
+            <RiEditLine className="w-3.5 h-3.5" />
+            <span>Edit</span>
+          </button>
+          <button
+            onClick={() => {
+              if (confirm('Delete this spending record? If it was paid from a wallet, the balance will be restored.')) {
+                deleteMutation.mutate(item.id);
+              }
+            }}
+            className="text-xs text-[var(--color-danger)] hover:underline font-medium flex items-center gap-1 touch-target py-1 px-2"
+          >
+            <RiDeleteBinLine className="w-3.5 h-3.5" />
+            <span>Delete</span>
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -226,7 +269,7 @@ export const SpendingPage: React.FC = () => {
         </div>
 
         <button
-          onClick={() => setIsBillModalOpen(true)}
+          onClick={handleOpenCreate}
           className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-[var(--radius-base)] bg-[var(--color-primary)] text-white font-medium text-sm hover:bg-[var(--color-primary-hover)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-all touch-target"
         >
           <RiAddLine className="w-5 h-5" />
@@ -262,12 +305,17 @@ export const SpendingPage: React.FC = () => {
         emptyMessage="No spending records matching current filters."
       />
 
-      {/* New Spending Bill Modal */}
+      {/* Spending Bill Modal (Create or Edit) */}
       <SpendingBillModal
         isOpen={isBillModalOpen}
-        onClose={() => setIsBillModalOpen(false)}
+        onClose={handleCloseBillModal}
+        spending={editingSpending}
         onSubmit={async (data) => {
-          await createMutation.mutateAsync(data);
+          if (editingSpending) {
+            await updateMutation.mutateAsync({ id: editingSpending.id, data });
+          } else {
+            await createMutation.mutateAsync(data);
+          }
         }}
         categories={categories}
         wallets={wallets}
@@ -279,8 +327,12 @@ export const SpendingPage: React.FC = () => {
         isOpen={!!selectedReceipt}
         onClose={() => setSelectedReceipt(null)}
         spending={selectedReceipt}
+        onEdit={() => {
+          if (selectedReceipt) {
+            handleOpenEdit(selectedReceipt);
+          }
+        }}
       />
     </div>
   );
 };
-

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { RiAddLine, RiDeleteBinLine } from '@remixicon/react';
+import { RiAddLine, RiEditLine, RiDeleteBinLine } from '@remixicon/react';
 import { incomeApi, IncomeRecord, CreateIncomeInput } from '@/api/incomeApi';
 import { useAuth } from '@/hooks/useAuth';
 import { ResponsiveTable, Column } from '@/components/ui/ResponsiveTable';
@@ -11,12 +11,11 @@ export const IncomePage: React.FC = () => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const defaultCurrency = user?.baseCurrency || 'MAD';
-  const currentYear = new Date().getFullYear();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingIncome, setEditingIncome] = useState<IncomeRecord | null>(null);
   const [selectedYear, setSelectedYear] = useState<number>(0);
   const [selectedSourceId, setSelectedSourceId] = useState<string>('');
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
   const [selectedCurrency, setSelectedCurrency] = useState<string>('');
 
   // Queries
@@ -25,18 +24,12 @@ export const IncomePage: React.FC = () => {
     queryFn: () => incomeApi.getSources(),
   });
 
-  const { data: categories = [] } = useQuery({
-    queryKey: ['incomeCategories'],
-    queryFn: () => incomeApi.getCategories(),
-  });
-
   const { data: incomes = [], isLoading } = useQuery({
-    queryKey: ['incomes', selectedYear, selectedSourceId, selectedCategoryId, selectedCurrency],
+    queryKey: ['incomes', selectedYear, selectedSourceId, selectedCurrency],
     queryFn: () =>
       incomeApi.getIncomes({
         year: selectedYear > 0 ? selectedYear : undefined,
         sourceId: selectedSourceId || undefined,
-        categoryId: selectedCategoryId || undefined,
         currency: selectedCurrency || undefined,
       }),
   });
@@ -44,6 +37,15 @@ export const IncomePage: React.FC = () => {
   // Mutations
   const createMutation = useMutation({
     mutationFn: (data: CreateIncomeInput) => incomeApi.createIncome(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['incomes'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<CreateIncomeInput> }) =>
+      incomeApi.updateIncome(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['incomes'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
@@ -61,8 +63,22 @@ export const IncomePage: React.FC = () => {
   const handleClearFilters = () => {
     setSelectedYear(0);
     setSelectedSourceId('');
-    setSelectedCategoryId('');
     setSelectedCurrency('');
+  };
+
+  const handleOpenCreate = () => {
+    setEditingIncome(null);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEdit = (item: IncomeRecord) => {
+    setEditingIncome(item);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingIncome(null);
   };
 
   const columns: Column<IncomeRecord>[] = [
@@ -110,15 +126,6 @@ export const IncomePage: React.FC = () => {
       },
     },
     {
-      key: 'categoryName',
-      header: 'Category',
-      render: (item: any) => (
-        <span className="inline-flex items-center px-2 py-0.5 rounded-[var(--radius-pill)] text-xs font-medium bg-[var(--color-primary-bg)] text-[var(--color-text)] border border-[var(--color-border)]">
-          {item.categoryName || item.category?.name || 'General'}
-        </span>
-      ),
-    },
-    {
       key: 'description',
       header: 'Description',
       render: (item) => (
@@ -132,18 +139,26 @@ export const IncomePage: React.FC = () => {
       header: '',
       align: 'right',
       render: (item) => (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            if (confirm('Are you sure you want to delete this income record?')) {
-              deleteMutation.mutate(item.id);
-            }
-          }}
-          className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-danger)] rounded-[var(--radius-base)] hover:bg-[var(--color-danger)]/10 transition-colors touch-target"
-          title="Delete Income"
-        >
-          <RiDeleteBinLine className="w-4 h-4" />
-        </button>
+        <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+          <button
+            onClick={() => handleOpenEdit(item)}
+            className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-primary)] rounded-[var(--radius-base)] hover:bg-[var(--color-primary-bg)] transition-colors touch-target"
+            title="Edit Income"
+          >
+            <RiEditLine className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => {
+              if (confirm('Are you sure you want to delete this income record?')) {
+                deleteMutation.mutate(item.id);
+              }
+            }}
+            className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-danger)] rounded-[var(--radius-base)] hover:bg-[var(--color-danger)]/10 transition-colors touch-target"
+            title="Delete Income"
+          >
+            <RiDeleteBinLine className="w-4 h-4" />
+          </button>
+        </div>
       ),
     },
   ];
@@ -168,9 +183,7 @@ export const IncomePage: React.FC = () => {
         </div>
 
         <div className="flex items-baseline justify-between mt-1">
-          <span className="inline-flex items-center px-2 py-0.5 rounded-[var(--radius-pill)] text-xs font-medium bg-[var(--color-primary-bg)] text-[var(--color-text)] border border-[var(--color-border)]">
-            {item.categoryName || item.category?.name || 'General'}
-          </span>
+          <span className="text-xs text-[var(--color-text-muted)]">Revenue</span>
           <div className="text-right">
             <span className="font-bold text-[var(--color-accent)] font-mono text-base">
               +{parseFloat(item.amount || '0').toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{' '}
@@ -191,7 +204,14 @@ export const IncomePage: React.FC = () => {
           </p>
         )}
 
-        <div className="mt-2 pt-2 border-t border-[var(--color-border)] flex justify-end">
+        <div className="mt-2 pt-2 border-t border-[var(--color-border)] flex items-center justify-end gap-2">
+          <button
+            onClick={() => handleOpenEdit(item)}
+            className="text-xs text-[var(--color-primary)] hover:underline font-medium flex items-center gap-1 touch-target py-1 px-2"
+          >
+            <RiEditLine className="w-3.5 h-3.5" />
+            <span>Edit</span>
+          </button>
           <button
             onClick={() => {
               if (confirm('Delete this income record?')) {
@@ -220,7 +240,7 @@ export const IncomePage: React.FC = () => {
         </div>
 
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={handleOpenCreate}
           className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-[var(--radius-base)] bg-[var(--color-primary)] text-white font-medium text-sm hover:bg-[var(--color-primary-hover)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-all touch-target"
         >
           <RiAddLine className="w-5 h-5" />
@@ -231,11 +251,8 @@ export const IncomePage: React.FC = () => {
       {/* Filters */}
       <IncomeFilters
         sources={sources}
-        categories={categories}
         selectedSourceId={selectedSourceId}
         onSelectSourceId={setSelectedSourceId}
-        selectedCategoryId={selectedCategoryId}
-        onSelectCategoryId={setSelectedCategoryId}
         selectedCurrency={selectedCurrency}
         onSelectCurrency={setSelectedCurrency}
         selectedYear={selectedYear}
@@ -253,22 +270,25 @@ export const IncomePage: React.FC = () => {
         emptyMessage="No income records matching current filter."
       />
 
-      {/* New Income Modal */}
+      {/* Income Modal (Create or Edit) */}
       <IncomeModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleCloseModal}
+        income={editingIncome}
         onSubmit={async (data) => {
-          await createMutation.mutateAsync(data);
+          if (editingIncome) {
+            await updateMutation.mutateAsync({ id: editingIncome.id, data });
+          } else {
+            await createMutation.mutateAsync(data);
+          }
           const entryYear = parseInt(data.date.split('-')[0], 10);
           if (selectedYear !== 0 && selectedYear !== entryYear) {
             setSelectedYear(0);
           }
         }}
         sources={sources}
-        categories={categories}
         defaultCurrency={defaultCurrency}
       />
     </div>
   );
 };
-

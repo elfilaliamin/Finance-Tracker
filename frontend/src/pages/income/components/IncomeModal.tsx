@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { ResponsiveModal } from '@/components/ui/ResponsiveModal';
-import { IncomeSource, IncomeCategory, CreateIncomeInput } from '@/api/incomeApi';
+import { IncomeSource, IncomeRecord, CreateIncomeInput } from '@/api/incomeApi';
 import { parsePastedDate } from '@/utils/date';
 
 const incomeSchema = z.object({
@@ -22,8 +22,8 @@ interface IncomeModalProps {
   onClose: () => void;
   onSubmit: (data: CreateIncomeInput) => Promise<void>;
   sources: IncomeSource[];
-  categories?: IncomeCategory[];
   defaultCurrency: string;
+  income?: IncomeRecord | null;
 }
 
 export const IncomeModal: React.FC<IncomeModalProps> = ({
@@ -32,6 +32,7 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
   onSubmit,
   sources,
   defaultCurrency,
+  income,
 }) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -46,12 +47,38 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
     resolver: zodResolver(incomeSchema),
     defaultValues: {
       date: new Date().toISOString().split('T')[0],
+      amount: '' as any,
       currency: (defaultCurrency as any) || 'MAD',
       sourceId: sources[0]?.id || '',
       description: '',
       notes: '',
     },
   });
+
+  useEffect(() => {
+    if (isOpen) {
+      if (income) {
+        reset({
+          date: income.date,
+          amount: parseFloat(income.amount || '0'),
+          currency: (income.currency as any) || 'MAD',
+          sourceId: income.sourceId || '',
+          description: income.description || '',
+          notes: income.notes || '',
+        });
+      } else {
+        reset({
+          date: new Date().toISOString().split('T')[0],
+          amount: '' as any,
+          currency: (defaultCurrency as any) || 'MAD',
+          sourceId: sources[0]?.id || '',
+          description: '',
+          notes: '',
+        });
+      }
+      setErrorMessage(null);
+    }
+  }, [isOpen, income, reset, defaultCurrency, sources]);
 
   const handleDatePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
     const text = e.clipboardData.getData('text');
@@ -108,12 +135,18 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
     onClose();
   };
 
+  const isEditMode = !!income;
+
   return (
     <ResponsiveModal
       isOpen={isOpen}
       onClose={handleClose}
-      title="Record New Income"
-      description="Add a revenue transaction. Strictly decoupled from wallet balances."
+      title={isEditMode ? 'Edit Income Record' : 'Record New Income'}
+      description={
+        isEditMode
+          ? 'Update the recorded revenue details. Strictly decoupled from wallet balances.'
+          : 'Add a revenue transaction. Strictly decoupled from wallet balances.'
+      }
     >
       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
         {errorMessage && (
@@ -237,7 +270,15 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
             {(isSaving || isSubmitting) && (
               <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
             )}
-            <span>{isSaving || isSubmitting ? 'Saving...' : 'Save Income'}</span>
+            <span>
+              {isSaving || isSubmitting
+                ? isEditMode
+                  ? 'Updating...'
+                  : 'Saving...'
+                : isEditMode
+                ? 'Update Income'
+                : 'Save Income'}
+            </span>
           </button>
         </div>
       </form>

@@ -55,10 +55,12 @@ export const updateSpendingSchema = z
   })
   .transform((data) => ({
     date: data.date,
-    paidFromWalletId: data.paidFromWalletId !== undefined ? data.paidFromWalletId || undefined : undefined,
-    store: (data.store || data.storeMerchant)?.trim() || undefined,
+    paidFromWalletId: data.paidFromWalletId !== undefined ? (data.paidFromWalletId || null) : undefined,
+    store: data.store !== undefined || data.storeMerchant !== undefined
+      ? ((data.store || data.storeMerchant)?.trim() || null)
+      : undefined,
     currency: data.currency,
-    notes: data.notes !== undefined ? data.notes?.trim() || undefined : undefined,
+    notes: data.notes !== undefined ? (data.notes?.trim() || null) : undefined,
     items: data.items,
   }));
 

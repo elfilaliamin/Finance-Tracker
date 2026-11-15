@@ -33,6 +33,16 @@ export class SpendingController {
     }
   };
 
+  update = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const spendingId = req.params.id as string;
+      const spending = await spendingService.updateSpending(spendingId, req.userId!, req.body);
+      sendSuccess(res, spending);
+    } catch (err) {
+      next(err);
+    }
+  };
+
   delete = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const spendingId = req.params.id as string;

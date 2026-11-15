@@ -14,6 +14,7 @@ import { IncomePage } from '@/pages/income/IncomePage';
 import { IncomeSourcesPage } from '@/pages/income/IncomeSourcesPage';
 import { NetworthPage } from '@/pages/networth/NetworthPage';
 import { WalletsPage } from '@/pages/wallets/WalletsPage';
+import { CategoriesPage } from '@/pages/categories/CategoriesPage';
 import { SpendingPage } from '@/pages/spending/SpendingPage';
 import { BudgetingPage } from '@/pages/budgeting/BudgetingPage';
 import { ReportPage } from '@/pages/reports/ReportPage';
@@ -93,6 +94,7 @@ export const AppRoutes: React.FC = () => {
         <Route path="/income-sources" element={<IncomeSourcesPage />} />
         <Route path="/net-worth" element={<NetworthPage />} />
         <Route path="/wallets" element={<WalletsPage />} />
+        <Route path="/categories" element={<CategoriesPage />} />
         <Route path="/spending" element={<SpendingPage />} />
         <Route path="/budgets" element={<BudgetingPage />} />
         <Route path="/reports" element={<ReportPage />} />

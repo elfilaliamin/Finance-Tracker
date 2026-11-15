@@ -65,6 +65,9 @@ export const spendingApi = {
   createSpending: (data: CreateSpendingInput) =>
     api.post<SpendingRecord>('/spendings', data),
 
+  updateSpending: (id: string, data: Partial<CreateSpendingInput>) =>
+    api.put<SpendingRecord>(`/spendings/${id}`, data),
+
   deleteSpending: (id: string) =>
     api.delete<{ success: boolean }>(`/spendings/${id}`),
 
@@ -73,5 +76,11 @@ export const spendingApi = {
 
   createCategory: (data: { name: string; color: string; icon?: string }) =>
     api.post<SpendingCategory>('/categories/spending', data),
+
+  updateCategory: (id: string, data: { name?: string; color?: string; icon?: string }) =>
+    api.put<SpendingCategory>(`/categories/spending/${id}`, data),
+
+  deleteCategory: (id: string) =>
+    api.delete<{ success: boolean }>(`/categories/spending/${id}`),
 };
 

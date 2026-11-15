@@ -2,7 +2,7 @@ import { SpendingRepository, spendingRepository, CalculatedSpendingItem, Calcula
 import { walletRepository } from '../wallets/wallet.repository.js';
 import { spendingCategoriesRepository } from '../categories/spendingCategories.repository.js';
 import { currencyService } from '../currencies/currency.service.js';
-import { CreateSpendingInput, SpendingFilterInput } from './spending.schemas.js';
+import { CreateSpendingInput, UpdateSpendingInput, SpendingFilterInput } from './spending.schemas.js';
 import { NotFoundError } from '../../errors/AppError.js';
 import { Money } from '../../utils/money.js';
 
@@ -82,6 +82,84 @@ export class SpendingService {
     };
 
     return await this.repository.create(userId, header, calculatedItems);
+  }
+
+  async updateSpending(id: string, userId: string, input: UpdateSpendingInput) {
+    const existing = await this.repository.findById(id, userId);
+    if (!existing) {
+      throw new NotFoundError(`Spending record with ID '${id}' not found.`);
+    }
+
+    const paidFromWalletId = input.paidFromWalletId !== undefined ? input.paidFromWalletId : existing.paidFromWalletId;
+    if (paidFromWalletId) {
+      const wallet = await walletRepository.findById(paidFromWalletId, userId);
+      if (!wallet) {
+        throw new NotFoundError(`Wallet with ID '${paidFromWalletId}' not found.`);
+      }
+    }
+
+    const itemsToUse = input.items || existing.items.map((i: any) => ({
+      articleName: i.articleName || i.name,
+      categoryId: i.categoryId,
+      unitPrice: Number(i.unitPrice),
+      quantity: Number(i.quantity),
+    }));
+
+    for (const item of itemsToUse) {
+      if (item.categoryId) {
+        const cat = await spendingCategoriesRepository.findById(item.categoryId, userId);
+        if (!cat) {
+          throw new NotFoundError(`Spending category with ID '${item.categoryId}' not found.`);
+        }
+      }
+    }
+
+    const date = input.date || existing.date;
+    const currency = (input.currency || existing.currency) as 'MAD' | 'USD' | 'EUR';
+    const store = input.store !== undefined ? input.store : existing.storeMerchant;
+    const notes = input.notes !== undefined ? input.notes : existing.notes;
+
+    const rate = await currencyService.getRateForDate(currency, 'MAD', date);
+
+    let grandTotal = Money.from(0);
+    let baseGrandTotal = Money.from(0);
+
+    const calculatedItems: CalculatedSpendingItem[] = itemsToUse.map((item) => {
+      const unitPriceStr = Money.toDbString(item.unitPrice);
+      const qtyStr = Money.from(item.quantity).toFixed(3);
+      const lineTotal = Money.multiply(unitPriceStr, qtyStr);
+      const baseLineTotal = Money.convert(lineTotal, rate);
+
+      grandTotal = Money.add(grandTotal, lineTotal);
+      baseGrandTotal = Money.add(baseGrandTotal, baseLineTotal);
+
+      return {
+        articleName: item.articleName,
+        categoryId: item.categoryId,
+        unitPrice: unitPriceStr,
+        quantity: qtyStr,
+        lineTotal: Money.toDbString(lineTotal),
+        baseLineTotal: Money.toDbString(baseLineTotal),
+      };
+    });
+
+    const header: CalculatedSpendingHeader = {
+      date,
+      paidFromWalletId,
+      store,
+      currency,
+      exchangeRateToBase: rate,
+      totalAmount: Money.toDbString(grandTotal),
+      baseTotalAmount: Money.toDbString(baseGrandTotal),
+      notes,
+    };
+
+    const success = await this.repository.update(id, userId, header, calculatedItems);
+    if (!success) {
+      throw new NotFoundError(`Spending record with ID '${id}' not found.`);
+    }
+
+    return await this.repository.findById(id, userId);
   }
 
   async deleteSpending(id: string, userId: string): Promise<void> {

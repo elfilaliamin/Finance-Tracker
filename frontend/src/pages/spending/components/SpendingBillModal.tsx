@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { RiAddLine, RiDeleteBinLine, RiReceiptLine, RiSubtractLine, RiAlertLine } from '@remixicon/react';
 import { ResponsiveModal } from '@/components/ui/ResponsiveModal';
-import { SpendingCategory, CreateSpendingInput } from '@/api/spendingApi';
+import { SpendingCategory, SpendingRecord, CreateSpendingInput } from '@/api/spendingApi';
 import { Wallet } from '@/api/walletApi';
 
 const spendingItemSchema = z.object({
@@ -32,6 +32,7 @@ interface SpendingBillModalProps {
   categories: SpendingCategory[];
   wallets: Wallet[];
   defaultCurrency: string;
+  spending?: SpendingRecord | null;
 }
 
 export const SpendingBillModal: React.FC<SpendingBillModalProps> = ({
@@ -41,6 +42,7 @@ export const SpendingBillModal: React.FC<SpendingBillModalProps> = ({
   categories,
   wallets,
   defaultCurrency,
+  spending,
 }) => {
   const {
     register,
@@ -81,9 +83,35 @@ export const SpendingBillModal: React.FC<SpendingBillModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
+      if (spending) {
+        reset({
+          date: spending.date,
+          currency: (spending.currency as any) || 'MAD',
+          paidFromWalletId: spending.paidFromWalletId || '',
+          storeMerchant: spending.storeMerchant || '',
+          notes: spending.notes || '',
+          items: spending.items && spending.items.length > 0
+            ? spending.items.map((i) => ({
+                name: i.name,
+                categoryId: i.categoryId || '',
+                unitPrice: typeof i.unitPrice === 'number' ? i.unitPrice : parseFloat(i.unitPrice as any) || 0,
+                quantity: typeof i.quantity === 'number' ? i.quantity : parseInt(i.quantity as any, 10) || 1,
+              }))
+            : [{ name: '', categoryId: '', unitPrice: 0, quantity: 1 }],
+        });
+      } else {
+        reset({
+          date: new Date().toISOString().split('T')[0],
+          currency: (defaultCurrency as any) || 'MAD',
+          paidFromWalletId: '',
+          storeMerchant: '',
+          notes: '',
+          items: [{ name: '', categoryId: '', unitPrice: 0, quantity: 1 }],
+        });
+      }
       setErrorMessage(null);
     }
-  }, [isOpen]);
+  }, [isOpen, spending, reset, defaultCurrency]);
 
   const handleFormSubmit = async (values: SpendingBillFormData) => {
     try {
@@ -108,12 +136,18 @@ export const SpendingBillModal: React.FC<SpendingBillModalProps> = ({
     }
   };
 
+  const isEditMode = !!spending;
+
   return (
     <ResponsiveModal
       isOpen={isOpen}
       onClose={onClose}
-      title="New Spending Bill"
-      description="Itemize articles on this receipt. Deducts automatically from selected wallet."
+      title={isEditMode ? 'Edit Spending Bill' : 'New Spending Bill'}
+      description={
+        isEditMode
+          ? 'Update articles on this receipt. Automatically recalculates wallet balances.'
+          : 'Itemize articles on this receipt. Deducts automatically from selected wallet.'
+      }
       maxWidth="2xl"
     >
       <form onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col space-y-4">
@@ -340,7 +374,13 @@ export const SpendingBillModal: React.FC<SpendingBillModalProps> = ({
               disabled={isSubmitting}
               className="px-5 py-2.5 rounded-[var(--radius-base)] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-sm font-semibold shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] disabled:opacity-60 touch-target"
             >
-              {isSubmitting ? 'Recording...' : 'Record Bill'}
+              {isSubmitting
+                ? isEditMode
+                  ? 'Updating...'
+                  : 'Recording...'
+                : isEditMode
+                ? 'Update Bill'
+                : 'Record Bill'}
             </button>
           </div>
         </div>
