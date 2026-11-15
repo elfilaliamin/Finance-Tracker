@@ -36,9 +36,11 @@ export interface CreateWalletInput {
 }
 
 export interface CreateAdjustmentInput {
-  date: string;
+  date?: string;
+  adjustmentDate?: string;
   amount: number;
-  type: 'delta' | 'reconcile';
+  type?: 'delta' | 'reconcile';
+  adjustmentType?: 'delta' | 'reconcile';
   notes?: string;
 }
 

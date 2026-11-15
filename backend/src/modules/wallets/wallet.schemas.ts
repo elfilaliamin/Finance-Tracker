@@ -20,12 +20,32 @@ export const updateWalletSchema = z.object({
   sortOrder: z.coerce.number().int().optional(),
 });
 
-export const createAdjustmentSchema = z.object({
-  adjustmentDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be formatted YYYY-MM-DD'),
-  adjustmentType: z.enum(['delta', 'reconcile']).default('delta'),
-  amount: z.coerce.number(), // for delta: positive or negative delta; for reconcile: target balance
-  notes: z.string().max(500).optional(),
-});
+export const createAdjustmentSchema = z
+  .object({
+    adjustmentDate: z.string().optional(),
+    date: z.string().optional(),
+    adjustmentType: z.enum(['delta', 'reconcile']).optional(),
+    type: z.enum(['delta', 'reconcile']).optional(),
+    amount: z.coerce.number(), // for delta: positive or negative delta; for reconcile: target balance
+    notes: z.string().max(500).optional().nullable(),
+  })
+  .transform((data) => {
+    let rawDate = data.adjustmentDate || data.date || new Date().toISOString().split('T')[0];
+    if (rawDate.includes('T')) {
+      rawDate = rawDate.split('T')[0];
+    }
+    const adjustmentType = data.adjustmentType || data.type || 'delta';
+    return {
+      adjustmentDate: rawDate,
+      adjustmentType,
+      amount: data.amount,
+      notes: data.notes || undefined,
+    };
+  })
+  .refine((data) => /^\d{4}-\d{2}-\d{2}$/.test(data.adjustmentDate), {
+    message: 'Date must be formatted YYYY-MM-DD',
+    path: ['date'],
+  });
 
 export type CreateWalletInput = z.infer<typeof createWalletSchema>;
 export type UpdateWalletInput = z.infer<typeof updateWalletSchema>;

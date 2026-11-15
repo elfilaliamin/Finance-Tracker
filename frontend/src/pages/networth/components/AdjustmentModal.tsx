@@ -39,15 +39,25 @@ export const AdjustmentModal: React.FC<AdjustmentModalProps> = ({
       setError(null);
       await onSubmit({
         date,
+        adjustmentDate: date,
         amount: parsedAmount,
         type: mode,
+        adjustmentType: mode,
         notes: notes.trim() || undefined,
       });
       setAmount('');
       setNotes('');
       onClose();
     } catch (err: any) {
-      setError(err.message || 'Failed to record adjustment');
+      if (err.details && Array.isArray(err.details) && err.details.length > 0) {
+        const issues = err.details
+          .map((d: any) => (d.issue ? (d.field ? `${d.field}: ${d.issue}` : d.issue) : ''))
+          .filter(Boolean)
+          .join(', ');
+        setError(issues || err.message || 'Failed to record adjustment');
+      } else {
+        setError(err.message || 'Failed to record adjustment');
+      }
     } finally {
       setIsSubmitting(false);
     }
