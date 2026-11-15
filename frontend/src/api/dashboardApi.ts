@@ -16,7 +16,7 @@ export interface DashboardMetrics {
   lowestIncomeMonth?: { month: string; amount: string };
   largestIncomeSource?: { name?: string; title?: string; amount: string };
   activeIncomeSourcesCount?: number;
-  latestIncome?: { date: string; amount: string; source?: string; sourceTitle?: string; currency?: string } | null;
+  latestIncome?: { date: string; amount: string; source?: string; sourceTitle?: string; currency?: string; baseAmount?: string } | null;
   latestNetWorth?: { date: string; amount: string } | null;
 }
 

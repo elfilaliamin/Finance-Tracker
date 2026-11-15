@@ -102,9 +102,15 @@ export const MetricCardsGrid: React.FC<MetricCardsGridProps> = ({ metrics, curre
       id: 'latestIncome',
       title: 'Latest Income',
       value: metrics.latestIncome
-        ? `${parseVal(metrics.latestIncome.amount)} ${currency}`
+        ? `${parseVal(metrics.latestIncome.amount)} ${metrics.latestIncome.currency || currency}`
         : 'None',
-      sub: metrics.latestIncome ? `${metrics.latestIncome.date} (${metrics.latestIncome.source || metrics.latestIncome.sourceTitle || 'Income'})` : 'No records',
+      sub: metrics.latestIncome
+        ? `${metrics.latestIncome.date} (${metrics.latestIncome.source || metrics.latestIncome.sourceTitle || 'Income'})${
+            metrics.latestIncome.currency && metrics.latestIncome.currency !== currency && metrics.latestIncome.baseAmount
+              ? ` • ~${parseVal(metrics.latestIncome.baseAmount)} ${currency}`
+              : ''
+          }`
+        : 'No records',
       icon: RiTimeLine,
     },
     {

@@ -2,6 +2,7 @@ import { and, desc, eq, gte, lte, sql } from 'drizzle-orm';
 import { db } from '../../db/index.js';
 import * as schema from '../../db/schema.js';
 import { Money } from '../../utils/money.js';
+import { currencyService } from '../currencies/currency.service.js';
 
 export class DashboardService {
   async getMetrics(userId: string, walletFilterId?: string) {
@@ -52,6 +53,7 @@ export class DashboardService {
     // 2. Income Metrics (STRICT INVARIANT: NEVER FILTERED BY WALLET!)
     const allIncomes = await db
       .select({
+        id: schema.incomes.id,
         date: schema.incomes.date,
         baseAmount: schema.incomes.baseAmount,
         sourceId: schema.incomes.sourceId,
@@ -73,7 +75,24 @@ export class DashboardService {
     const sourceTotals = new Map<string, { title: string; total: typeof currentMonthIncome }>();
 
     for (const inc of allIncomes) {
-      const amt = Money.from(inc.baseAmount);
+      let amt = Money.from(inc.baseAmount);
+
+      // Auto-heal legacy 1:1 fallback records where non-MAD income was saved with baseAmount == amount
+      if (inc.currency && inc.currency !== 'MAD' && inc.baseAmount === inc.amount) {
+        try {
+          const rate = await currencyService.getRateForDate(inc.currency, 'MAD', inc.date);
+          const converted = Money.convert(inc.amount, rate);
+          amt = converted;
+          inc.baseAmount = Money.toDbString(converted);
+          await db
+            .update(schema.incomes)
+            .set({ exchangeRateToBase: rate, baseAmount: inc.baseAmount })
+            .where(eq(schema.incomes.id, inc.id));
+        } catch {
+          // keep original amt if fallback fails
+        }
+      }
+
       lifetimeIncome = Money.add(lifetimeIncome, amt);
 
       const y = inc.date.substring(0, 4);
@@ -144,6 +163,7 @@ export class DashboardService {
       date: allIncomes[0].date,
       amount: allIncomes[0].amount,
       currency: allIncomes[0].currency,
+      baseAmount: allIncomes[0].baseAmount,
       sourceTitle: allIncomes[0].sourceTitle || 'Unknown',
     } : null;
 
