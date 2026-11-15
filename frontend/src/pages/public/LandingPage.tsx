@@ -153,10 +153,10 @@ export const LandingPage: React.FC = () => {
     <div className="min-h-screen bg-[var(--color-background)] text-[color:var(--color-text)] font-[family-name:var(--font-body)] flex flex-col text-base">
       {/* 1. Header (Navbar + AppLogo, Desktop + Mobile Hamburger Menu) */}
       <header className="border-b border-[var(--color-border)] bg-[var(--color-surface)] sticky top-0 z-[var(--z-sticky)]">
-        <div className="max-w-[var(--breakpoint-wide)] mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
+        <div className="max-w-[var(--breakpoint-wide)] mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           {/* Logo & Brand Title */}
           <Link to="/" className="flex items-center gap-3 group">
-            <AppLogo size={38} className="group-hover:scale-105 transition-transform shadow-[var(--shadow-sm)]" />
+            <AppLogo size={40} className="group-hover:scale-105 transition-transform shadow-[var(--shadow-sm)]" />
             <span className="font-extrabold text-xl sm:text-2xl font-[family-name:var(--font-heading)] tracking-tight text-[color:var(--color-text)]">
               Finance Tracker
             </span>
@@ -377,7 +377,7 @@ export const LandingPage: React.FC = () => {
                 className="p-6 sm:p-7 rounded-[var(--radius-base)] bg-[var(--color-background)] border border-[var(--color-border)] text-left flex flex-col justify-between h-full shadow-[var(--shadow-sm)]"
               >
                 <div>
-                  <span className="text-xs font-black uppercase tracking-widest text-[color:var(--color-primary-text)] mb-2.5 block">
+                  <span className="text-2xl sm:text-3xl font-black font-mono tracking-tight text-[color:var(--color-primary-text)] mb-3 block">
                     {item.num}
                   </span>
                   <h3 className="text-xl sm:text-2xl font-bold font-[family-name:var(--font-heading)] text-[color:var(--color-text)] mb-3 leading-snug whitespace-nowrap">
