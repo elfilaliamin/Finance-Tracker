@@ -73,7 +73,7 @@ export const ResponsiveModal: React.FC<ResponsiveModalProps> = ({
       <div className="fixed inset-0 z-[var(--z-modal)] flex flex-col justify-end">
         {/* Backdrop Scrim */}
         <div
-          className="fixed inset-0 bg-[var(--color-scrim)] backdrop-blur-[var(--blur-glass)] transition-opacity animate-in fade-in"
+          className="fixed inset-0 bg-[var(--color-scrim)] transition-opacity animate-in fade-in"
           onClick={closeOnBackdrop ? onClose : undefined}
           aria-hidden="true"
         />
@@ -122,7 +122,7 @@ export const ResponsiveModal: React.FC<ResponsiveModalProps> = ({
     <div className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-[var(--color-scrim)] backdrop-blur-[var(--blur-glass)] transition-opacity animate-in fade-in"
+        className="fixed inset-0 bg-[var(--color-scrim)] transition-opacity animate-in fade-in"
         onClick={closeOnBackdrop ? onClose : undefined}
         aria-hidden="true"
       />

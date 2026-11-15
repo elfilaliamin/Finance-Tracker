@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { settingsApi } from '@/api/settingsApi';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/hooks/useTheme';
+import { useUserAvatar } from '@/hooks/useUserAvatar';
 import { ExchangeRatesCard } from './components/ExchangeRatesCard';
 import { DangerZoneCard } from './components/DangerZoneCard';
 import { ImportWizardModal } from './components/ImportWizardModal';
@@ -17,6 +18,8 @@ import {
   RiComputerLine,
   RiCheckboxCircleLine,
   RiPaletteLine,
+  RiCameraLine,
+  RiDeleteBinLine,
 } from '@remixicon/react';
 
 const passwordSchema = z
@@ -36,9 +39,55 @@ export const SettingsPage: React.FC = () => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const { theme, setTheme } = useTheme();
+  const { avatar, setAvatar } = useUserAvatar();
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image size exceeds 5MB limit.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        // Resize to maximum 256x256 to ensure ultra-fast loading and minimal storage
+        const canvas = document.createElement('canvas');
+        const maxDim = 256;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxDim) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          }
+        } else {
+          if (height > maxDim) {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          setAvatar(dataUrl);
+        }
+      };
+      img.src = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
 
   const {
     register,
@@ -102,6 +151,57 @@ export const SettingsPage: React.FC = () => {
             <div className="bg-[var(--color-primary-bg)] p-3 rounded-[var(--radius-base)] border border-[var(--color-border)]">
               <span className="text-[var(--color-text-muted)] block text-[10px] uppercase font-semibold">Base Currency</span>
               <span className="font-bold text-[var(--color-accent)] text-sm mt-0.5 block">{user.baseCurrency}</span>
+            </div>
+          </div>
+
+          {/* Profile Picture Management */}
+          <div className="pt-4 border-t border-[var(--color-border)]">
+            <h4 className="text-xs font-semibold text-[var(--color-text)] mb-3">Profile Picture</h4>
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              {/* Circular Avatar Preview */}
+              <div className="relative group shrink-0">
+                {avatar ? (
+                  <img
+                    src={avatar}
+                    alt={user.name || user.email}
+                    className="w-16 h-16 rounded-full object-cover border-2 border-[var(--color-accent)] shadow-sm"
+                  />
+                ) : (
+                  <div className="w-16 h-16 rounded-full bg-emerald-600 text-white font-bold text-xl flex items-center justify-center uppercase shadow-sm">
+                    {(user.name || user.email).charAt(0)}
+                  </div>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="space-y-1.5 flex-1 text-center sm:text-left">
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5">
+                  <label className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-[var(--radius-base)] bg-[var(--color-primary)] text-white text-xs font-semibold hover:bg-[var(--color-primary-hover)] cursor-pointer shadow-xs transition-colors">
+                    <RiCameraLine size={15} />
+                    <span>Upload Image</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleImageUpload}
+                    />
+                  </label>
+
+                  {avatar && (
+                    <button
+                      type="button"
+                      onClick={() => setAvatar(null)}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-[var(--radius-base)] border border-[var(--color-border)] text-[var(--color-danger)] text-xs font-semibold hover:bg-[var(--color-danger)]/10 transition-colors"
+                    >
+                      <RiDeleteBinLine size={15} />
+                      <span>Remove</span>
+                    </button>
+                  )}
+                </div>
+                <p className="text-[11px] text-[var(--color-text-muted)]">
+                  Upload a photo (PNG, JPG, WebP). It will be displayed beside your name in the navbar and sidebar.
+                </p>
+              </div>
             </div>
           </div>
         </div>

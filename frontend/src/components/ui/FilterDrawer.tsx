@@ -77,7 +77,7 @@ export const FilterDrawer: React.FC<FilterDrawerProps> = ({
       {isOpen && (
         <div className="fixed inset-0 z-[var(--z-modal)] flex flex-col justify-end">
           <div
-            className="fixed inset-0 bg-[var(--color-scrim)] backdrop-blur-[var(--blur-glass)] transition-opacity"
+            className="fixed inset-0 bg-[var(--color-scrim)] transition-opacity"
             onClick={() => setIsOpen(false)}
             aria-hidden="true"
           />

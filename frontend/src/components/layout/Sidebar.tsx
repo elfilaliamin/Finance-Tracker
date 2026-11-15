@@ -17,6 +17,7 @@ import {
 } from '@remixicon/react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/hooks/useTheme';
+import { useUserAvatar } from '@/hooks/useUserAvatar';
 import { AppLogo } from '@/components/ui/AppLogo';
 
 interface SidebarProps {
@@ -62,6 +63,7 @@ export const navGroups: NavGroup[] = [
 export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false, onToggleCollapse }) => {
   const { user, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
+  const { avatar } = useUserAvatar();
 
   return (
     <aside
@@ -100,7 +102,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false, onToggleCol
       {/* Classic-Grouped Navigation List */}
       <nav className="flex-1 px-3 py-4 space-y-6 overflow-y-auto" role="navigation" aria-label="Main Navigation">
         {navGroups.map((group) => (
-          <div key={group.group} className="space-y-1">
+          <div key={group.group} className="flex flex-col space-y-1">
             {!collapsed && (
               <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-[color:var(--color-muted)] mb-1">
                 {group.group}
@@ -114,7 +116,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false, onToggleCol
                   to={item.path}
                   title={collapsed ? item.label : undefined}
                   className={({ isActive }) =>
-                    `flex items-center gap-3 px-3 py-2.5 rounded-[var(--radius-base)] text-[length:var(--font-size-step-sub1)] font-medium transition-all touch-target ${
+                    `w-full flex items-center gap-3 px-3 py-2.5 rounded-[var(--radius-base)] text-[length:var(--font-size-step-sub1)] font-medium transition-all ${
                       isActive
                         ? 'bg-[var(--color-primary)] text-[color:var(--color-on-primary)] font-semibold shadow-[var(--shadow-sm)]'
                         : 'text-[color:var(--color-muted)] hover:bg-[var(--color-primary-bg)] hover:text-[color:var(--color-primary-text)]'
@@ -133,19 +135,32 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false, onToggleCol
       {/* Footer Controls: Workspace, Theme & Logout */}
       <div className="p-3 border-t border-[var(--color-border)] bg-[var(--color-surface)] space-y-2">
         {!collapsed && user && (
-          <div className="px-3 py-2 rounded-[var(--radius-base)] bg-[var(--color-background)] border border-[var(--color-border)] flex items-center justify-between">
-            <div className="min-w-0 pr-2">
-              <p className="text-xs font-semibold text-[color:var(--color-text)] truncate">
-                {user.name || user.email}
-              </p>
-              <p className="text-[10px] text-[color:var(--color-muted)] uppercase tracking-wider font-mono">
-                {user.baseCurrency} Base
-              </p>
+          <div className="px-3 py-2 rounded-[var(--radius-base)] bg-[var(--color-background)] border border-[var(--color-border)] flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2.5 min-w-0 pr-1">
+              {avatar ? (
+                <img
+                  src={avatar}
+                  alt={user.name || user.email}
+                  className="w-8 h-8 rounded-full object-cover border border-[var(--color-border)] shrink-0"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center uppercase shrink-0">
+                  {(user.name || user.email).charAt(0)}
+                </div>
+              )}
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-[color:var(--color-text)] truncate">
+                  {user.name || user.email}
+                </p>
+                <p className="text-[10px] text-[color:var(--color-muted)] uppercase tracking-wider font-mono">
+                  {user.baseCurrency} Base
+                </p>
+              </div>
             </div>
             <button
               onClick={toggleTheme}
               aria-label="Toggle dark/light mode"
-              className="p-1.5 rounded-[var(--radius-base)] text-[color:var(--color-muted)] hover:text-[color:var(--color-text)] hover:bg-[var(--color-surface)] transition-colors"
+              className="p-1.5 rounded-[var(--radius-base)] text-[color:var(--color-muted)] hover:text-[color:var(--color-text)] hover:bg-[var(--color-surface)] transition-colors shrink-0"
               title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
             >
               {isDark ? <RiSunLine size={16} /> : <RiMoonLine size={16} />}

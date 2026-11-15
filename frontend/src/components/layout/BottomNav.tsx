@@ -87,7 +87,7 @@ export const BottomNav: React.FC = () => {
         <div className="fixed inset-0 z-[var(--z-modal)] lg:hidden flex flex-col justify-end">
           {/* Backdrop Scrim */}
           <div
-            className="fixed inset-0 bg-[var(--color-scrim)] backdrop-blur-[var(--blur-glass)] transition-opacity"
+            className="fixed inset-0 bg-[var(--color-scrim)] transition-opacity"
             onClick={() => setShowMore(false)}
             aria-hidden="true"
           />

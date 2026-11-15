@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation, Link } from 'react-router-dom';
 import { Sidebar, navGroups } from './Sidebar';
 import { BottomNav } from './BottomNav';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/hooks/useTheme';
+import { useUserAvatar } from '@/hooks/useUserAvatar';
 import { RiSunLine, RiMoonLine } from '@remixicon/react';
 
 export const AppShell: React.FC = () => {
@@ -12,6 +13,7 @@ export const AppShell: React.FC = () => {
   const [collapsedTablet, setCollapsedTablet] = useState(true);
   const { user } = useAuth();
   const { isDark, toggleTheme } = useTheme();
+  const { avatar } = useUserAvatar();
   const location = useLocation();
 
   // Find active nav item & group
@@ -49,8 +51,8 @@ export const AppShell: React.FC = () => {
 
       {/* Main Content Area */}
       <div className={`flex-1 flex flex-col transition-all duration-[var(--duration-base)] ${sidebarWidthClass}`}>
-        {/* Top Header: minimal-center */}
-        <header className="sticky top-0 z-[var(--z-sticky)] h-16 bg-[var(--color-surface)]/95 backdrop-blur-[var(--blur-glass)] border-b border-[var(--color-border)] px-4 md:px-6 flex items-center justify-between shadow-[var(--shadow-sm)]">
+        {/* Top Header: Solid modern bar without glass effect */}
+        <header className="sticky top-0 z-[var(--z-sticky)] h-16 bg-[var(--color-surface)] border-b border-[var(--color-border)] px-4 md:px-6 flex items-center justify-between shadow-[var(--shadow-sm)]">
           <div className="flex items-center gap-3">
             {isMobile && (
               <div className="w-8 h-8 rounded-[var(--radius-base)] bg-[var(--color-primary)] text-[color:var(--color-on-primary)] flex items-center justify-center font-bold text-sm tracking-tight shrink-0 shadow-[var(--shadow-sm)]">
@@ -67,18 +69,42 @@ export const AppShell: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-3">
+            {/* User Profile Pill with Avatar & Name */}
             {user && (
-              <span className="inline-flex items-center px-2.5 py-1 rounded-[var(--radius-pill)] text-xs font-semibold bg-[var(--color-primary-bg)] text-[color:var(--color-primary-text)] border border-[var(--color-border)] font-mono">
-                {user.baseCurrency}
-              </span>
+              <Link
+                to="/settings"
+                title="Manage profile & avatar in Settings"
+                className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-full hover:bg-[var(--color-primary-bg)] border border-[var(--color-border)] transition-colors group"
+              >
+                {/* Avatar Image or Initials */}
+                {avatar ? (
+                  <img
+                    src={avatar}
+                    alt={user.name || user.email}
+                    className="w-7 h-7 rounded-full object-cover border border-[var(--color-border)] shadow-xs shrink-0"
+                  />
+                ) : (
+                  <div className="w-7 h-7 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center uppercase shadow-xs shrink-0">
+                    {(user.name || user.email).charAt(0)}
+                  </div>
+                )}
+                <div className="flex flex-col text-left hidden sm:flex min-w-0 pr-1">
+                  <span className="text-xs font-semibold text-[var(--color-text)] leading-tight truncate max-w-[130px]">
+                    {user.name || user.email}
+                  </span>
+                  <span className="text-[10px] text-[var(--color-text-muted)] font-mono leading-tight">
+                    {user.baseCurrency} Base
+                  </span>
+                </div>
+              </Link>
             )}
 
             {/* Quick theme toggle */}
             <button
               onClick={toggleTheme}
               aria-label="Toggle dark/light mode"
-              className="p-2 rounded-[var(--radius-base)] text-[color:var(--color-muted)] hover:text-[color:var(--color-text)] hover:bg-[var(--color-background)] transition-colors touch-target"
+              className="p-2 rounded-[var(--radius-base)] text-[color:var(--color-muted)] hover:text-[color:var(--color-text)] hover:bg-[var(--color-background)] transition-colors"
               title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
             >
               {isDark ? <RiSunLine size={19} /> : <RiMoonLine size={19} />}

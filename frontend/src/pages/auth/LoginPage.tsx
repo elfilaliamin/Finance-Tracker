@@ -62,7 +62,7 @@ export const LoginPage: React.FC = () => {
         }}
       />
       {/* Deep moody cinematic dark overlay (matching reference design) */}
-      <div className="absolute inset-0 bg-[#081513]/75 dark:bg-[#030908]/85 backdrop-blur-[1px]" />
+      <div className="absolute inset-0 bg-[#081513]/75 dark:bg-[#030908]/85" />
 
       {/* Floating Center Card */}
       <div className="relative z-10 w-full max-w-[430px] bg-[#f8faf9] dark:bg-[#152722] py-9 px-7 sm:px-10 rounded-2xl shadow-2xl border border-white/40 dark:border-white/10 animate-fade-in-up">
