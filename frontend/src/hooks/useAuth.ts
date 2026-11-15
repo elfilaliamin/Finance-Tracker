@@ -5,7 +5,8 @@ import { useNavigate } from 'react-router-dom';
 export interface User {
   id: string;
   email: string;
-  name: string | null;
+  name?: string | null;
+  displayName?: string | null;
   baseCurrency: string;
   createdAt: string;
 }
@@ -19,7 +20,12 @@ export function useAuth() {
     queryFn: async () => {
       try {
         const res = await api.get<{ user: User }>('/auth/me');
-        return res.user;
+        if (!res?.user) return null;
+        return {
+          ...res.user,
+          name: res.user.displayName || res.user.name || res.user.email.split('@')[0],
+          baseCurrency: res.user.baseCurrency || 'MAD',
+        };
       } catch (err) {
         return null;
       }
@@ -31,7 +37,11 @@ export function useAuth() {
   const loginMutation = useMutation({
     mutationFn: async (credentials: { email: string; password: string }) => {
       const res = await api.post<{ user: User }>('/auth/login', credentials);
-      return res.user;
+      return {
+        ...res.user,
+        name: res.user.displayName || res.user.name || res.user.email.split('@')[0],
+        baseCurrency: res.user.baseCurrency || 'MAD',
+      };
     },
     onSuccess: (data) => {
       queryClient.setQueryData(['auth', 'me'], data);
@@ -48,7 +58,11 @@ export function useAuth() {
       baseCurrency?: string;
     }) => {
       const res = await api.post<{ user: User }>('/auth/register', payload);
-      return res.user;
+      return {
+        ...res.user,
+        name: res.user.displayName || res.user.name || res.user.email.split('@')[0],
+        baseCurrency: payload.baseCurrency || res.user.baseCurrency || 'MAD',
+      };
     },
     onSuccess: (data) => {
       queryClient.setQueryData(['auth', 'me'], data);

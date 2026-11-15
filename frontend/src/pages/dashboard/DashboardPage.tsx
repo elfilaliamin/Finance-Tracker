@@ -101,7 +101,23 @@ export const DashboardPage: React.FC = () => {
       ) : (
         <>
           {/* 12 Metric KPI Cards */}
-          {metrics && <MetricCardsGrid metrics={metrics} currency={displayCurrency} />}
+          <MetricCardsGrid
+            metrics={metrics || {
+              todaysNetWorth: '0.00',
+              currentMonthIncome: '0.00',
+              priorMonthIncome: '0.00',
+              yearIncome: '0.00',
+              lifetimeIncome: '0.00',
+              avgMonthlyIncome: '0.00',
+              highestIncomeMonth: { month: 'N/A', amount: '0.00' },
+              lowestIncomeMonth: { month: 'N/A', amount: '0.00' },
+              largestIncomeSource: { name: 'None', amount: '0.00' },
+              activeIncomeSourcesCount: 0,
+              latestIncome: null,
+              latestNetWorth: null,
+            }}
+            currency={displayCurrency}
+          />
 
           {/* Charts: Income Trend & Net Worth Progression */}
           <DashboardCharts
@@ -111,9 +127,11 @@ export const DashboardPage: React.FC = () => {
           />
 
           {/* Category x 12 Months Spending Matrix */}
-          {spendingMatrix && (
-            <SpendingMatrix data={spendingMatrix} currency={displayCurrency} year={selectedYear} />
-          )}
+          <SpendingMatrix
+            data={spendingMatrix || { categories: [], grandTotal: '0.00' }}
+            currency={displayCurrency}
+            year={selectedYear}
+          />
         </>
       )}
     </div>

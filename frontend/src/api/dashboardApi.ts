@@ -1,29 +1,43 @@
 import { api } from './client';
 
 export interface DashboardMetrics {
-  todaysNetWorth: string;
-  currentMonthIncome: string;
-  priorMonthIncome: string;
-  yearIncome: string;
-  lifetimeIncome: string;
-  avgMonthlyIncome: string;
-  highestIncomeMonth: { month: string; amount: string };
-  lowestIncomeMonth: { month: string; amount: string };
-  largestIncomeSource: { name: string; amount: string };
-  activeIncomeSourcesCount: number;
-  latestIncome: { date: string; amount: string; source: string } | null;
-  latestNetWorth: { date: string; amount: string } | null;
+  todaysNetWorth?: string;
+  todayNetWorth?: string;
+  totalAssets?: string;
+  totalLiabilities?: string;
+  currentMonthIncome?: string;
+  priorMonthIncome?: string;
+  previousMonthIncome?: string;
+  yearIncome?: string;
+  lifetimeIncome?: string;
+  avgMonthlyIncome?: string;
+  averageMonthlyIncome?: string;
+  highestIncomeMonth?: { month: string; amount: string };
+  lowestIncomeMonth?: { month: string; amount: string };
+  largestIncomeSource?: { name?: string; title?: string; amount: string };
+  activeIncomeSourcesCount?: number;
+  latestIncome?: { date: string; amount: string; source?: string; sourceTitle?: string; currency?: string } | null;
+  latestNetWorth?: { date: string; amount: string } | null;
 }
 
 export interface SpendingMatrixData {
-  categories: {
+  categories?: {
     id: string;
     name: string;
     color: string;
-    monthlyAmounts: Record<string, string>;
-    total: string;
+    monthlyAmounts?: Record<string, string>;
+    total?: string;
+    months?: string[];
   }[];
-  monthlyTotals: Record<string, string>;
+  rows?: {
+    id: string;
+    name: string;
+    color: string;
+    months: string[];
+    rowTotal: string;
+  }[];
+  monthlyTotals?: Record<string, string>;
+  columnTotals?: string[];
   grandTotal: string;
 }
 

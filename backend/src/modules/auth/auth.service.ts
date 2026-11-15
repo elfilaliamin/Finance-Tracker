@@ -70,6 +70,7 @@ export class AuthService {
         email: user.email,
         displayName: user.displayName,
         createdAt: user.createdAt,
+        baseCurrency: user.baseCurrency || 'MAD',
       },
       token,
     };

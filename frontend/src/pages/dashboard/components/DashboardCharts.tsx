@@ -24,15 +24,29 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({
   netWorthHistory,
   currency,
 }) => {
-  const formatYAxis = (val: number) => {
-    if (val >= 1000000) return `${(val / 1000000).toFixed(1)}M`;
-    if (val >= 1000) return `${(val / 1000).toFixed(0)}k`;
-    return String(val);
+  const normalizedIncomeTrend = (incomeTrend || []).map((pt: any) => ({
+    ...pt,
+    amount: typeof pt.amount === 'number' ? pt.amount : parseFloat(pt.amount || pt.income || '0'),
+  }));
+
+  const normalizedNetWorthHistory = (netWorthHistory || []).map((pt: any) => ({
+    ...pt,
+    amount: typeof pt.amount === 'number' ? pt.amount : parseFloat(pt.amount || pt.balance || '0'),
+    date: pt.date || pt.name || '',
+  }));
+
+  const formatYAxis = (val: any) => {
+    const num = typeof val === 'number' ? val : parseFloat(val || '0');
+    if (isNaN(num)) return '0';
+    if (Math.abs(num) >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
+    if (Math.abs(num) >= 1000) return `${(num / 1000).toFixed(0)}k`;
+    return String(num);
   };
 
   const customTooltipFormatter = (val: any) => {
     const num = typeof val === 'number' ? val : parseFloat(val || '0');
-    return [`${num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`];
+    const safeNum = isNaN(num) ? 0 : num;
+    return [`${safeNum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`];
   };
 
   return (
@@ -42,13 +56,13 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({
         title="Income Trend"
         subtitle={`Monthly income progression (${currency})`}
       >
-        {incomeTrend.length === 0 ? (
+        {normalizedIncomeTrend.length === 0 ? (
           <div className="h-full flex items-center justify-center text-[var(--color-text-muted)] text-sm">
             No income recorded for this period.
           </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={incomeTrend} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <BarChart data={normalizedIncomeTrend} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" />
               <XAxis dataKey="month" stroke="var(--color-text-muted)" fontSize={11} tickLine={false} />
               <YAxis stroke="var(--color-text-muted)" fontSize={11} tickLine={false} tickFormatter={formatYAxis} />
@@ -74,13 +88,13 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({
         title="Net Worth History"
         subtitle={`Balance trajectory across snapshots (${currency})`}
       >
-        {netWorthHistory.length === 0 ? (
+        {normalizedNetWorthHistory.length === 0 ? (
           <div className="h-full flex items-center justify-center text-[var(--color-text-muted)] text-sm">
             No net worth snapshots recorded yet.
           </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={netWorthHistory} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <AreaChart data={normalizedNetWorthHistory} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="networthGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="var(--color-secondary)" stopOpacity={0.4} />

@@ -19,60 +19,65 @@ interface MetricCardsGridProps {
 }
 
 export const MetricCardsGrid: React.FC<MetricCardsGridProps> = ({ metrics, currency }) => {
+  const parseVal = (val: string | undefined | null) => {
+    const num = parseFloat(val || '0');
+    return isNaN(num) ? '0.00' : num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+
   const cards = [
     {
       title: "Today's Net Worth",
-      value: `${parseFloat(metrics.todaysNetWorth || '0').toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`,
+      value: `${parseVal(metrics.todaysNetWorth || metrics.todayNetWorth)} ${currency}`,
       sub: metrics.latestNetWorth ? `Last snapshot: ${metrics.latestNetWorth.date}` : 'No snapshots yet',
       icon: RiWallet3Line,
     },
     {
       title: 'Current Month Income',
-      value: `${parseFloat(metrics.currentMonthIncome || '0').toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`,
+      value: `${parseVal(metrics.currentMonthIncome)} ${currency}`,
       sub: 'This calendar month',
       icon: RiArrowUpCircleLine,
     },
     {
       title: 'Prior Month Income',
-      value: `${parseFloat(metrics.priorMonthIncome || '0').toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`,
+      value: `${parseVal(metrics.priorMonthIncome || metrics.previousMonthIncome)} ${currency}`,
       sub: 'Previous calendar month',
       icon: RiCalendarLine,
     },
     {
       title: 'Year Income (YTD)',
-      value: `${parseFloat(metrics.yearIncome || '0').toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`,
+      value: `${parseVal(metrics.yearIncome)} ${currency}`,
       sub: `Calendar year ${new Date().getFullYear()}`,
       icon: RiAwardLine,
     },
     {
       title: 'Lifetime Income',
-      value: `${parseFloat(metrics.lifetimeIncome || '0').toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`,
+      value: `${parseVal(metrics.lifetimeIncome)} ${currency}`,
       sub: 'All recorded income',
       icon: RiSparklingLine,
     },
     {
       title: 'Average Monthly Income',
-      value: `${parseFloat(metrics.avgMonthlyIncome || '0').toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`,
+      value: `${parseVal(metrics.avgMonthlyIncome || metrics.averageMonthlyIncome)} ${currency}`,
       sub: 'Active months average',
       icon: RiBarChartGroupedLine,
     },
     {
       title: 'Highest Income Month',
-      value: `${parseFloat(metrics.highestIncomeMonth?.amount || '0').toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`,
-      sub: metrics.highestIncomeMonth?.month ? `Month: ${metrics.highestIncomeMonth.month}` : 'None',
+      value: `${parseVal(metrics.highestIncomeMonth?.amount)} ${currency}`,
+      sub: metrics.highestIncomeMonth?.month && metrics.highestIncomeMonth.month !== 'N/A' ? `Month: ${metrics.highestIncomeMonth.month}` : 'None',
       icon: RiArrowRightUpLine,
     },
     {
       title: 'Lowest Income Month',
-      value: `${parseFloat(metrics.lowestIncomeMonth?.amount || '0').toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`,
-      sub: metrics.lowestIncomeMonth?.month ? `Month: ${metrics.lowestIncomeMonth.month}` : 'None',
+      value: `${parseVal(metrics.lowestIncomeMonth?.amount)} ${currency}`,
+      sub: metrics.lowestIncomeMonth?.month && metrics.lowestIncomeMonth.month !== 'N/A' ? `Month: ${metrics.lowestIncomeMonth.month}` : 'None',
       icon: RiArrowRightDownLine,
     },
     {
       title: 'Largest Income Source',
-      value: metrics.largestIncomeSource?.name || 'None',
-      sub: metrics.largestIncomeSource?.amount
-        ? `${parseFloat(metrics.largestIncomeSource.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`
+      value: metrics.largestIncomeSource?.name || metrics.largestIncomeSource?.title || 'None',
+      sub: metrics.largestIncomeSource?.amount && metrics.largestIncomeSource.amount !== '0.00'
+        ? `${parseVal(metrics.largestIncomeSource.amount)} ${currency}`
         : '0.00',
       icon: RiSparklingLine,
     },
@@ -85,15 +90,15 @@ export const MetricCardsGrid: React.FC<MetricCardsGridProps> = ({ metrics, curre
     {
       title: 'Latest Income',
       value: metrics.latestIncome
-        ? `${parseFloat(metrics.latestIncome.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`
+        ? `${parseVal(metrics.latestIncome.amount)} ${currency}`
         : 'None',
-      sub: metrics.latestIncome ? `${metrics.latestIncome.date} (${metrics.latestIncome.source})` : 'No records',
+      sub: metrics.latestIncome ? `${metrics.latestIncome.date} (${metrics.latestIncome.source || metrics.latestIncome.sourceTitle || 'Income'})` : 'No records',
       icon: RiTimeLine,
     },
     {
       title: 'Latest Net Worth Record',
       value: metrics.latestNetWorth
-        ? `${parseFloat(metrics.latestNetWorth.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`
+        ? `${parseVal(metrics.latestNetWorth.amount)} ${currency}`
         : 'None',
       sub: metrics.latestNetWorth?.date ? `Date: ${metrics.latestNetWorth.date}` : 'No adjustments',
       icon: RiWallet3Line,

@@ -5,8 +5,16 @@ import * as schema from '../../db/schema.js';
 export class AuthRepository {
   async findByEmail(email: string) {
     const [user] = await db
-      .select()
+      .select({
+        id: schema.users.id,
+        email: schema.users.email,
+        passwordHash: schema.users.passwordHash,
+        displayName: schema.users.displayName,
+        createdAt: schema.users.createdAt,
+        baseCurrency: schema.userSettings.displayCurrency,
+      })
       .from(schema.users)
+      .leftJoin(schema.userSettings, eq(schema.users.id, schema.userSettings.userId))
       .where(eq(schema.users.email, email.toLowerCase().trim()));
     return user || null;
   }
@@ -18,8 +26,10 @@ export class AuthRepository {
         email: schema.users.email,
         displayName: schema.users.displayName,
         createdAt: schema.users.createdAt,
+        baseCurrency: schema.userSettings.displayCurrency,
       })
       .from(schema.users)
+      .leftJoin(schema.userSettings, eq(schema.users.id, schema.userSettings.userId))
       .where(eq(schema.users.id, id));
     return user || null;
   }
@@ -62,7 +72,10 @@ export class AuthRepository {
         theme: 'system',
       });
 
-      return newUser;
+      return {
+        ...newUser,
+        baseCurrency,
+      };
     });
   }
 

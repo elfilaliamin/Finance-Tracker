@@ -147,20 +147,35 @@ export class DashboardService {
       sourceTitle: allIncomes[0].sourceTitle || 'Unknown',
     } : null;
 
+    const netWorthFormatted = Money.toDbString(todayNetWorth);
     return {
-      todayNetWorth: Money.toDbString(todayNetWorth),
+      todayNetWorth: netWorthFormatted,
+      todaysNetWorth: netWorthFormatted,
       totalAssets: Money.toDbString(totalAssets),
       totalLiabilities: Money.toDbString(totalLiabilities),
       currentMonthIncome: Money.toDbString(currentMonthIncome),
       previousMonthIncome: Money.toDbString(prevMonthIncome),
+      priorMonthIncome: Money.toDbString(prevMonthIncome),
       yearIncome: Money.toDbString(yearIncome),
       lifetimeIncome: Money.toDbString(lifetimeIncome),
       averageMonthlyIncome: Money.toDbString(averageMonthlyIncome),
+      avgMonthlyIncome: Money.toDbString(averageMonthlyIncome),
       highestIncomeMonth: highestMonth,
       lowestIncomeMonth: lowestVal.lt(Number.MAX_SAFE_INTEGER) ? lowestMonth : { month: 'N/A', amount: '0.00' },
-      largestIncomeSource: largestSource,
+      largestIncomeSource: {
+        title: largestSource.title,
+        name: largestSource.title,
+        amount: largestSource.amount,
+      },
       activeIncomeSourcesCount: activeSourcesCountRecord?.count || 0,
-      latestIncome,
+      latestIncome: latestIncome ? {
+        ...latestIncome,
+        source: latestIncome.sourceTitle,
+      } : null,
+      latestNetWorth: {
+        date: new Date().toISOString().substring(0, 10),
+        amount: netWorthFormatted,
+      },
     };
   }
 
@@ -188,11 +203,15 @@ export class DashboardService {
       monthlySum[monthIndex] += parseFloat(r.baseAmount);
     }
 
-    return months.map((m, idx) => ({
-      month: m,
-      monthIndex: idx + 1,
-      income: Money.toDbString(monthlySum[idx]),
-    }));
+    return months.map((m, idx) => {
+      const incomeStr = Money.toDbString(monthlySum[idx]);
+      return {
+        month: m,
+        monthIndex: idx + 1,
+        income: incomeStr,
+        amount: parseFloat(incomeStr),
+      };
+    });
   }
 
   async getSpendingMatrix(userId: string, year: number = new Date().getFullYear(), walletFilterId?: string) {
@@ -268,10 +287,34 @@ export class DashboardService {
       rowTotal: Money.toDbString(r.rowTotal),
     }));
 
+    const categoriesFormatted = rows.map((r) => {
+      const monthlyAmounts: Record<string, string> = {};
+      r.months.forEach((amt: string, idx: number) => {
+        const monthKey = String(idx + 1).padStart(2, '0');
+        monthlyAmounts[monthKey] = amt;
+      });
+      return {
+        id: r.id,
+        name: r.name,
+        color: r.color,
+        monthlyAmounts,
+        total: r.rowTotal,
+        months: r.months,
+      };
+    });
+
+    const monthlyTotals: Record<string, string> = {};
+    columnTotals.forEach((c: any, idx: number) => {
+      const monthKey = String(idx + 1).padStart(2, '0');
+      monthlyTotals[monthKey] = Money.toDbString(c);
+    });
+
     return {
       year,
       monthColumns,
       rows,
+      categories: categoriesFormatted,
+      monthlyTotals,
       columnTotals: columnTotals.map((c) => Money.toDbString(c)),
       grandTotal: Money.toDbString(grandTotal),
     };
@@ -289,13 +332,22 @@ export class DashboardService {
       .from(schema.wallets)
       .where(and(eq(schema.wallets.userId, userId), eq(schema.wallets.status, 'active')));
 
-    return wallets.map((w) => ({
-      id: w.id,
-      name: w.name,
-      type: w.type,
-      color: w.color,
-      balance: w.currentBalance,
-    }));
+    let total = Money.from(0);
+    for (const w of wallets) {
+      if (w.type === 'asset') {
+        total = Money.add(total, Money.from(w.currentBalance));
+      } else {
+        total = Money.subtract(total, Money.from(w.currentBalance));
+      }
+    }
+
+    const todayDate = new Date().toISOString().substring(0, 10);
+    return [
+      {
+        date: todayDate,
+        amount: parseFloat(Money.toDbString(total)),
+      },
+    ];
   }
 }
 
