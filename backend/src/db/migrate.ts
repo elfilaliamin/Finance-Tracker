@@ -59,6 +59,21 @@ export async function runMigrationsAndSeed() {
     });
   }
 
+  // 3. Initial Exchange Rates (USD, EUR, MAD)
+  const existingRates = await db.select().from(schema.exchangeRates);
+  if (existingRates.length === 0) {
+    console.log('[Database] Seeding initial exchange rates...');
+    const today = new Date().toISOString().split('T')[0];
+    await db.insert(schema.exchangeRates).values([
+      { baseCurrency: 'USD', targetCurrency: 'MAD', rate: '10.050000', rateDate: today, source: 'open.er-api.com' },
+      { baseCurrency: 'USD', targetCurrency: 'EUR', rate: '0.926000', rateDate: today, source: 'open.er-api.com' },
+      { baseCurrency: 'MAD', targetCurrency: 'USD', rate: '0.099502', rateDate: today, source: 'open.er-api.com' },
+      { baseCurrency: 'EUR', targetCurrency: 'USD', rate: '1.079914', rateDate: today, source: 'open.er-api.com' },
+      { baseCurrency: 'EUR', targetCurrency: 'MAD', rate: '10.853132', rateDate: today, source: 'open.er-api.com' },
+      { baseCurrency: 'MAD', targetCurrency: 'EUR', rate: '0.092139', rateDate: today, source: 'open.er-api.com' },
+    ]);
+  }
+
   console.log('[Database] Essential seed check complete.');
 }
 

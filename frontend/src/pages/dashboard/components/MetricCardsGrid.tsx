@@ -142,7 +142,7 @@ export const MetricCardsGrid: React.FC<MetricCardsGridProps> = ({ metrics, curre
               </div>
             </div>
             <div>
-              <p className="font-heading text-xl sm:text-2xl font-bold text-[var(--color-text)] tracking-tight">{card.value}</p>
+              <p className="font-heading text-xl sm:text-2xl font-bold text-[var(--color-text)] tracking-wide">{card.value}</p>
               <p className="text-xs text-[var(--color-text-muted)] mt-1 truncate">{card.sub}</p>
             </div>
           </div>

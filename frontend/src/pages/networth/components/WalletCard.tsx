@@ -51,7 +51,7 @@ export const WalletCard: React.FC<WalletCardProps> = ({
           </span>
           <div className="flex items-baseline gap-1.5 mt-0.5">
             <span
-              className={`text-2xl font-heading font-bold font-mono tracking-tight ${
+              className={`text-2xl font-heading font-bold font-mono tracking-wide ${
                 isAsset ? 'text-[var(--color-text)]' : 'text-[var(--color-danger)]'
               }`}
             >

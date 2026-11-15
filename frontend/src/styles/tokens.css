@@ -1,6 +1,7 @@
 :root {
   /* Colors (Light Mode) */
   --color-primary: #064e3b;
+  --color-primary-hover: #047857;
   --color-primary-bg: rgba(6, 78, 59, 0.08);
   --color-primary-text: #064e3b;
   --color-secondary: #047857;
@@ -103,7 +104,8 @@
 /* Dark Mode Overrides */
 [data-theme='dark'],
 .dark {
-  --color-primary: #34d399;
+  --color-primary: #10b981;
+  --color-primary-hover: #059669;
   --color-primary-bg: rgba(52, 211, 153, 0.16);
   --color-primary-text: #34d399;
   --color-secondary: #10b981;
@@ -146,7 +148,8 @@
 /* System Dark Mode (Applied when no data-theme is explicitly specified) */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --color-primary: #34d399;
+    --color-primary: #10b981;
+    --color-primary-hover: #059669;
     --color-primary-bg: rgba(52, 211, 153, 0.16);
     --color-primary-text: #34d399;
     --color-secondary: #10b981;

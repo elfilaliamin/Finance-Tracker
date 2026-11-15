@@ -2,7 +2,8 @@ import { api } from './client';
 
 export interface ExchangeRate {
   id: string;
-  sourceCurrency: string;
+  baseCurrency?: string;
+  sourceCurrency?: string;
   targetCurrency: string;
   rate: string;
   rateDate: string;

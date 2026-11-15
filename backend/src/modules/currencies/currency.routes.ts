@@ -20,6 +20,7 @@ router.get('/currencies', currencyController.getCurrencies);
 router.get('/exchange-rates/latest', currencyController.getLatestRates);
 router.get('/exchange-rates/history', authenticate, currencyController.getHistory);
 router.post('/exchange-rates/sync', authenticate, currencyController.syncRates);
+router.post('/exchange-rates/refresh', authenticate, currencyController.syncRates);
 router.post(
   '/exchange-rates/manual',
   authenticate,

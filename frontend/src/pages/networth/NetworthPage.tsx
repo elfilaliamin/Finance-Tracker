@@ -122,7 +122,7 @@ export const NetworthPage: React.FC = () => {
             </div>
           </div>
           <div className="flex items-baseline gap-1.5">
-            <span className="text-2xl sm:text-3xl font-heading font-extrabold font-mono text-[var(--color-text)] tracking-tight">
+            <span className="text-2xl sm:text-3xl font-heading font-bold font-mono text-[var(--color-text)] tracking-wider">
               {netWorth.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </span>
             <span className="text-xs font-semibold text-[var(--color-text-muted)]">{baseCurrency}</span>
@@ -141,7 +141,7 @@ export const NetworthPage: React.FC = () => {
             </div>
           </div>
           <div className="flex items-baseline gap-1.5">
-            <span className="text-2xl sm:text-3xl font-heading font-extrabold font-mono text-[var(--color-accent)] tracking-tight">
+            <span className="text-2xl sm:text-3xl font-heading font-bold font-mono text-[var(--color-accent)] tracking-wider">
               +{totalAssets.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </span>
             <span className="text-xs font-semibold text-[var(--color-text-muted)]">{baseCurrency}</span>
@@ -160,7 +160,7 @@ export const NetworthPage: React.FC = () => {
             </div>
           </div>
           <div className="flex items-baseline gap-1.5">
-            <span className="text-2xl sm:text-3xl font-heading font-extrabold font-mono text-[var(--color-danger)] tracking-tight">
+            <span className="text-2xl sm:text-3xl font-heading font-bold font-mono text-[var(--color-danger)] tracking-wider">
               -{totalLiabilities.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </span>
             <span className="text-xs font-semibold text-[var(--color-text-muted)]">{baseCurrency}</span>
