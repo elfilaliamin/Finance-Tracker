@@ -3,7 +3,14 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link, Navigate } from 'react-router-dom';
-import { RiLoginBoxLine, RiAlertLine, RiShieldCheckLine } from '@remixicon/react';
+import {
+  RiMailLine,
+  RiLockPasswordLine,
+  RiEyeLine,
+  RiEyeOffLine,
+  RiArrowRightLine,
+  RiAlertLine,
+} from '@remixicon/react';
 import { useAuth } from '@/hooks/useAuth';
 import { AppLogo } from '@/components/ui/AppLogo';
 
@@ -17,6 +24,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 export const LoginPage: React.FC = () => {
   const { login, isLoggingIn, isAuthenticated, isLoading } = useAuth();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
 
   const {
     register,
@@ -40,103 +48,147 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] relative flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
-      {/* AI-Generated Finance Background Image */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center pointer-events-none opacity-20 dark:opacity-25 filter blur-[1px] transform scale-105"
+    <div className="min-h-screen relative flex items-center justify-center p-4 sm:p-6 overflow-hidden">
+      {/* Background Architectural/Office Interior Image */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat transform scale-105"
         style={{
-          backgroundImage: 'url(/auth-bg.jpg)'
+          backgroundImage: 'url(/auth-bg.jpg)',
         }}
       />
-      {/* Ambient gradient glow in background */}
-      <div 
-        className="absolute inset-0 pointer-events-none opacity-60 dark:opacity-40"
-        style={{
-          background: 'radial-gradient(ellipse 70% 60% at 50% 25%, var(--color-primary-bg) 0%, transparent 80%)'
-        }}
-      />
+      {/* Deep moody cinematic dark overlay (matching reference design) */}
+      <div className="absolute inset-0 bg-[#081513]/75 dark:bg-[#030908]/85 backdrop-blur-[1px]" />
 
-      <div className="relative z-10 sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <Link to="/" className="inline-flex items-center gap-3 mb-6 group">
-          <AppLogo size={48} className="shadow-[var(--shadow-md)] group-hover:scale-105 transition-transform" />
-          <span className="font-heading font-black text-2xl tracking-tight text-[var(--color-text)]">
-            Finance<span className="text-[var(--color-accent)]">Tracker</span>
-          </span>
-        </Link>
-        <h2 className="text-2xl font-heading font-bold tracking-tight text-[var(--color-text)]">
-          Sign in to your account
-        </h2>
-        <p className="mt-2 text-sm text-[var(--color-text-muted)]">
-          Or{' '}
-          <Link to="/register" className="font-medium text-[var(--color-accent)] hover:underline">
-            create a new account
+      {/* Floating Center Card */}
+      <div className="relative z-10 w-full max-w-[430px] bg-[#f8faf9] dark:bg-[#152722] py-9 px-7 sm:px-10 rounded-2xl shadow-2xl border border-white/40 dark:border-white/10 animate-fade-in-up">
+        {/* Top Center Logo */}
+        <div className="flex justify-center mb-5">
+          <Link to="/" className="group inline-block" title="Back to Finance Tracker">
+            <AppLogo size={46} className="shadow-sm group-hover:scale-105 transition-transform" />
           </Link>
-        </p>
-      </div>
+        </div>
 
-      <div className="relative z-10 mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-[var(--color-surface)] py-8 px-6 shadow-[var(--shadow-lg)] border border-[var(--color-border)] rounded-[var(--radius-surface)] sm:px-10">
-          {errorMessage && (
-            <div className="mb-5 p-3.5 rounded-[var(--radius-base)] bg-[var(--color-danger)]/10 border border-[var(--color-danger)]/30 flex items-center gap-2.5 text-[var(--color-danger)] text-sm">
-              <RiAlertLine className="w-5 h-5 shrink-0" />
-              <span>{errorMessage}</span>
-            </div>
-          )}
+        {/* Card Header */}
+        <div className="text-center mb-6">
+          <h1 className="text-2xl sm:text-[1.65rem] font-bold font-[family-name:var(--font-heading)] text-slate-900 dark:text-white tracking-tight">
+            Welcome back
+          </h1>
+          <p className="mt-1.5 text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+            Enter your credentials to access your workspace.
+          </p>
+        </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-            <div>
-              <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-2">
-                Email Address
-              </label>
+        {/* Error notification banner */}
+        {errorMessage && (
+          <div className="mb-5 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center gap-2.5 text-rose-600 dark:text-rose-400 text-xs sm:text-sm">
+            <RiAlertLine className="w-4 h-4 shrink-0" />
+            <span>{errorMessage}</span>
+          </div>
+        )}
+
+        {/* Login Form */}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-4.5">
+          {/* Work / Personal Email Field */}
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-xs font-semibold text-slate-800 dark:text-slate-200 mb-1.5 text-left"
+            >
+              Email address
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                <RiMailLine size={16} />
+              </div>
               <input
+                id="email"
                 type="email"
                 autoComplete="email"
+                placeholder="alex.rivers@finance.local"
+                className="w-full pl-10 pr-3.5 py-2.5 rounded-xl text-sm bg-[#eaf6f0] dark:bg-[#1e3830] border border-[#bfe5d1] dark:border-[#2b5446] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#047857] focus:bg-white dark:focus:bg-[#1a332b] transition-colors"
                 {...register('email')}
-                className="w-full px-4 py-2.5 rounded-[var(--radius-base)] bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-ring)] focus:border-transparent text-sm transition-all"
-                placeholder="you@example.com"
               />
-              {errors.email && <p className="mt-1.5 text-xs text-[var(--color-danger)]">{errors.email.message}</p>}
             </div>
+            {errors.email && (
+              <p className="mt-1 text-xs text-rose-600 dark:text-rose-400 text-left">
+                {errors.email.message}
+              </p>
+            )}
+          </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-2">
+          {/* Password Field with Eye Toggle */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label
+                htmlFor="password"
+                className="block text-xs font-semibold text-slate-800 dark:text-slate-200 text-left"
+              >
                 Password
               </label>
-              <input
-                type="password"
-                autoComplete="current-password"
-                {...register('password')}
-                className="w-full px-4 py-2.5 rounded-[var(--radius-base)] bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-ring)] focus:border-transparent text-sm transition-all"
-                placeholder="••••••••"
-              />
-              {errors.password && <p className="mt-1.5 text-xs text-[var(--color-danger)]">{errors.password.message}</p>}
+              <span className="text-xs font-medium text-[#047857] dark:text-[#34d399] hover:underline cursor-pointer">
+                Forgot password?
+              </span>
             </div>
-
-            <div className="pt-2">
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                <RiLockPasswordLine size={16} />
+              </div>
+              <input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="current-password"
+                placeholder="••••••••••••••••"
+                className="w-full pl-10 pr-10 py-2.5 rounded-xl text-sm bg-[#eaf6f0] dark:bg-[#1e3830] border border-[#bfe5d1] dark:border-[#2b5446] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#047857] focus:bg-white dark:focus:bg-[#1a332b] transition-colors font-mono"
+                {...register('password')}
+              />
               <button
-                type="submit"
-                disabled={isLoggingIn}
-                className="w-full py-3 px-4 rounded-[var(--radius-base)] bg-[var(--color-primary)] text-white font-medium text-sm hover:bg-[var(--color-primary-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-ring)] shadow-[var(--shadow-base)] hover:shadow-[var(--shadow-hover)] transition-all flex items-center justify-center gap-2 disabled:opacity-60 touch-target"
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                tabIndex={-1}
               >
-                {isLoggingIn ? (
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <>
-                    <RiLoginBoxLine className="w-5 h-5" />
-                    <span>Sign In</span>
-                  </>
-                )}
+                {showPassword ? <RiEyeOffLine size={16} /> : <RiEyeLine size={16} />}
               </button>
             </div>
-          </form>
-
-          <div className="mt-6 pt-5 border-t border-[var(--color-border)] flex items-center justify-center gap-2 text-xs text-[var(--color-text-muted)]">
-            <RiShieldCheckLine className="w-4 h-4 text-[var(--color-accent)]" />
-            <span>Encrypted & self-hosted security</span>
+            {errors.password && (
+              <p className="mt-1 text-xs text-rose-600 dark:text-rose-400 text-left">
+                {errors.password.message}
+              </p>
+            )}
           </div>
+
+          {/* Submit Button */}
+          <div className="pt-2">
+            <button
+              type="submit"
+              disabled={isLoggingIn}
+              className="w-full py-3 px-4 rounded-xl text-sm font-bold text-white bg-[#064e3b] hover:bg-[#047857] active:scale-[0.99] shadow-sm hover:shadow transition-all duration-150 flex items-center justify-center gap-2 touch-target disabled:opacity-50"
+            >
+              {isLoggingIn ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <>
+                  <span>Sign In to Workspace</span>
+                  <RiArrowRightLine size={16} />
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+
+        {/* Footer Link */}
+        <div className="mt-6 text-center">
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+            Don't have an account?{' '}
+            <Link
+              to="/register"
+              className="font-bold text-[#064e3b] dark:text-[#34d399] hover:underline"
+            >
+              Sign up
+            </Link>
+          </p>
         </div>
       </div>
     </div>
   );
 };
-
