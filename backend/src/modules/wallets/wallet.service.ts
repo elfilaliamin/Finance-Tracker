@@ -112,6 +112,19 @@ export class WalletService {
       throw new NotFoundError(`Adjustment with ID '${adjustmentId}' not found.`);
     }
   }
+
+  async getTransactions(
+    walletId: string,
+    userId: string,
+    filters?: { from?: string; to?: string; type?: string }
+  ) {
+    await this.getWallet(walletId, userId);
+    const result = await this.repository.getWalletTransactions(walletId, userId, filters);
+    if (!result) {
+      throw new NotFoundError(`Wallet with ID '${walletId}' not found.`);
+    }
+    return result;
+  }
 }
 
 export const walletService = new WalletService();

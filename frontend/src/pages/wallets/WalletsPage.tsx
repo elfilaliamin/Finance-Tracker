@@ -11,11 +11,13 @@ import {
   RiSearchLine,
   RiBankCardLine,
   RiFilterLine,
+  RiHistoryLine,
 } from '@remixicon/react';
 import { walletApi, Wallet, CreateWalletInput, CreateAdjustmentInput } from '@/api/walletApi';
 import { useAuth } from '@/hooks/useAuth';
 import { WalletModal } from '../networth/components/WalletModal';
 import { AdjustmentModal } from '../networth/components/AdjustmentModal';
+import { WalletTransactionsModal } from '../networth/components/WalletTransactionsModal';
 
 export const WalletsPage: React.FC = () => {
   const queryClient = useQueryClient();
@@ -28,6 +30,9 @@ export const WalletsPage: React.FC = () => {
 
   const [isAdjustModalOpen, setIsAdjustModalOpen] = useState(false);
   const [adjustingWallet, setAdjustingWallet] = useState<Wallet | null>(null);
+
+  const [isTransactionsModalOpen, setIsTransactionsModalOpen] = useState(false);
+  const [inspectingWallet, setInspectingWallet] = useState<Wallet | null>(null);
 
   // Filters state
   const [searchQuery, setSearchQuery] = useState('');
@@ -74,6 +79,7 @@ export const WalletsPage: React.FC = () => {
       walletApi.createAdjustment(walletId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['wallets'] });
+      queryClient.invalidateQueries({ queryKey: ['walletTransactions'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       setIsAdjustModalOpen(false);
       setAdjustingWallet(null);
@@ -111,6 +117,11 @@ export const WalletsPage: React.FC = () => {
   const handleOpenAdjust = (w: Wallet) => {
     setAdjustingWallet(w);
     setIsAdjustModalOpen(true);
+  };
+
+  const handleOpenTransactions = (w: Wallet) => {
+    setInspectingWallet(w);
+    setIsTransactionsModalOpen(true);
   };
 
   const handleWalletSubmit = async (data: CreateWalletInput) => {
@@ -403,14 +414,24 @@ export const WalletsPage: React.FC = () => {
 
                 {/* Card Actions Footer */}
                 <div className="pt-3 border-t border-[var(--color-border)] flex items-center justify-between gap-2">
-                  <button
-                    onClick={() => handleOpenAdjust(wallet)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-base)] bg-[var(--color-primary-bg)] hover:bg-[var(--color-primary-bg)]/80 text-[var(--color-accent)] text-xs font-semibold border border-[var(--color-border)] transition-colors touch-target"
-                    title="Record balance adjustment"
-                  >
-                    <RiSwapLine size={14} />
-                    <span>Adjust Balance</span>
-                  </button>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => handleOpenTransactions(wallet)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-base)] bg-[var(--color-primary-bg)] hover:bg-[var(--color-border)]/50 text-[var(--color-accent)] text-xs font-semibold border border-[var(--color-border)] transition-colors touch-target"
+                      title="View transactions history"
+                    >
+                      <RiHistoryLine size={14} />
+                      <span>History</span>
+                    </button>
+                    <button
+                      onClick={() => handleOpenAdjust(wallet)}
+                      className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-[var(--radius-base)] hover:bg-[var(--color-primary-bg)] text-[var(--color-text-muted)] hover:text-[var(--color-accent)] text-xs font-medium border border-transparent hover:border-[var(--color-border)] transition-colors touch-target"
+                      title="Record balance adjustment"
+                    >
+                      <RiSwapLine size={14} />
+                      <span>Adjust</span>
+                    </button>
+                  </div>
 
                   <div className="flex items-center gap-1">
                     <button
@@ -462,6 +483,19 @@ export const WalletsPage: React.FC = () => {
           }}
           wallet={adjustingWallet}
           onSubmit={handleAdjustmentSubmit}
+        />
+      )}
+
+      {/* Transactions History Modal */}
+      {inspectingWallet && (
+        <WalletTransactionsModal
+          isOpen={isTransactionsModalOpen}
+          onClose={() => {
+            setIsTransactionsModalOpen(false);
+            setInspectingWallet(null);
+          }}
+          wallet={inspectingWallet}
+          onOpenAdjust={(w) => handleOpenAdjust(w)}
         />
       )}
     </div>

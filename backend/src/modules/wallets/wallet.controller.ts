@@ -73,6 +73,17 @@ export class WalletController {
       next(err);
     }
   };
+
+  getTransactions = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const walletId = req.params.id as string;
+      const { from, to, type } = req.query as { from?: string; to?: string; type?: string };
+      const result = await walletService.getTransactions(walletId, req.userId!, { from, to, type });
+      sendSuccess(res, result);
+    } catch (err) {
+      next(err);
+    }
+  };
 }
 
 export const walletController = new WalletController();

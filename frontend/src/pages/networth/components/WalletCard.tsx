@@ -1,5 +1,5 @@
 import React from 'react';
-import { RiEqualizerLine, RiEditLine, RiDeleteBinLine } from '@remixicon/react';
+import { RiEqualizerLine, RiEditLine, RiDeleteBinLine, RiHistoryLine } from '@remixicon/react';
 import { Wallet } from '@/api/walletApi';
 
 interface WalletCardProps {
@@ -7,6 +7,7 @@ interface WalletCardProps {
   onAdjust: (wallet: Wallet) => void;
   onEdit: (wallet: Wallet) => void;
   onDelete: (wallet: Wallet) => void;
+  onViewTransactions?: (wallet: Wallet) => void;
 }
 
 export const WalletCard: React.FC<WalletCardProps> = ({
@@ -14,6 +15,7 @@ export const WalletCard: React.FC<WalletCardProps> = ({
   onAdjust,
   onEdit,
   onDelete,
+  onViewTransactions,
 }) => {
   const balance = parseFloat(wallet.currentBalance || '0');
   const isAsset = wallet.type === 'asset';
@@ -67,13 +69,25 @@ export const WalletCard: React.FC<WalletCardProps> = ({
       </div>
 
       <div className="mt-4 pt-3 border-t border-[var(--color-border)] flex items-center justify-between gap-2">
-        <button
-          onClick={() => onAdjust(wallet)}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-base)] bg-[var(--color-primary-bg)] text-[var(--color-accent)] hover:bg-[var(--color-border)]/50 text-xs font-semibold transition-colors touch-target"
-        >
-          <RiEqualizerLine className="w-4 h-4" />
-          <span>Adjust Balance</span>
-        </button>
+        <div className="flex items-center gap-1.5">
+          {onViewTransactions && (
+            <button
+              onClick={() => onViewTransactions(wallet)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-base)] bg-[var(--color-primary-bg)] text-[var(--color-accent)] hover:bg-[var(--color-border)]/50 text-xs font-semibold transition-colors touch-target"
+              title="View wallet transaction history"
+            >
+              <RiHistoryLine className="w-4 h-4" />
+              <span>History</span>
+            </button>
+          )}
+          <button
+            onClick={() => onAdjust(wallet)}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-[var(--radius-base)] hover:bg-[var(--color-primary-bg)] text-[var(--color-text-muted)] hover:text-[var(--color-accent)] text-xs font-medium border border-transparent hover:border-[var(--color-border)] transition-colors touch-target"
+          >
+            <RiEqualizerLine className="w-4 h-4" />
+            <span>Adjust</span>
+          </button>
+        </div>
 
         <div className="flex items-center gap-1">
           <button

@@ -11,6 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { WalletCard } from './components/WalletCard';
 import { WalletModal } from './components/WalletModal';
 import { AdjustmentModal } from './components/AdjustmentModal';
+import { WalletTransactionsModal } from './components/WalletTransactionsModal';
 
 export const NetworthPage: React.FC = () => {
   const queryClient = useQueryClient();
@@ -23,6 +24,9 @@ export const NetworthPage: React.FC = () => {
 
   const [isAdjustModalOpen, setIsAdjustModalOpen] = useState(false);
   const [adjustingWallet, setAdjustingWallet] = useState<Wallet | null>(null);
+
+  const [isTransactionsModalOpen, setIsTransactionsModalOpen] = useState(false);
+  const [inspectingWallet, setInspectingWallet] = useState<Wallet | null>(null);
 
   // Queries
   const { data: wallets = [], isLoading } = useQuery({
@@ -194,6 +198,10 @@ export const NetworthPage: React.FC = () => {
                     wallet={w}
                     onAdjust={handleOpenAdjust}
                     onEdit={handleOpenEdit}
+                    onViewTransactions={(target) => {
+                      setInspectingWallet(target);
+                      setIsTransactionsModalOpen(true);
+                    }}
                     onDelete={(target) => {
                       if (confirm(`Delete wallet "${target.name}"?`)) {
                         deleteWalletMutation.mutate(target.id);
@@ -226,6 +234,10 @@ export const NetworthPage: React.FC = () => {
                     wallet={w}
                     onAdjust={handleOpenAdjust}
                     onEdit={handleOpenEdit}
+                    onViewTransactions={(target) => {
+                      setInspectingWallet(target);
+                      setIsTransactionsModalOpen(true);
+                    }}
                     onDelete={(target) => {
                       if (confirm(`Delete liability "${target.name}"?`)) {
                         deleteWalletMutation.mutate(target.id);
@@ -268,6 +280,19 @@ export const NetworthPage: React.FC = () => {
           }
         }}
       />
+
+      {/* Wallet Transactions History Modal */}
+      {inspectingWallet && (
+        <WalletTransactionsModal
+          isOpen={isTransactionsModalOpen}
+          onClose={() => {
+            setIsTransactionsModalOpen(false);
+            setInspectingWallet(null);
+          }}
+          wallet={inspectingWallet}
+          onOpenAdjust={(w) => handleOpenAdjust(w)}
+        />
+      )}
     </div>
   );
 };

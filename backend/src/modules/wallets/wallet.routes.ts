@@ -23,5 +23,8 @@ router.post(
 );
 router.delete('/:id/adjustments/:adjustmentId', walletController.deleteAdjustment);
 
+// Wallet Transactions History (Combined Money Added & Spendings)
+router.get('/:id/transactions', walletController.getTransactions);
+
 export default router;
 

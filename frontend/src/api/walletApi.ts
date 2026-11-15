@@ -44,6 +44,48 @@ export interface CreateAdjustmentInput {
   notes?: string;
 }
 
+export interface WalletTransactionItem {
+  id: string;
+  source: 'adjustment' | 'spending';
+  type: 'deposit' | 'withdrawal' | 'reconcile' | 'spending';
+  direction: 'in' | 'out';
+  title: string;
+  description?: string;
+  amount: string;
+  signedAmount: string;
+  currency: string;
+  date: string;
+  notes?: string;
+  createdAt: string;
+  spendingDetails?: {
+    store?: string;
+    itemCount: number;
+    items?: Array<{ articleName: string; lineTotal: string; categoryName?: string }>;
+  };
+  adjustmentDetails?: {
+    adjustmentType: 'delta' | 'reconcile';
+    resultingBalance: string;
+  };
+}
+
+export interface WalletTransactionsResponse {
+  wallet: {
+    id: string;
+    name: string;
+    color: string;
+    type: 'asset' | 'liability';
+    currentBalance: string;
+    defaultCurrency: string;
+  };
+  summary: {
+    totalAdded: string;
+    totalSpent: string;
+    netChange: string;
+    transactionCount: number;
+  };
+  transactions: WalletTransactionItem[];
+}
+
 export const walletApi = {
   getWallets: () =>
     api.get<Wallet[]>('/wallets'),
@@ -65,5 +107,8 @@ export const walletApi = {
 
   createAdjustment: (walletId: string, data: CreateAdjustmentInput) =>
     api.post<{ wallet: Wallet; adjustment: WalletAdjustment }>(`/wallets/${walletId}/adjustments`, data),
+
+  getTransactions: (walletId: string, filters?: { from?: string; to?: string; type?: string }) =>
+    api.get<WalletTransactionsResponse>(`/wallets/${walletId}/transactions`, filters),
 };
 
