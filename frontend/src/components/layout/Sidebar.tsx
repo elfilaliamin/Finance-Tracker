@@ -17,6 +17,7 @@ import {
 } from '@remixicon/react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/hooks/useTheme';
+import { AppLogo } from '@/components/ui/AppLogo';
 
 interface SidebarProps {
   collapsed?: boolean;
@@ -72,21 +73,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false, onToggleCol
       <div className="flex items-center justify-between h-16 px-4 border-b border-[var(--color-border)]">
         {!collapsed ? (
           <div className="flex items-center gap-2.5 overflow-hidden">
-            <div className="w-8 h-8 rounded-[var(--radius-base)] bg-[var(--color-primary)] text-[color:var(--color-on-primary)] flex items-center justify-center font-bold text-sm tracking-tight shadow-[var(--shadow-sm)]">
-              FT
-            </div>
+            <AppLogo size={32} />
             <div className="flex flex-col min-w-0">
               <span className="font-bold text-[length:var(--font-size-step-1)] font-[family-name:var(--font-heading)] tracking-tight text-[color:var(--color-text)] truncate">
                 Finance Tracker
               </span>
-              <span className="text-[10px] text-[color:var(--color-muted)] uppercase tracking-wider font-semibold">
-                Wealth Operating System
-              </span>
             </div>
           </div>
         ) : (
-          <div className="w-8 h-8 mx-auto rounded-[var(--radius-base)] bg-[var(--color-primary)] text-[color:var(--color-on-primary)] flex items-center justify-center font-bold text-sm">
-            FT
+          <div className="mx-auto">
+            <AppLogo size={32} />
           </div>
         )}
 

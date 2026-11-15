@@ -19,6 +19,7 @@ import {
 } from '@remixicon/react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/hooks/useTheme';
+import { AppLogo } from '@/components/ui/AppLogo';
 
 export const LandingPage: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -150,22 +151,15 @@ export const LandingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[var(--color-background)] text-[color:var(--color-text)] font-[family-name:var(--font-body)] flex flex-col text-base">
-      {/* 1. Header (Desktop + Mobile Hamburger Menu) */}
+      {/* 1. Header (Spacious Navbar + AppLogo, Desktop + Mobile Hamburger Menu) */}
       <header className="border-b border-[var(--color-border)] bg-[var(--color-surface)] sticky top-0 z-[var(--z-sticky)]">
-        <div className="max-w-[var(--breakpoint-wide)] mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-[var(--radius-base)] bg-[var(--color-primary)] text-[color:var(--color-on-primary)] flex items-center justify-center font-bold text-lg shadow-[var(--shadow-sm)]">
-              FT
-            </div>
-            <div className="flex flex-col">
-              <span className="font-extrabold text-lg sm:text-xl font-[family-name:var(--font-heading)] tracking-tight text-[color:var(--color-text)] leading-tight">
-                Finance Tracker
-              </span>
-              <span className="text-xs font-bold tracking-wider text-[color:var(--color-primary-text)] uppercase">
-                Simple Spending & Net Worth
-              </span>
-            </div>
+        <div className="max-w-[var(--breakpoint-wide)] mx-auto px-4 sm:px-6 lg:px-8 h-20 sm:h-24 flex items-center justify-between">
+          {/* Logo & Brand Title */}
+          <Link to="/" className="flex items-center gap-3.5 group">
+            <AppLogo size={44} className="group-hover:scale-105 transition-transform shadow-[var(--shadow-sm)]" />
+            <span className="font-extrabold text-xl sm:text-2xl font-[family-name:var(--font-heading)] tracking-tight text-[color:var(--color-text)]">
+              Finance Tracker
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -653,13 +647,10 @@ export const LandingPage: React.FC = () => {
       <footer className="mt-auto py-8 bg-[var(--color-surface)] text-[color:var(--color-muted)] text-sm border-t border-[var(--color-border)]">
         <div className="max-w-[var(--breakpoint-wide)] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-7 h-7 rounded-[var(--radius-base)] bg-[var(--color-primary)] text-[color:var(--color-on-primary)] flex items-center justify-center font-bold text-sm">
-              FT
-            </div>
+            <AppLogo size={32} />
             <span className="font-bold text-[color:var(--color-text)] font-[family-name:var(--font-heading)] text-base">
               Finance Tracker
             </span>
-            <span>&bull; Simplified Spending & Net Worth Management</span>
           </div>
           <p className="text-xs sm:text-sm text-[color:var(--color-muted)]">
             Private Multi-User Support &bull; English &bull; Open-Source

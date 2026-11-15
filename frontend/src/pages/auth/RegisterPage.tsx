@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { Link, Navigate } from 'react-router-dom';
 import { RiUserAddLine, RiAlertLine, RiShieldCheckLine } from '@remixicon/react';
 import { useAuth } from '@/hooks/useAuth';
+import { AppLogo } from '@/components/ui/AppLogo';
 
 const registerSchema = z.object({
   name: z.string().optional(),
@@ -54,11 +55,9 @@ export const RegisterPage: React.FC = () => {
       />
 
       <div className="relative z-10 sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <Link to="/" className="inline-flex items-center gap-2.5 mb-6 group">
-          <div className="w-11 h-11 rounded-[var(--radius-base)] bg-[var(--color-primary)] flex items-center justify-center font-bold text-white text-xl shadow-[var(--shadow-md)] group-hover:scale-105 transition-transform">
-            FT
-          </div>
-          <span className="font-heading font-bold text-2xl tracking-tight text-[var(--color-text)]">
+        <Link to="/" className="inline-flex items-center gap-3 mb-6 group">
+          <AppLogo size={48} className="shadow-[var(--shadow-md)] group-hover:scale-105 transition-transform" />
+          <span className="font-heading font-black text-2xl tracking-tight text-[var(--color-text)]">
             Finance<span className="text-[var(--color-accent)]">Tracker</span>
           </span>
         </Link>
