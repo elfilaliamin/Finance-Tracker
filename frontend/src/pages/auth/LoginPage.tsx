@@ -41,11 +41,18 @@ export const LoginPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)] relative flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      {/* AI-Generated Finance Background Image */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center pointer-events-none opacity-20 dark:opacity-25 filter blur-[1px] transform scale-105"
+        style={{
+          backgroundImage: 'url(/auth-bg.jpg)'
+        }}
+      />
       {/* Ambient gradient glow in background */}
       <div 
-        className="absolute inset-0 pointer-events-none opacity-30 dark:opacity-20"
+        className="absolute inset-0 pointer-events-none opacity-60 dark:opacity-40"
         style={{
-          background: 'radial-gradient(ellipse 60% 50% at 50% 20%, var(--color-primary) 0%, transparent 70%)'
+          background: 'radial-gradient(ellipse 70% 60% at 50% 25%, var(--color-primary-bg) 0%, transparent 80%)'
         }}
       />
 

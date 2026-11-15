@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import {
   RiReceiptLine,
@@ -27,6 +27,27 @@ export const LandingPage: React.FC = () => {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+          }
+        });
+      },
+      {
+        threshold: 0.08,
+        rootMargin: '0px 0px -40px 0px',
+      }
+    );
+
+    const elements = document.querySelectorAll('.reveal-on-scroll');
+    elements.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, []);
 
   if (!isLoading && isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
@@ -368,7 +389,7 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* 3. The 3 Cards: Perfectly consistent, aligned view with smooth hover */}
-      <section className="border-y border-[var(--color-border)] bg-[var(--color-surface)] py-8 sm:py-10">
+      <section className="border-y border-[var(--color-border)] bg-[var(--color-surface)] py-8 sm:py-10 reveal-on-scroll scroll-driven-view">
         <div className="max-w-[var(--breakpoint-wide)] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
             {bigThree.map((item) => (
@@ -394,7 +415,7 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* 4. How It Works: 3 Simple Steps (Text Left & Readable with hover transitions) */}
-      <section id="how-it-works" className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-[var(--breakpoint-wide)] mx-auto w-full">
+      <section id="how-it-works" className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-[var(--breakpoint-wide)] mx-auto w-full reveal-on-scroll scroll-driven-view">
         <div className="text-left max-w-3xl mb-14">
           <span className="text-sm font-bold uppercase tracking-wider text-[color:var(--color-primary-text)] mb-2 block">
             Simple 3-Step Process
@@ -435,7 +456,7 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* 5. Simplified Dashboard & Reports Showcase */}
-      <section id="reports" className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-[var(--color-surface)] border-y border-[var(--color-border)] w-full">
+      <section id="reports" className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-[var(--color-surface)] border-y border-[var(--color-border)] w-full reveal-on-scroll scroll-driven-view">
         <div className="max-w-[var(--breakpoint-wide)] mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-stretch">
             {/* Left Image Card: Matched height with right narrative */}
@@ -538,7 +559,7 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* 6. Feature Grid: The 6 Core Essentials (Bigger, readable text with smooth hover transitions) */}
-      <section id="features" className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-[var(--breakpoint-wide)] mx-auto w-full">
+      <section id="features" className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-[var(--breakpoint-wide)] mx-auto w-full reveal-on-scroll scroll-driven-view">
         <div className="text-left max-w-3xl mb-14">
           <span className="text-sm font-bold uppercase tracking-wider text-[color:var(--color-primary-text)] mb-2 block">
             Everything You Need
@@ -581,7 +602,7 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* 7. Frequently Asked Questions: Text to the Left, +/- Button to the Right */}
-      <section id="faq" className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto w-full">
+      <section id="faq" className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto w-full reveal-on-scroll scroll-driven-view">
         <div className="text-left mb-12">
           <span className="text-sm font-bold uppercase tracking-wider text-[color:var(--color-primary-text)] mb-2 block">
             Got Questions?
@@ -628,7 +649,7 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* 8. Call to Action Banner: Sign In button removed (kept only on navbar) */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-[var(--color-primary-bg)] border-t border-[var(--color-border)] text-center">
+      <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-[var(--color-primary-bg)] border-t border-[var(--color-border)] text-center reveal-on-scroll scroll-driven-view">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-3xl sm:text-5xl font-black font-[family-name:var(--font-heading)] text-[color:var(--color-text)] tracking-tight mb-5 leading-tight">
             Start tracking your spending and growing your wealth today
