@@ -9,16 +9,21 @@ import {
   RiArrowRightLine,
 } from '@remixicon/react';
 import { settingsApi, ExchangeRate } from '@/api/settingsApi';
+import { useAuth } from '@/hooks/useAuth';
 
 export const ExchangeRatesCard: React.FC = () => {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const baseCurrency = (user?.baseCurrency || 'MAD').toUpperCase();
+
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Quick converter state
+  const otherInitial = baseCurrency === 'MAD' ? 'USD' : 'MAD';
   const [convertAmount, setConvertAmount] = useState<number>(100);
-  const [convertFrom, setConvertFrom] = useState<string>('USD');
-  const [convertTo, setConvertTo] = useState<string>('MAD');
+  const [convertFrom, setConvertFrom] = useState<string>(baseCurrency);
+  const [convertTo, setConvertTo] = useState<string>(otherInitial);
 
   const { data: rawRates = [], isLoading } = useQuery({
     queryKey: ['exchangeRates'],
@@ -66,57 +71,61 @@ export const ExchangeRatesCard: React.FC = () => {
     return fallback;
   };
 
-  const usdToMad = getPairRate('USD', 'MAD', 10.05);
-  const eurToMad = getPairRate('EUR', 'MAD', 10.85);
-  const eurToUsd = getPairRate('EUR', 'USD', 1.08);
-  const usdToEur = getPairRate('USD', 'EUR', 0.926);
+  const getFallback = (b: string, t: string): number => {
+    if (b === 'USD' && t === 'MAD') return 10.05;
+    if (b === 'MAD' && t === 'USD') return 0.099502;
+    if (b === 'EUR' && t === 'MAD') return 10.8531;
+    if (b === 'MAD' && t === 'EUR') return 0.092139;
+    if (b === 'EUR' && t === 'USD') return 1.0799;
+    if (b === 'USD' && t === 'EUR') return 0.926;
+    return 1;
+  };
+
+  const getCurrencySymbol = (code: string) => {
+    switch (code) {
+      case 'MAD':
+        return 'DH';
+      case 'USD':
+        return '$';
+      case 'EUR':
+        return '€';
+      default:
+        return code;
+    }
+  };
+
+  // Determine the 4 paired cards based on the base currency (MAD / USD / EUR)
+  const otherCurrencies = ['MAD', 'USD', 'EUR'].filter((c) => c !== baseCurrency);
+  const secondaryA = otherCurrencies[0] || 'USD';
+  const secondaryB = otherCurrencies[1] || 'EUR';
+
+  const pairDefinitions = [
+    { base: baseCurrency, target: secondaryA },
+    { base: secondaryA, target: baseCurrency },
+    { base: baseCurrency, target: secondaryB },
+    { base: secondaryB, target: baseCurrency },
+  ];
+
+  const cards = pairDefinitions.map((p) => {
+    const rate = getPairRate(p.base, p.target, getFallback(p.base, p.target));
+    const invRate = getPairRate(p.target, p.base, getFallback(p.target, p.base));
+    return {
+      pairTitle: `${p.base} / ${p.target}`,
+      base: p.base,
+      target: p.target,
+      rate,
+      inverseRate: invRate,
+      symbol: `${getCurrencySymbol(p.base)} → ${getCurrencySymbol(p.target)}`,
+    };
+  });
 
   // Calculate quick conversion
   const conversionRate = getPairRate(
     convertFrom,
     convertTo,
-    convertFrom === 'USD' && convertTo === 'MAD' ? 10.05 : 1
+    getFallback(convertFrom, convertTo)
   );
   const convertedTotal = (convertAmount * conversionRate).toFixed(2);
-
-  const keyPairs = [
-    {
-      pair: 'USD / MAD',
-      base: 'USD',
-      target: 'MAD',
-      rate: usdToMad,
-      inverseRate: 1 / usdToMad,
-      symbol: '$ → DH',
-      desc: 'US Dollar to Moroccan Dirham',
-    },
-    {
-      pair: 'EUR / MAD',
-      base: 'EUR',
-      target: 'MAD',
-      rate: eurToMad,
-      inverseRate: 1 / eurToMad,
-      symbol: '€ → DH',
-      desc: 'Euro to Moroccan Dirham',
-    },
-    {
-      pair: 'EUR / USD',
-      base: 'EUR',
-      target: 'USD',
-      rate: eurToUsd,
-      inverseRate: 1 / eurToUsd,
-      symbol: '€ → $',
-      desc: 'Euro to US Dollar',
-    },
-    {
-      pair: 'USD / EUR',
-      base: 'USD',
-      target: 'EUR',
-      rate: usdToEur,
-      inverseRate: 1 / usdToEur,
-      symbol: '$ → €',
-      desc: 'US Dollar to Euro',
-    },
-  ];
 
   const latestDate = rates[0]?.rateDate || new Date().toISOString().split('T')[0];
 
@@ -131,7 +140,7 @@ export const ExchangeRatesCard: React.FC = () => {
           <div>
             <h3 className="font-heading font-bold text-[var(--color-text)] text-base">Exchange Rates Engine</h3>
             <p className="text-xs text-[var(--color-text-muted)]">
-              Real-time multi-currency conversion rates between MAD, USD, and EUR
+              Live multi-currency conversion rates based on your default currency ({baseCurrency})
             </p>
           </div>
         </div>
@@ -159,7 +168,7 @@ export const ExchangeRatesCard: React.FC = () => {
         </div>
       )}
 
-      {/* Prominent Current Rates Grid */}
+      {/* Prominent Current Live Rates 4 Cards */}
       <div className="space-y-2.5">
         <div className="flex items-center justify-between">
           <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
@@ -172,30 +181,30 @@ export const ExchangeRatesCard: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {keyPairs.map((p) => (
+          {cards.map((c) => (
             <div
-              key={p.pair}
+              key={c.pairTitle}
               className="bg-[var(--color-primary-bg)]/40 border border-[var(--color-border)] rounded-[var(--radius-base)] p-3.5 shadow-xs flex flex-col justify-between"
             >
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
-                  {p.pair}
+                  {c.pairTitle}
                 </span>
                 <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-muted)]">
-                  {p.symbol}
+                  {c.symbol}
                 </span>
               </div>
 
               <div>
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-xs text-[var(--color-text-muted)] font-mono font-medium">1 {p.base} =</span>
+                  <span className="text-xs text-[var(--color-text-muted)] font-mono font-medium">1 {c.base} =</span>
                   <span className="text-lg sm:text-xl font-heading font-extrabold font-mono text-[var(--color-accent)] tracking-wide">
-                    {p.rate.toFixed(4)}
+                    {c.rate < 0.1 ? c.rate.toFixed(6) : c.rate.toFixed(4)}
                   </span>
-                  <span className="text-xs font-bold text-[var(--color-text)] font-mono">{p.target}</span>
+                  <span className="text-xs font-bold text-[var(--color-text)] font-mono">{c.target}</span>
                 </div>
                 <p className="text-[10px] text-[var(--color-text-muted)] mt-1 truncate">
-                  1 {p.target} ≈ {p.inverseRate.toFixed(4)} {p.base}
+                  1 {c.target} ≈ {c.inverseRate < 0.1 ? c.inverseRate.toFixed(6) : c.inverseRate.toFixed(4)} {c.base}
                 </p>
               </div>
             </div>
@@ -226,9 +235,9 @@ export const ExchangeRatesCard: React.FC = () => {
               onChange={(e) => setConvertFrom(e.target.value)}
               className="px-2.5 py-2 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-sm font-bold focus:outline-none"
             >
+              <option value="MAD">MAD</option>
               <option value="USD">USD</option>
               <option value="EUR">EUR</option>
-              <option value="MAD">MAD</option>
             </select>
           </div>
 
@@ -256,53 +265,6 @@ export const ExchangeRatesCard: React.FC = () => {
             </select>
           </div>
         </div>
-      </div>
-
-      {/* Detailed Rates Table */}
-      <div className="space-y-2">
-        <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
-          All Recorded Pairs
-        </h4>
-
-        {isLoading ? (
-          <p className="text-xs text-[var(--color-text-muted)] py-3">Loading rates from database...</p>
-        ) : rates.length === 0 ? (
-          <div className="p-3 text-xs text-[var(--color-text-muted)] border border-[var(--color-border)] rounded-[var(--radius-base)]">
-            No custom rates synced yet. Standard baseline rates are active above. Click <strong>Update Rates</strong> to fetch the latest rates from the market.
-          </div>
-        ) : (
-          <div className="overflow-x-auto border border-[var(--color-border)] rounded-[var(--radius-base)]">
-            <table className="w-full text-left border-collapse text-xs">
-              <thead>
-                <tr className="bg-[var(--color-primary-bg)] border-b border-[var(--color-border)] font-semibold text-[var(--color-text-muted)]">
-                  <th className="py-2.5 px-3">Currency Pair</th>
-                  <th className="py-2.5 px-3 text-right">Exchange Rate</th>
-                  <th className="py-2.5 px-3 text-right">Effective Date</th>
-                  <th className="py-2.5 px-3 text-right">Data Source</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--color-border)]">
-                {rates.map((r, idx) => {
-                  const rateVal = parseFloat(r.rate);
-                  return (
-                    <tr key={r.id || idx} className="hover:bg-[var(--color-primary-bg)]/30">
-                      <td className="py-2.5 px-3 font-bold text-[var(--color-text)] font-mono">
-                        1 {r.baseCurrency} &rarr; {r.targetCurrency}
-                      </td>
-                      <td className="py-2.5 px-3 text-right font-mono font-semibold text-[var(--color-accent)] tracking-wide">
-                        {isNaN(rateVal) ? r.rate : rateVal.toFixed(6)}
-                      </td>
-                      <td className="py-2.5 px-3 text-right text-[var(--color-text-muted)] font-mono">{r.rateDate}</td>
-                      <td className="py-2.5 px-3 text-right text-[var(--color-text-muted)] uppercase text-[10px]">
-                        {r.source || 'open.er-api.com'}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
       </div>
     </div>
   );
