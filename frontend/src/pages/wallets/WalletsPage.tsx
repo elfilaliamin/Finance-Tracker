@@ -149,9 +149,10 @@ export const WalletsPage: React.FC = () => {
     }
   };
 
-  const handleAdjustmentSubmit = async (data: CreateAdjustmentInput) => {
-    if (adjustingWallet) {
-      await adjustmentMutation.mutateAsync({ walletId: adjustingWallet.id, data });
+  const handleAdjustmentSubmit = async (data: CreateAdjustmentInput, targetWalletId?: string) => {
+    const finalWalletId = targetWalletId || adjustingWallet?.id;
+    if (finalWalletId) {
+      await adjustmentMutation.mutateAsync({ walletId: finalWalletId, data });
     }
   };
 
@@ -526,6 +527,7 @@ export const WalletsPage: React.FC = () => {
             setAdjustingWallet(null);
           }}
           wallet={adjustingWallet}
+          wallets={wallets}
           onSubmit={handleAdjustmentSubmit}
         />
       )}

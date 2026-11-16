@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ResponsiveModal } from '@/components/ui/ResponsiveModal';
 import { Wallet, CreateAdjustmentInput } from '@/api/walletApi';
 import { parsePastedDate } from '@/utils/date';
@@ -7,25 +7,35 @@ interface AdjustmentModalProps {
   isOpen: boolean;
   onClose: () => void;
   wallet: Wallet | null;
-  onSubmit: (input: CreateAdjustmentInput) => Promise<void>;
+  wallets?: Wallet[];
+  onSubmit: (input: CreateAdjustmentInput, walletId?: string) => Promise<void>;
 }
 
 export const AdjustmentModal: React.FC<AdjustmentModalProps> = ({
   isOpen,
   onClose,
   wallet,
+  wallets,
   onSubmit,
 }) => {
-  const [mode, setMode] = useState<'delta' | 'reconcile'>('reconcile');
+  const [selectedWalletId, setSelectedWalletId] = useState<string>(wallet?.id || '');
+  const [mode, setMode] = useState<'reconcile' | 'delta'>('reconcile');
   const [amount, setAmount] = useState<string>('');
   const [date, setDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
   const [notes, setNotes] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  if (!wallet) return null;
+  useEffect(() => {
+    if (wallet?.id) {
+      setSelectedWalletId(wallet.id);
+    }
+  }, [wallet?.id, isOpen]);
 
-  const currentBal = parseFloat(wallet.currentBalance || '0');
+  const activeWallet = (wallets && wallets.find((w) => w.id === selectedWalletId)) || wallet;
+  if (!activeWallet) return null;
+
+  const currentBal = parseFloat(activeWallet.currentBalance || '0');
 
   const handleDatePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
     const text = e.clipboardData.getData('text');
@@ -69,7 +79,7 @@ export const AdjustmentModal: React.FC<AdjustmentModalProps> = ({
         type: mode,
         adjustmentType: mode,
         notes: notes.trim() || undefined,
-      });
+      }, activeWallet.id);
       setAmount('');
       setNotes('');
       onClose();
@@ -92,10 +102,37 @@ export const AdjustmentModal: React.FC<AdjustmentModalProps> = ({
     <ResponsiveModal
       isOpen={isOpen}
       onClose={onClose}
-      title={`Adjust Balance: ${wallet.name}`}
+      title={`Adjust Balance: ${activeWallet.name}`}
       description="Record a manual balance update or count reconciliation."
     >
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Wallet Selector (when multiple wallets are available) */}
+        {wallets && wallets.length > 1 && (
+          <div>
+            <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5">
+              Select Wallet to Adjust *
+            </label>
+            <div className="relative">
+              <select
+                value={activeWallet.id}
+                onChange={(e) => setSelectedWalletId(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-ring)] focus:outline-none text-sm appearance-none cursor-pointer pr-10"
+              >
+                {wallets.map((w) => (
+                  <option key={w.id} value={w.id}>
+                    {w.name} ({w.type === 'asset' ? 'Asset' : 'Liability'} • {parseFloat(w.currentBalance || '0').toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {w.defaultCurrency})
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5 text-[var(--color-text-muted)]">
+                <svg className="w-4 h-4 fill-current opacity-70" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Mode Selector Tabs */}
         <div className="flex rounded-[var(--radius-base)] bg-[var(--color-primary-bg)] p-1 border border-[var(--color-border)]">
           <button
@@ -127,7 +164,7 @@ export const AdjustmentModal: React.FC<AdjustmentModalProps> = ({
           <span className="text-[var(--color-text-muted)] font-medium">Current Registered Balance:</span>
           <span className="font-bold text-[var(--color-text)] font-mono text-sm">
             {currentBal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{' '}
-            {wallet.defaultCurrency}
+            {activeWallet.defaultCurrency}
           </span>
         </div>
 
@@ -169,7 +206,7 @@ export const AdjustmentModal: React.FC<AdjustmentModalProps> = ({
               className="w-full px-3.5 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-ring)] focus:outline-none font-mono text-sm pr-16"
             />
             <span className="absolute right-3.5 top-2.5 text-xs font-semibold text-[var(--color-text-muted)]">
-              {wallet.defaultCurrency}
+              {activeWallet.defaultCurrency}
             </span>
           </div>
           <p className="mt-1 text-[11px] text-[var(--color-text-muted)]">

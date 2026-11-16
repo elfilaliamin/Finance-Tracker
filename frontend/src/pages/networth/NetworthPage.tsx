@@ -214,7 +214,10 @@ export const NetworthPage: React.FC = () => {
           <button
             onClick={() => {
               if (wallets.length > 0) {
-                handleOpenAdjust(wallets[0]);
+                const initialWallet =
+                  (selectedWalletId !== 'all' && wallets.find((w) => w.id === selectedWalletId)) ||
+                  wallets[0];
+                handleOpenAdjust(initialWallet);
               }
             }}
             className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-[var(--radius-base)] bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] font-semibold text-xs sm:text-sm hover:bg-[var(--color-primary-bg)] shadow-[var(--shadow-sm)] transition-all touch-target"
@@ -748,13 +751,13 @@ export const NetworthPage: React.FC = () => {
             setAdjustingWallet(null);
           }}
           wallet={adjustingWallet}
-          onSubmit={async (input) => {
-            if (adjustingWallet) {
-              await adjustmentMutation.mutateAsync({
-                walletId: adjustingWallet.id,
-                data: input,
-              });
-            }
+          wallets={wallets}
+          onSubmit={async (input, targetWalletId) => {
+            const finalWalletId = targetWalletId || adjustingWallet.id;
+            await adjustmentMutation.mutateAsync({
+              walletId: finalWalletId,
+              data: input,
+            });
           }}
         />
       )}
