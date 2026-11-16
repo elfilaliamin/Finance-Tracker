@@ -81,5 +81,11 @@ export const createTransferSchema = z
 export type CreateWalletInput = z.infer<typeof createWalletSchema>;
 export type UpdateWalletInput = z.infer<typeof updateWalletSchema>;
 export type CreateAdjustmentInput = z.infer<typeof createAdjustmentSchema>;
-export type CreateTransferInput = z.infer<typeof createTransferSchema>;
+export interface CreateTransferInput {
+  fromWalletId: string;
+  toWalletId: string;
+  amount: number;
+  transferDate: string;
+  notes?: string;
+}
 

@@ -100,11 +100,11 @@ export class WalletRepository {
         .set({ defaultSpendingWalletId: null })
         .where(eq(schema.userSettings.defaultSpendingWalletId, walletId));
 
-      // 3. Decouple saving goals if linked
+      // 3. Decouple saving goals / budgets if linked
       await tx
-        .update(schema.savingGoals)
+        .update(schema.budgets)
         .set({ walletId: null })
-        .where(eq(schema.savingGoals.walletId, walletId));
+        .where(eq(schema.budgets.walletId, walletId));
 
       // 4. Delete adjustments for this wallet
       await tx
@@ -406,7 +406,10 @@ export class WalletRepository {
         .from(schema.wallets)
         .where(and(eq(schema.wallets.id, walletId), eq(schema.wallets.userId, userId)));
       if (!found) return null;
-      wallet = found;
+      wallet = {
+        ...found,
+        type: found.type as 'asset' | 'liability',
+      };
     }
 
     // 2. Fetch adjustments
@@ -452,12 +455,13 @@ export class WalletRepository {
     // 3b. Fetch transfers
     const transferConditions = [eq(schema.walletTransfers.userId, userId)];
     if (!isAll) {
-      transferConditions.push(
-        or(
-          eq(schema.walletTransfers.fromWalletId, walletId),
-          eq(schema.walletTransfers.toWalletId, walletId)
-        )
+      const transferMatch = or(
+        eq(schema.walletTransfers.fromWalletId, walletId),
+        eq(schema.walletTransfers.toWalletId, walletId)
       );
+      if (transferMatch) {
+        transferConditions.push(transferMatch);
+      }
     }
     if (filters?.from) transferConditions.push(gte(schema.walletTransfers.transferDate, filters.from));
     if (filters?.to) transferConditions.push(lte(schema.walletTransfers.transferDate, filters.to));

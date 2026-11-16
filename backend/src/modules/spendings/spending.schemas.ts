@@ -118,8 +118,10 @@ export interface CreateSpendingInput {
   paidFromWalletId?: string | null;
   store?: string | null;
   storeMerchant?: string | null;
+  categoryId?: string | null;
   currency: 'MAD' | 'USD' | 'EUR';
   notes?: string | null;
+  directFunds?: boolean;
   items: SpendingItemInput[];
 }
 

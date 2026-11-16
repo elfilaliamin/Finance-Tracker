@@ -1,4 +1,5 @@
-import { and, desc, eq, gte, lte, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, inArray, isNotNull, lte, or, sql } from 'drizzle-orm';
+import { Decimal } from 'decimal.js';
 import { db } from '../../db/index.js';
 import * as schema from '../../db/schema.js';
 import { Money } from '../../utils/money.js';
@@ -52,7 +53,7 @@ export class DashboardService {
         try {
           const rate = await currencyService.getRateForDate(w.defaultCurrency, baseCurrency, todayStr);
           balance = Money.convert(balance, rate);
-        } catch {}
+        } catch { }
       }
       if (w.type === 'asset') {
         totalAssets = Money.add(totalAssets, balance);
@@ -492,7 +493,7 @@ export class DashboardService {
 
     // Group balance deltas by date and walletId
     // deltaMap[date][walletId] = change in wallet balance on that date
-    const deltaMap = new Map<string, Map<string, typeof Money.prototype>>();
+    const deltaMap = new Map<string, Map<string, Decimal>>();
 
     const addDelta = (date: string, walletId: string, amount: string | number) => {
       if (!deltaMap.has(date)) {
@@ -615,7 +616,7 @@ export class DashboardService {
         const singleW = wallets[0];
         if (singleW.type === 'liability') {
           // For a liability wallet: debt is its balance, net worth is negative of balance
-          netWorth = Money.from(0).subtract(dayDebt);
+          netWorth = Money.subtract(Money.from(0), dayDebt);
         } else {
           netWorth = dayAssets;
         }
