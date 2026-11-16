@@ -53,8 +53,6 @@ services:
     image: ghcr.io/elfilaliamin/ft-backend:latest
     container_name: ft-backend
     restart: unless-stopped
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
     networks:
       - finance-tracker-net
     depends_on:
@@ -91,8 +89,6 @@ services:
     image: ghcr.io/elfilaliamin/ft-frontend:latest
     container_name: ft-frontend
     restart: unless-stopped
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
     networks:
       - finance-tracker-net
     ports:
@@ -117,4 +113,25 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+
+  auto-prune:
+    image: docker:cli
+    container_name: ft-auto-prune
+    restart: unless-stopped
+    network_mode: "none"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: >
+      sh -c "sleep 30; while true; do docker image prune -f; sleep 86400; done"
+    deploy:
+      resources:
+        limits:
+          memory: 32M
+        reservations:
+          memory: 8M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
 
