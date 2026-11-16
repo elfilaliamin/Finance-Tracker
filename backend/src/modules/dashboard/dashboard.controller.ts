@@ -36,7 +36,17 @@ export class DashboardController {
 
   getNetWorthHistory = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const history = await dashboardService.getNetWorthHistory(req.userId!);
+      const walletId = req.query.walletId as string | undefined;
+      const period = req.query.period as string | undefined;
+      const from = req.query.from as string | undefined;
+      const to = req.query.to as string | undefined;
+      const year = req.query.year ? parseInt(req.query.year as string, 10) : undefined;
+      const history = await dashboardService.getNetWorthHistory(req.userId!, walletId, {
+        period,
+        from,
+        to,
+        year,
+      });
       sendSuccess(res, history);
     } catch (err) {
       next(err);

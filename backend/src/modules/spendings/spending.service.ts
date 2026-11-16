@@ -79,6 +79,7 @@ export class SpendingService {
       totalAmount: Money.toDbString(grandTotal),
       baseTotalAmount: Money.toDbString(baseGrandTotal),
       notes: input.notes,
+      directFunds: input.directFunds,
     };
 
     return await this.repository.create(userId, header, calculatedItems);

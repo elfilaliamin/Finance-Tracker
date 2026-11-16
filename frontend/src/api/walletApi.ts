@@ -82,6 +82,9 @@ export interface WalletTransactionItem {
   date: string;
   notes?: string;
   createdAt: string;
+  walletId?: string;
+  walletName?: string;
+  walletColor?: string;
   spendingDetails?: {
     store?: string;
     itemCount: number;

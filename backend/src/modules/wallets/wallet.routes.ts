@@ -22,6 +22,7 @@ router.get('/', walletController.list);
 router.get('/:id', walletController.getOne);
 router.post('/', validateRequest({ body: createWalletSchema }), walletController.create);
 router.put('/:id', validateRequest({ body: updateWalletSchema }), walletController.update);
+router.delete('/:id', walletController.delete);
 
 // Wallet Adjustments (Delta & Reconcile)
 router.get('/:id/adjustments', walletController.listAdjustments);

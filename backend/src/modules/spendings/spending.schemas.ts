@@ -33,6 +33,7 @@ export const createSpendingSchema = z
     categoryId: z.string().uuid().optional().nullable(),
     currency: z.enum(['MAD', 'USD', 'EUR']),
     notes: z.string().max(1000).optional().nullable(),
+    directFunds: z.boolean().optional().default(false),
     items: z.array(spendingItemInputSchema).min(1, 'At least one line item is required'),
   })
   .transform((data) => ({
@@ -42,6 +43,7 @@ export const createSpendingSchema = z
     categoryId: data.categoryId || undefined,
     currency: data.currency,
     notes: data.notes?.trim() || undefined,
+    directFunds: data.directFunds ?? false,
     items: data.items.map((item) => ({
       ...item,
       categoryId: item.categoryId || data.categoryId || undefined,

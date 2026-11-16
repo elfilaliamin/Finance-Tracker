@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { dashboardApi } from '@/api/dashboardApi';
 import { walletApi } from '@/api/walletApi';
+import { incomeApi } from '@/api/incomeApi';
 import { useAuth } from '@/hooks/useAuth';
 import { useDashboardConfig } from '@/hooks/useDashboardConfig';
 import { MetricCardsGrid } from './components/MetricCardsGrid';
@@ -18,6 +19,22 @@ export const DashboardPage: React.FC = () => {
   const [selectedWalletId, setSelectedWalletId] = useState<string>('');
 
   const displayCurrency = user?.baseCurrency || 'MAD';
+
+  // Fetch available years from records (no future years, only years with data)
+  const { data: serverAvailableYears = [] } = useQuery({
+    queryKey: ['availableYears'],
+    queryFn: () => incomeApi.getAvailableYears(),
+  });
+
+  const olderRecordedYears = Array.from(new Set(serverAvailableYears))
+    .filter((yr) => typeof yr === 'number' && !isNaN(yr) && yr < currentYear - 1 && yr <= currentYear)
+    .sort((a, b) => b - a);
+
+  const dashboardYearOptions = [
+    { value: currentYear, label: `This Year (${currentYear})` },
+    { value: currentYear - 1, label: `Last Year (${currentYear - 1})` },
+    ...olderRecordedYears.map((yr) => ({ value: yr, label: String(yr) })),
+  ];
 
   // Fetch wallets for global wallet filter
   const { data: wallets = [] } = useQuery({
@@ -43,10 +60,14 @@ export const DashboardPage: React.FC = () => {
     queryFn: () => dashboardApi.getIncomeTrend(selectedYear),
   });
 
-  // Fetch Net Worth History (filtered by wallet if selected)
+  // Fetch Net Worth History (filtered by wallet and selected year)
   const { data: netWorthHistory = [] } = useQuery({
-    queryKey: ['dashboard', 'netWorthHistory', selectedWalletId],
-    queryFn: () => dashboardApi.getNetWorthHistory(selectedWalletId || undefined),
+    queryKey: ['dashboard', 'netWorthHistory', selectedWalletId, selectedYear],
+    queryFn: () =>
+      dashboardApi.getNetWorthHistory({
+        walletId: selectedWalletId || undefined,
+        year: selectedYear,
+      }),
   });
 
   const isLoading = isMetricsLoading || isMatrixLoading;
@@ -69,9 +90,9 @@ export const DashboardPage: React.FC = () => {
               onChange={(e) => setSelectedYear(parseInt(e.target.value, 10))}
               className="bg-transparent text-sm font-semibold text-[var(--color-text)] focus:outline-none"
             >
-              {[currentYear - 2, currentYear - 1, currentYear, currentYear + 1].map((yr) => (
-                <option key={yr} value={yr} className="bg-[var(--color-surface)] text-[var(--color-text)]">
-                  {yr}
+              {dashboardYearOptions.map((opt) => (
+                <option key={opt.value} value={opt.value} className="bg-[var(--color-surface)] text-[var(--color-text)]">
+                  {opt.label}
                 </option>
               ))}
             </select>

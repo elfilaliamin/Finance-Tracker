@@ -70,6 +70,14 @@ export class WalletService {
     return updated;
   }
 
+  async deleteWallet(id: string, userId: string) {
+    const deleted = await this.repository.deleteWallet(id, userId);
+    if (!deleted) {
+      throw new NotFoundError(`Wallet with ID '${id}' not found.`);
+    }
+    return { success: true };
+  }
+
   async recordAdjustment(walletId: string, userId: string, input: CreateAdjustmentInput) {
     const wallet = await this.getWallet(walletId, userId);
     const currentBalance = Money.from(wallet.currentBalance);
@@ -123,7 +131,9 @@ export class WalletService {
     userId: string,
     filters?: { from?: string; to?: string; type?: string }
   ) {
-    await this.getWallet(walletId, userId);
+    if (walletId !== 'all') {
+      await this.getWallet(walletId, userId);
+    }
     const result = await this.repository.getWalletTransactions(walletId, userId, filters);
     if (!result) {
       throw new NotFoundError(`Wallet with ID '${walletId}' not found.`);

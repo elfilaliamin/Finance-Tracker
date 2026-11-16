@@ -42,6 +42,16 @@ export class WalletController {
     }
   };
 
+  delete = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const walletId = req.params.id as string;
+      const result = await walletService.deleteWallet(walletId, req.userId!);
+      sendSuccess(res, result);
+    } catch (err) {
+      next(err);
+    }
+  };
+
   recordAdjustment = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const walletId = req.params.id as string;

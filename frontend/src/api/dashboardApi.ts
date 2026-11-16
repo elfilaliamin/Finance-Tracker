@@ -48,7 +48,12 @@ export interface IncomeTrendPoint {
 
 export interface NetWorthHistoryPoint {
   date: string;
+  name?: string;
   amount: number;
+  netWorth?: number;
+  assets?: number;
+  debt?: number;
+  liabilities?: number;
 }
 
 export const dashboardApi = {
@@ -66,7 +71,18 @@ export const dashboardApi = {
       year: year || new Date().getFullYear(),
     }),
 
-  getNetWorthHistory: (walletId?: string) =>
-    api.get<NetWorthHistoryPoint[]>('/dashboard/charts/net-worth-history', walletId ? { walletId } : undefined),
+  getNetWorthHistory: (
+    walletIdOrFilters?: string | { walletId?: string; period?: string; year?: number; from?: string; to?: string },
+    options?: { period?: string; year?: number; from?: string; to?: string }
+  ) => {
+    let params: Record<string, any> = {};
+    if (typeof walletIdOrFilters === 'string') {
+      params.walletId = walletIdOrFilters;
+      if (options) Object.assign(params, options);
+    } else if (walletIdOrFilters && typeof walletIdOrFilters === 'object') {
+      params = { ...walletIdOrFilters };
+    }
+    return api.get<NetWorthHistoryPoint[]>('/dashboard/charts/net-worth-history', Object.keys(params).length > 0 ? params : undefined);
+  },
 };
 

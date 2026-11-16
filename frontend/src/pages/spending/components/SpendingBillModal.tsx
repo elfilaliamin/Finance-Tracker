@@ -20,6 +20,7 @@ const spendingBillSchema = z.object({
   paidFromWalletId: z.string().uuid().optional().or(z.literal('')),
   categoryId: z.string().optional(),
   notes: z.string().optional(),
+  directFunds: z.boolean().optional(),
   items: z.array(spendingItemSchema).min(1, 'At least one item is required'),
 });
 
@@ -60,6 +61,7 @@ export const SpendingBillModal: React.FC<SpendingBillModalProps> = ({
       paidFromWalletId: '',
       categoryId: '',
       notes: '',
+      directFunds: false,
       items: [{ name: '', categoryId: '', unitPrice: 0, quantity: 1 }],
     },
   });
@@ -96,6 +98,7 @@ export const SpendingBillModal: React.FC<SpendingBillModalProps> = ({
           paidFromWalletId: spending.paidFromWalletId || '',
           categoryId: initialCatId,
           notes: spending.notes || '',
+          directFunds: false,
           items:
             spending.items && spending.items.length > 0
               ? spending.items.map((i) => ({
@@ -113,6 +116,7 @@ export const SpendingBillModal: React.FC<SpendingBillModalProps> = ({
           paidFromWalletId: '',
           categoryId: categories[0]?.id || '',
           notes: '',
+          directFunds: false,
           items: [{ name: '', categoryId: categories[0]?.id || '', unitPrice: 0, quantity: 1 }],
         });
       }
@@ -132,6 +136,7 @@ export const SpendingBillModal: React.FC<SpendingBillModalProps> = ({
         categoryId: values.categoryId ? values.categoryId : undefined,
         storeMerchant: selectedCat?.name || undefined,
         notes: values.notes ? values.notes.trim() : undefined,
+        directFunds: values.directFunds,
         items: values.items.map((i) => ({
           name: i.name.trim(),
           categoryId: values.categoryId ? values.categoryId : undefined,
@@ -198,6 +203,21 @@ export const SpendingBillModal: React.FC<SpendingBillModalProps> = ({
                 </option>
               ))}
             </select>
+            {watch('paidFromWalletId') && !isEditMode && (
+              <label className="mt-2 flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  {...register('directFunds')}
+                  className="rounded border-[var(--color-border)] text-[var(--color-accent)] focus:ring-[var(--color-ring)] w-4 h-4 cursor-pointer"
+                />
+                <span className="text-xs font-semibold text-[var(--color-text)]">
+                  Direct Funds
+                </span>
+                <span className="text-[10px] text-[var(--color-text-muted)]">
+                  (adds funds to wallet first, then spends)
+                </span>
+              </label>
+            )}
           </div>
 
           <div>

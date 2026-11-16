@@ -353,34 +353,303 @@ export class DashboardService {
     };
   }
 
-  async getNetWorthHistory(userId: string) {
+  async getNetWorthHistory(
+    userId: string,
+    walletFilterId?: string,
+    options?: { from?: string; to?: string; period?: string; year?: number }
+  ) {
+    const isAll = !walletFilterId || walletFilterId === 'all';
+
+    // 1. Fetch active wallets (filtered if single wallet selected)
     const wallets = await db
       .select({
         id: schema.wallets.id,
         name: schema.wallets.name,
         type: schema.wallets.type,
         currentBalance: schema.wallets.currentBalance,
-        color: schema.wallets.color,
+        defaultCurrency: schema.wallets.defaultCurrency,
+        createdAt: schema.wallets.createdAt,
       })
       .from(schema.wallets)
-      .where(and(eq(schema.wallets.userId, userId), eq(schema.wallets.status, 'active')));
+      .where(
+        and(
+          eq(schema.wallets.userId, userId),
+          eq(schema.wallets.status, 'active'),
+          !isAll ? eq(schema.wallets.id, walletFilterId) : undefined
+        )
+      );
 
-    let total = Money.from(0);
-    for (const w of wallets) {
-      if (w.type === 'asset') {
-        total = Money.add(total, Money.from(w.currentBalance));
-      } else {
-        total = Money.subtract(total, Money.from(w.currentBalance));
+    const [userSetting] = await db
+      .select({ displayCurrency: schema.userSettings.displayCurrency })
+      .from(schema.userSettings)
+      .where(eq(schema.userSettings.userId, userId));
+    const baseCurrency = userSetting?.displayCurrency || 'MAD';
+
+    const now = new Date();
+    const todayStr = now.toISOString().substring(0, 10);
+    const currentYear = now.getFullYear();
+
+    // 2. Determine start and end dates based on period / year / options
+    let startDate: string;
+    let endDate: string = options?.to || todayStr;
+
+    if (options?.period === 'this_month') {
+      const ym = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
+      startDate = `${ym}-01`;
+      endDate = todayStr;
+    } else if (options?.period === 'last_month') {
+      const prevDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const ym = `${prevDate.getFullYear()}-${(prevDate.getMonth() + 1).toString().padStart(2, '0')}`;
+      const lastDay = new Date(prevDate.getFullYear(), prevDate.getMonth() + 1, 0).getDate();
+      startDate = `${ym}-01`;
+      endDate = `${ym}-${lastDay.toString().padStart(2, '0')}`;
+    } else if (options?.period === 'this_year' || options?.year === currentYear) {
+      startDate = `${currentYear}-01-01`;
+      endDate = todayStr;
+    } else if (options?.period === 'last_year' || options?.year === currentYear - 1) {
+      const yr = currentYear - 1;
+      startDate = `${yr}-01-01`;
+      endDate = `${yr}-12-31`;
+    } else if (options?.period && /^\d{4}$/.test(options.period)) {
+      const yr = parseInt(options.period, 10);
+      startDate = `${yr}-01-01`;
+      endDate = yr === currentYear ? todayStr : `${yr}-12-31`;
+    } else if (options?.from) {
+      startDate = options.from;
+    } else {
+      // Default: Last 30 days up to today
+      const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      startDate = thirtyDaysAgo.toISOString().substring(0, 10);
+    }
+
+    if (startDate > endDate) {
+      startDate = endDate;
+    }
+
+    // 3. Fetch all wallet-altering events
+    const walletIds = wallets.map((w) => w.id);
+    if (walletIds.length === 0) {
+      return [
+        {
+          date: todayStr,
+          amount: 0,
+          netWorth: 0,
+          assets: 0,
+          debt: 0,
+          liabilities: 0,
+        },
+      ];
+    }
+
+    const adjustments = await db
+      .select({
+        walletId: schema.walletAdjustments.walletId,
+        date: schema.walletAdjustments.adjustmentDate,
+        amount: schema.walletAdjustments.amount,
+      })
+      .from(schema.walletAdjustments)
+      .where(
+        and(
+          eq(schema.walletAdjustments.userId, userId),
+          inArray(schema.walletAdjustments.walletId, walletIds)
+        )
+      );
+
+    const spendings = await db
+      .select({
+        paidFromWalletId: schema.spendings.paidFromWalletId,
+        date: schema.spendings.date,
+        totalAmount: schema.spendings.totalAmount,
+      })
+      .from(schema.spendings)
+      .where(
+        and(
+          eq(schema.spendings.userId, userId),
+          eq(schema.spendings.isDeleted, false),
+          isNotNull(schema.spendings.paidFromWalletId),
+          inArray(schema.spendings.paidFromWalletId, walletIds)
+        )
+      );
+
+    const transfers = await db
+      .select({
+        fromWalletId: schema.walletTransfers.fromWalletId,
+        toWalletId: schema.walletTransfers.toWalletId,
+        date: schema.walletTransfers.transferDate,
+        amount: schema.walletTransfers.amount,
+        targetAmount: schema.walletTransfers.targetAmount,
+      })
+      .from(schema.walletTransfers)
+      .where(
+        and(
+          eq(schema.walletTransfers.userId, userId),
+          or(
+            inArray(schema.walletTransfers.fromWalletId, walletIds),
+            inArray(schema.walletTransfers.toWalletId, walletIds)
+          )
+        )
+      );
+
+    // Group balance deltas by date and walletId
+    // deltaMap[date][walletId] = change in wallet balance on that date
+    const deltaMap = new Map<string, Map<string, typeof Money.prototype>>();
+
+    const addDelta = (date: string, walletId: string, amount: string | number) => {
+      if (!deltaMap.has(date)) {
+        deltaMap.set(date, new Map());
+      }
+      const dayMap = deltaMap.get(date)!;
+      const current = dayMap.get(walletId) || Money.from(0);
+      dayMap.set(walletId, Money.add(current, amount));
+    };
+
+    // Delta adjustments add to balance
+    for (const adj of adjustments) {
+      addDelta(adj.date, adj.walletId, adj.amount);
+    }
+
+    // Spendings subtract from balance
+    for (const sp of spendings) {
+      if (sp.paidFromWalletId) {
+        addDelta(sp.date, sp.paidFromWalletId, `-${sp.totalAmount}`);
       }
     }
 
-    const todayDate = new Date().toISOString().substring(0, 10);
-    return [
-      {
-        date: todayDate,
-        amount: parseFloat(Money.toDbString(total)),
-      },
-    ];
+    // Transfers: sender subtracts, receiver adds
+    for (const tr of transfers) {
+      addDelta(tr.date, tr.fromWalletId, `-${tr.amount}`);
+      addDelta(tr.date, tr.toWalletId, tr.targetAmount);
+    }
+
+    // 4. Generate sampled timeline dates
+    const startD = new Date(startDate);
+    const endD = new Date(endDate);
+    const diffDays = Math.max(1, Math.round((endD.getTime() - startD.getTime()) / (1000 * 3600 * 24)));
+
+    // Pick sampling interval (daily if <= 31 days, every 2-3 days if <= 90 days, weekly/monthly if larger)
+    let step = 1;
+    if (diffDays > 180) {
+      step = 7;
+    } else if (diffDays > 60) {
+      step = 3;
+    } else if (diffDays > 31) {
+      step = 2;
+    }
+
+    const sampledDates: string[] = [];
+    const curr = new Date(startD);
+    while (curr <= endD) {
+      sampledDates.push(curr.toISOString().substring(0, 10));
+      curr.setDate(curr.getDate() + step);
+    }
+    if (sampledDates[sampledDates.length - 1] !== endDate) {
+      sampledDates.push(endDate);
+    }
+
+    // Also include any specific dates where transactions occurred within [startDate, endDate]
+    for (const d of deltaMap.keys()) {
+      if (d >= startDate && d <= endDate && !sampledDates.includes(d)) {
+        sampledDates.push(d);
+      }
+    }
+    sampledDates.sort();
+
+    // 5. Calculate each wallet balance at each sampled date
+    // Current balances are at todayStr. Working backwards:
+    // Balance at date D = currentBalance - sum(deltas after D)
+    const points: Array<{
+      date: string;
+      name?: string;
+      amount: number;
+      netWorth: number;
+      assets: number;
+      debt: number;
+      liabilities: number;
+    }> = [];
+
+    // Pre-cache latest exchange rates
+    const walletRateMap = new Map<string, string>();
+    for (const w of wallets) {
+      if (w.defaultCurrency && w.defaultCurrency !== baseCurrency) {
+        try {
+          const rate = await currencyService.getRateForDate(w.defaultCurrency, baseCurrency, todayStr);
+          walletRateMap.set(w.id, rate);
+        } catch {
+          walletRateMap.set(w.id, '1.000000');
+        }
+      } else {
+        walletRateMap.set(w.id, '1.000000');
+      }
+    }
+
+    for (const date of sampledDates) {
+      let dayAssets = Money.from(0);
+      let dayDebt = Money.from(0);
+
+      for (const w of wallets) {
+        let bal = Money.from(w.currentBalance);
+
+        // Subtract deltas that occurred AFTER this date
+        for (const [d, dayDeltas] of deltaMap.entries()) {
+          if (d > date && dayDeltas.has(w.id)) {
+            const change = dayDeltas.get(w.id)!;
+            bal = Money.subtract(bal, change);
+          }
+        }
+
+        // Convert to base currency
+        const rate = walletRateMap.get(w.id) || '1.000000';
+        const converted = rate !== '1.000000' ? Money.convert(bal, rate) : bal;
+
+        if (w.type === 'asset') {
+          dayAssets = Money.add(dayAssets, converted);
+        } else {
+          dayDebt = Money.add(dayDebt, converted);
+        }
+      }
+
+      let netWorth = Money.subtract(dayAssets, dayDebt);
+
+      // If single wallet filter:
+      if (!isAll && wallets.length === 1) {
+        const singleW = wallets[0];
+        if (singleW.type === 'liability') {
+          // For a liability wallet: debt is its balance, net worth is negative of balance
+          netWorth = Money.from(0).subtract(dayDebt);
+        } else {
+          netWorth = dayAssets;
+        }
+      }
+
+      const nwNum = parseFloat(Money.toDbString(netWorth));
+      const assetNum = Math.max(0, parseFloat(Money.toDbString(dayAssets)));
+      const debtNum = Math.max(0, parseFloat(Money.toDbString(dayDebt)));
+
+      points.push({
+        date,
+        name: date,
+        amount: nwNum,
+        netWorth: nwNum,
+        assets: assetNum,
+        debt: debtNum,
+        liabilities: debtNum,
+      });
+    }
+
+    // Ensure at least 2 points for smooth chart rendering
+    if (points.length === 1) {
+      const first = points[0];
+      const earlierDate = new Date(new Date(first.date).getTime() - 7 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .substring(0, 10);
+      points.unshift({
+        ...first,
+        date: earlierDate,
+        name: earlierDate,
+      });
+    }
+
+    return points;
   }
 }
 

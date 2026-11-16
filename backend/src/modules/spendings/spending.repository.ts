@@ -23,6 +23,7 @@ export interface CalculatedSpendingHeader {
   totalAmount: string;
   baseTotalAmount: string;
   notes?: string | null;
+  directFunds?: boolean;
 }
 
 export class SpendingRepository {
@@ -64,7 +65,7 @@ export class SpendingRepository {
         )
         .returning();
 
-      // 3. Atomically decrement wallet balance if paidFromWalletId is specified (with currency conversion)
+      // 3. Handle wallet balance updates (with Direct Funds support)
       if (header.paidFromWalletId) {
         const [wallet] = await tx
           .select({
@@ -80,14 +81,39 @@ export class SpendingRepository {
             const rate = await currencyService.getRateForDate(header.currency, wallet.defaultCurrency, header.date);
             deductionAmount = Money.toDbString(Money.convert(header.totalAmount, rate));
           }
-          const newBalance = Money.subtract(wallet.currentBalance, deductionAmount);
-          await tx
-            .update(schema.wallets)
-            .set({
-              currentBalance: Money.toDbString(newBalance),
-              updatedAt: new Date(),
-            })
-            .where(eq(schema.wallets.id, header.paidFromWalletId));
+
+          if (header.directFunds) {
+            // Direct Funds: Money spent is first added to the targeted wallet, then spent
+            const rateToBase = await currencyService.getRateForDate(wallet.defaultCurrency, 'MAD', header.date);
+            const baseAmount = Money.toDbString(Money.convert(deductionAmount, rateToBase));
+            const fundedBalance = Money.toDbString(Money.add(wallet.currentBalance, deductionAmount));
+
+            await tx.insert(schema.walletAdjustments).values({
+              walletId: header.paidFromWalletId,
+              userId,
+              adjustmentDate: header.date,
+              adjustmentType: 'delta',
+              amount: deductionAmount,
+              resultingBalance: fundedBalance,
+              currency: wallet.defaultCurrency,
+              exchangeRateToBase: rateToBase,
+              baseAmount,
+              notes: `Direct funds for ${header.store || 'Spending'}`,
+            });
+
+            // After deposit and immediate deduction, final balance is preserved at wallet.currentBalance
+            // and wallet history records both the incoming direct funds deposit and the spending transaction
+          } else {
+            // Normal deduction
+            const newBalance = Money.subtract(wallet.currentBalance, deductionAmount);
+            await tx
+              .update(schema.wallets)
+              .set({
+                currentBalance: Money.toDbString(newBalance),
+                updatedAt: new Date(),
+              })
+              .where(eq(schema.wallets.id, header.paidFromWalletId));
+          }
         }
       }
 

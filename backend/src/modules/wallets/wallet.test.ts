@@ -237,4 +237,19 @@ describe('Wallet & Balance Adjustment Suite', () => {
       /Insufficient funds/
     );
   });
+
+  it('should successfully delete wallet', async () => {
+    let deletedId: string | null = null;
+    const mockRepo = {
+      deleteWallet: async (id: string, _userId: string) => {
+        deletedId = id;
+        return true;
+      },
+    } as any;
+
+    const service = new WalletService(mockRepo);
+    const result = await service.deleteWallet('w-1', 'user-1');
+    assert.deepEqual(result, { success: true });
+    assert.equal(deletedId, 'w-1');
+  });
 });

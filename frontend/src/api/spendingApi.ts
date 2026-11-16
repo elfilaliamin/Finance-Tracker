@@ -43,6 +43,7 @@ export interface CreateSpendingInput {
   categoryId?: string;
   currency: string;
   notes?: string;
+  directFunds?: boolean;
   items: {
     name: string;
     categoryId?: string;

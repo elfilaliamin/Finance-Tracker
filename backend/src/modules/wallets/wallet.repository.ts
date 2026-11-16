@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, inArray, lte, or } from 'drizzle-orm';
+import { and, desc, eq, gte, inArray, isNotNull, lte, or } from 'drizzle-orm';
 import { db } from '../../db/index.js';
 import * as schema from '../../db/schema.js';
 import { Money } from '../../utils/money.js';
@@ -75,6 +75,60 @@ export class WalletRepository {
       .where(and(eq(schema.wallets.id, id), eq(schema.wallets.userId, userId)))
       .returning();
     return updated || null;
+  }
+
+  async deleteWallet(walletId: string, userId: string): Promise<boolean> {
+    return await db.transaction(async (tx) => {
+      const [wallet] = await tx
+        .select()
+        .from(schema.wallets)
+        .where(and(eq(schema.wallets.id, walletId), eq(schema.wallets.userId, userId)));
+
+      if (!wallet) {
+        return false;
+      }
+
+      // 1. Decouple spendings so historical receipts are not lost
+      await tx
+        .update(schema.spendings)
+        .set({ paidFromWalletId: null })
+        .where(eq(schema.spendings.paidFromWalletId, walletId));
+
+      // 2. Decouple default spending wallet in user settings if matched
+      await tx
+        .update(schema.userSettings)
+        .set({ defaultSpendingWalletId: null })
+        .where(eq(schema.userSettings.defaultSpendingWalletId, walletId));
+
+      // 3. Decouple saving goals if linked
+      await tx
+        .update(schema.savingGoals)
+        .set({ walletId: null })
+        .where(eq(schema.savingGoals.walletId, walletId));
+
+      // 4. Delete adjustments for this wallet
+      await tx
+        .delete(schema.walletAdjustments)
+        .where(eq(schema.walletAdjustments.walletId, walletId));
+
+      // 5. Delete transfers involving this wallet
+      await tx
+        .delete(schema.walletTransfers)
+        .where(
+          or(
+            eq(schema.walletTransfers.fromWalletId, walletId),
+            eq(schema.walletTransfers.toWalletId, walletId)
+          )
+        );
+
+      // 6. Delete the wallet itself
+      const [deleted] = await tx
+        .delete(schema.wallets)
+        .where(and(eq(schema.wallets.id, walletId), eq(schema.wallets.userId, userId)))
+        .returning();
+
+      return !!deleted;
+    });
   }
 
   async recordAdjustment(
@@ -311,19 +365,53 @@ export class WalletRepository {
     userId: string,
     filters?: { from?: string; to?: string; type?: string }
   ) {
-    // 1. Fetch wallet
-    const [wallet] = await db
-      .select()
+    const isAll = walletId === 'all';
+
+    // Fetch all user wallets to resolve names and colors
+    const userWallets = await db
+      .select({
+        id: schema.wallets.id,
+        name: schema.wallets.name,
+        color: schema.wallets.color,
+        type: schema.wallets.type,
+        currentBalance: schema.wallets.currentBalance,
+        defaultCurrency: schema.wallets.defaultCurrency,
+      })
       .from(schema.wallets)
-      .where(and(eq(schema.wallets.id, walletId), eq(schema.wallets.userId, userId)));
+      .where(eq(schema.wallets.userId, userId));
+    const walletNameMap = new Map(userWallets.map((w) => [w.id, w.name]));
+    const walletColorMap = new Map(userWallets.map((w) => [w.id, w.color]));
 
-    if (!wallet) return null;
+    let wallet: {
+      id: string;
+      name: string;
+      color: string;
+      type: 'asset' | 'liability';
+      currentBalance: string;
+      defaultCurrency: string;
+    };
 
-    // 2. Fetch adjustments for this wallet
-    const adjConditions = [
-      eq(schema.walletAdjustments.walletId, walletId),
-      eq(schema.walletAdjustments.userId, userId),
-    ];
+    if (isAll) {
+      wallet = {
+        id: 'all',
+        name: 'All Wallets',
+        color: '#047857',
+        type: 'asset',
+        currentBalance: '0.00',
+        defaultCurrency: userWallets[0]?.defaultCurrency || 'MAD',
+      };
+    } else {
+      const [found] = await db
+        .select()
+        .from(schema.wallets)
+        .where(and(eq(schema.wallets.id, walletId), eq(schema.wallets.userId, userId)));
+      if (!found) return null;
+      wallet = found;
+    }
+
+    // 2. Fetch adjustments
+    const adjConditions = [eq(schema.walletAdjustments.userId, userId)];
+    if (!isAll) adjConditions.push(eq(schema.walletAdjustments.walletId, walletId));
     if (filters?.from) adjConditions.push(gte(schema.walletAdjustments.adjustmentDate, filters.from));
     if (filters?.to) adjConditions.push(lte(schema.walletAdjustments.adjustmentDate, filters.to));
 
@@ -333,12 +421,16 @@ export class WalletRepository {
       .where(and(...adjConditions))
       .orderBy(desc(schema.walletAdjustments.adjustmentDate), desc(schema.walletAdjustments.createdAt));
 
-    // 3. Fetch spendings for this wallet
+    // 3. Fetch spendings
     const spendConditions = [
-      eq(schema.spendings.paidFromWalletId, walletId),
       eq(schema.spendings.userId, userId),
       eq(schema.spendings.isDeleted, false),
     ];
+    if (isAll) {
+      spendConditions.push(isNotNull(schema.spendings.paidFromWalletId));
+    } else {
+      spendConditions.push(eq(schema.spendings.paidFromWalletId, walletId));
+    }
     if (filters?.from) spendConditions.push(gte(schema.spendings.date, filters.from));
     if (filters?.to) spendConditions.push(lte(schema.spendings.date, filters.to));
 
@@ -351,19 +443,22 @@ export class WalletRepository {
         totalAmount: schema.spendings.totalAmount,
         notes: schema.spendings.notes,
         createdAt: schema.spendings.createdAt,
+        paidFromWalletId: schema.spendings.paidFromWalletId,
       })
       .from(schema.spendings)
       .where(and(...spendConditions))
       .orderBy(desc(schema.spendings.date), desc(schema.spendings.createdAt));
 
-    // 3b. Fetch transfers involving this wallet (as sender or receiver)
-    const transferConditions = [
-      eq(schema.walletTransfers.userId, userId),
-      or(
-        eq(schema.walletTransfers.fromWalletId, walletId),
-        eq(schema.walletTransfers.toWalletId, walletId)
-      ),
-    ];
+    // 3b. Fetch transfers
+    const transferConditions = [eq(schema.walletTransfers.userId, userId)];
+    if (!isAll) {
+      transferConditions.push(
+        or(
+          eq(schema.walletTransfers.fromWalletId, walletId),
+          eq(schema.walletTransfers.toWalletId, walletId)
+        )
+      );
+    }
     if (filters?.from) transferConditions.push(gte(schema.walletTransfers.transferDate, filters.from));
     if (filters?.to) transferConditions.push(lte(schema.walletTransfers.transferDate, filters.to));
 
@@ -372,13 +467,6 @@ export class WalletRepository {
       .from(schema.walletTransfers)
       .where(and(...transferConditions))
       .orderBy(desc(schema.walletTransfers.transferDate), desc(schema.walletTransfers.createdAt));
-
-    // Fetch all user wallets to resolve names in transfers
-    const userWallets = await db
-      .select({ id: schema.wallets.id, name: schema.wallets.name })
-      .from(schema.wallets)
-      .where(eq(schema.wallets.userId, userId));
-    const walletNameMap = new Map(userWallets.map((w) => [w.id, w.name]));
 
     // 4. Fetch line items for these spendings if any
     const spendingIds = spendings.map((s) => s.id);
@@ -431,6 +519,9 @@ export class WalletRepository {
       date: string;
       notes?: string;
       createdAt: string;
+      walletId?: string;
+      walletName?: string;
+      walletColor?: string;
       spendingDetails?: {
         store?: string;
         itemCount: number;
@@ -500,6 +591,9 @@ export class WalletRepository {
         date: adj.adjustmentDate,
         notes: adj.notes || undefined,
         createdAt: adj.createdAt instanceof Date ? adj.createdAt.toISOString() : String(adj.createdAt),
+        walletId: adj.walletId,
+        walletName: walletNameMap.get(adj.walletId) || 'Wallet',
+        walletColor: walletColorMap.get(adj.walletId),
         adjustmentDetails: {
           adjustmentType: adj.adjustmentType as 'delta' | 'reconcile',
           resultingBalance: adj.resultingBalance,
@@ -542,6 +636,9 @@ export class WalletRepository {
         date: sp.date,
         notes: sp.notes || undefined,
         createdAt: sp.createdAt instanceof Date ? sp.createdAt.toISOString() : String(sp.createdAt),
+        walletId: sp.paidFromWalletId || undefined,
+        walletName: (sp.paidFromWalletId && walletNameMap.get(sp.paidFromWalletId)) || 'Wallet',
+        walletColor: sp.paidFromWalletId ? walletColorMap.get(sp.paidFromWalletId) : undefined,
         spendingDetails: {
           store: sp.store || undefined,
           itemCount: spItems.length,
@@ -550,61 +647,72 @@ export class WalletRepository {
       });
     }
 
-    // Map transfers involving this wallet
+    // Map transfers involving this wallet (or all transfers if viewing all)
     for (const tr of transfers) {
-      const isSender = tr.fromWalletId === walletId;
-      const otherWalletId = isSender ? tr.toWalletId : tr.fromWalletId;
-      const otherWalletName = walletNameMap.get(otherWalletId) || 'Another Wallet';
+      const fromName = walletNameMap.get(tr.fromWalletId) || 'Wallet';
+      const toName = walletNameMap.get(tr.toWalletId) || 'Wallet';
 
-      if (isSender) {
+      if (isAll || tr.fromWalletId === walletId) {
         // Wallet that gives (sender) -> RED in history, direction 'out'
         const amountNum = parseFloat(tr.amount);
-        totalSpent = Money.add(totalSpent, Money.from(tr.amount));
+        if (!isAll) {
+          totalSpent = Money.add(totalSpent, Money.from(tr.amount));
+        }
 
         transactionItems.push({
-          id: tr.id,
+          id: `${tr.id}-out`,
           source: 'transfer',
           type: 'transfer_out',
           direction: 'out',
-          title: `Transfer to ${otherWalletName}`,
-          description: tr.notes || `Transferred to ${otherWalletName}`,
+          title: `Transfer to ${toName}`,
+          description: tr.notes || `Transferred to ${toName}`,
           amount: Math.abs(amountNum).toFixed(2),
           signedAmount: `-${Math.abs(amountNum).toFixed(2)}`,
           currency: tr.fromCurrency,
           date: tr.transferDate,
           notes: tr.notes || undefined,
           createdAt: tr.createdAt instanceof Date ? tr.createdAt.toISOString() : String(tr.createdAt),
+          walletId: tr.fromWalletId,
+          walletName: fromName,
+          walletColor: walletColorMap.get(tr.fromWalletId),
           transferDetails: {
             role: 'sender',
-            otherWalletId,
-            otherWalletName,
+            otherWalletId: tr.toWalletId,
+            otherWalletName: toName,
             exchangeRate: tr.exchangeRate,
             targetAmount: tr.targetAmount,
             toCurrency: tr.toCurrency,
           },
         });
-      } else {
+      }
+
+      if (isAll || tr.toWalletId === walletId) {
         // Wallet that receives (receiver) -> BLUE in history, direction 'in'
         const targetNum = parseFloat(tr.targetAmount);
-        totalAdded = Money.add(totalAdded, Money.from(tr.targetAmount));
+        if (!isAll) {
+          totalAdded = Money.add(totalAdded, Money.from(tr.targetAmount));
+        }
 
         transactionItems.push({
-          id: tr.id,
+          id: `${tr.id}-in`,
           source: 'transfer',
           type: 'transfer_in',
           direction: 'in',
-          title: `Transfer from ${otherWalletName}`,
-          description: tr.notes || `Received from ${otherWalletName}`,
+          title: `Transfer from ${fromName}`,
+          description: tr.notes || `Received from ${fromName}`,
           amount: Math.abs(targetNum).toFixed(2),
           signedAmount: `+${Math.abs(targetNum).toFixed(2)}`,
           currency: tr.toCurrency,
           date: tr.transferDate,
           notes: tr.notes || undefined,
           createdAt: tr.createdAt instanceof Date ? tr.createdAt.toISOString() : String(tr.createdAt),
+          walletId: tr.toWalletId,
+          walletName: toName,
+          walletColor: walletColorMap.get(tr.toWalletId),
           transferDetails: {
             role: 'receiver',
-            otherWalletId,
-            otherWalletName,
+            otherWalletId: tr.fromWalletId,
+            otherWalletName: fromName,
             exchangeRate: tr.exchangeRate,
             sourceAmount: tr.amount,
             fromCurrency: tr.fromCurrency,
