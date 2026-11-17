@@ -295,33 +295,30 @@ export const WalletsPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setTypeFilter('all')}
-              className={`px-3 py-1.5 rounded-[calc(var(--radius-base)-2px)] transition-colors ${
-                typeFilter === 'all'
+              className={`px-3 py-1.5 rounded-[calc(var(--radius-base)-2px)] transition-colors ${typeFilter === 'all'
                   ? 'bg-white dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 shadow-xs'
                   : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
-              }`}
+                }`}
             >
               All ({wallets.length})
             </button>
             <button
               type="button"
               onClick={() => setTypeFilter('asset')}
-              className={`px-3 py-1.5 rounded-[calc(var(--radius-base)-2px)] transition-colors ${
-                typeFilter === 'asset'
+              className={`px-3 py-1.5 rounded-[calc(var(--radius-base)-2px)] transition-colors ${typeFilter === 'asset'
                   ? 'bg-white dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 shadow-xs'
                   : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
-              }`}
+                }`}
             >
               Assets ({assetWallets.length})
             </button>
             <button
               type="button"
               onClick={() => setTypeFilter('liability')}
-              className={`px-3 py-1.5 rounded-[calc(var(--radius-base)-2px)] transition-colors ${
-                typeFilter === 'liability'
+              className={`px-3 py-1.5 rounded-[calc(var(--radius-base)-2px)] transition-colors ${typeFilter === 'liability'
                   ? 'bg-white dark:bg-rose-900/60 text-rose-600 dark:text-rose-300 shadow-xs'
                   : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
-              }`}
+                }`}
             >
               Debts ({liabilityWallets.length})
             </button>
@@ -405,11 +402,10 @@ export const WalletsPage: React.FC = () => {
 
                     <div className="flex items-center gap-1.5 shrink-0">
                       <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded-[var(--radius-pill)] text-[10px] font-bold uppercase tracking-wider border ${
-                          isAsset
+                        className={`inline-flex items-center px-2 py-0.5 rounded-[var(--radius-pill)] text-[10px] font-bold uppercase tracking-wider border ${isAsset
                             ? 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
                             : 'bg-rose-100 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800'
-                        }`}
+                          }`}
                       >
                         {isAsset ? 'Asset' : 'Liability'}
                       </span>
@@ -430,9 +426,8 @@ export const WalletsPage: React.FC = () => {
                     </span>
                     <div className="flex items-baseline gap-1.5 mt-0.5">
                       <span
-                        className={`text-2xl font-bold font-mono tracking-wider ${
-                          isAsset ? 'text-[var(--color-text)]' : 'text-[var(--color-danger)]'
-                        }`}
+                        className={`text-2xl font-bold font-mono tracking-wider ${isAsset ? 'text-[var(--color-text)]' : 'text-[var(--color-danger)]'
+                          }`}
                       >
                         {isAsset ? '' : '-'}
                         {Math.abs(balanceNum).toLocaleString(undefined, {
@@ -460,22 +455,12 @@ export const WalletsPage: React.FC = () => {
                     </button>
                     <button
                       onClick={() => handleOpenAdjust(wallet)}
-                      className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-[var(--radius-base)] bg-emerald-50/60 hover:bg-emerald-100 dark:bg-emerald-950/20 dark:hover:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300 text-xs font-medium border border-emerald-200/60 dark:border-emerald-800/60 transition-colors touch-target"
+                      className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-[var(--radius-base)] bg-emerald-50/60 hover:bg-emerald-100 dark:bg-emerald-950/20 dark:hover:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300 text-xs font-medium border border-emerald-200/60 dark:border-emerald-800/60 transition-colors touch-target"
                       title="Record balance adjustment"
                     >
                       <RiSwapLine size={14} />
                       <span>Adjust</span>
                     </button>
-                    {wallets.length >= 2 && (
-                      <button
-                        onClick={() => handleOpenTransfer(wallet)}
-                        className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-[var(--radius-base)] bg-blue-50/60 hover:bg-blue-100 dark:bg-blue-950/20 dark:hover:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-xs font-medium border border-blue-200/60 dark:border-blue-800/60 transition-colors touch-target"
-                        title="Transfer money from this wallet"
-                      >
-                        <RiSwapLine size={14} />
-                        <span>Transfer</span>
-                      </button>
-                    )}
                   </div>
 
                   <div className="flex items-center gap-1 shrink-0 ml-auto">
