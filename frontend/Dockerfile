@@ -10,6 +10,7 @@ RUN npm run build
 
 # Stage 2: Build Standalone VitePress Documentation
 FROM node:22-alpine AS docs-builder
+RUN apk add --no-cache git
 WORKDIR /docs
 
 COPY docs/package*.json ./
