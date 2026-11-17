@@ -16,6 +16,13 @@ jobs:
     strategy:
       matrix:
         service: [backend, frontend]
+        include:
+          - service: backend
+            context: ./backend
+            file: ./backend/Dockerfile
+          - service: frontend
+            context: .
+            file: ./frontend/Dockerfile
 
     steps:
       - name: Checkout repository
@@ -34,7 +41,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
-          context: ./${{ matrix.service }}
+          context: ${{ matrix.context }}
+          file: ${{ matrix.file }}
           target: runner
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/ft-${{ matrix.service }}:latest

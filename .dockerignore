@@ -1,0 +1,15 @@
+node_modules
+backend/node_modules
+frontend/node_modules
+docs/node_modules
+dist
+backend/dist
+frontend/dist
+docs/.vitepress/dist
+docs/.vitepress/cache
+.git
+.github
+understand
+logs
+*.log
+coverage
