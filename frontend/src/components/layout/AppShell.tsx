@@ -76,17 +76,17 @@ export const AppShell: React.FC = () => {
               <Link
                 to="/settings"
                 title="Manage profile & avatar in Settings"
-                className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-full hover:bg-[var(--color-primary-bg)] border border-[var(--color-border)] transition-colors group"
+                className="flex items-center gap-2.5 p-0 sm:px-2.5 sm:py-1.5 rounded-full hover:bg-[var(--color-primary-bg)] border-0 sm:border sm:border-[var(--color-border)] transition-colors group"
               >
                 {/* Avatar Image or Initials */}
                 {avatar ? (
                   <img
                     src={avatar}
                     alt={user.name || user.email}
-                    className="w-7 h-7 rounded-full object-cover border border-[var(--color-border)] shadow-xs shrink-0"
+                    className="w-8 h-8 rounded-full object-cover border-2 border-[var(--color-accent)] shadow-xs shrink-0"
                   />
                 ) : (
-                  <div className="w-7 h-7 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center uppercase shadow-xs shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center uppercase shadow-xs shrink-0 border-2 border-[var(--color-accent)]">
                     {(user.name || user.email).charAt(0)}
                   </div>
                 )}
