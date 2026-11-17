@@ -209,21 +209,6 @@ export const SpendingBillModal: React.FC<SpendingBillModalProps> = ({
                 </option>
               ))}
             </select>
-            {watch('paidFromWalletId') && !isEditMode && (
-              <label className="mt-2 flex items-center gap-2 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  {...register('directFunds')}
-                  className="rounded border-[var(--color-border)] text-[var(--color-accent)] focus:ring-[var(--color-ring)] w-4 h-4 cursor-pointer"
-                />
-                <span className="text-xs font-semibold text-[var(--color-text)]">
-                  Direct Funds
-                </span>
-                <span className="text-[10px] text-[var(--color-text-muted)]">
-                  (adds funds to wallet first, then spends)
-                </span>
-              </label>
-            )}
           </div>
 
           <div>
@@ -256,6 +241,25 @@ export const SpendingBillModal: React.FC<SpendingBillModalProps> = ({
               <option value="EUR" className="bg-[var(--color-surface)] text-[var(--color-text)]">EUR</option>
             </select>
           </div>
+
+          {/* Direct Funds (Full line across whole row) */}
+          {watch('paidFromWalletId') && !isEditMode && (
+            <div className="col-span-1 sm:col-span-2">
+              <label className="flex items-center gap-2.5 px-3 py-2.5 rounded-[var(--radius-base)] bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-emerald-400 dark:hover:border-emerald-600 transition-colors cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  {...register('directFunds')}
+                  className="rounded border-[var(--color-border)] text-emerald-600 focus:ring-emerald-500 w-4 h-4 cursor-pointer shrink-0"
+                />
+                <span className="text-xs font-semibold text-[var(--color-text)]">
+                  Direct Funds
+                </span>
+                <span className="text-[11px] text-[var(--color-text-muted)]">
+                  (adds funds to wallet first, then spends)
+                </span>
+              </label>
+            </div>
+          )}
         </div>
 
         {/* Itemized Lines */}
