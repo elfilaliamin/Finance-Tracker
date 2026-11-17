@@ -318,55 +318,55 @@ export const SpendingBillModal: React.FC<SpendingBillModalProps> = ({
                     )}
                   </div>
 
-                  {/* Row 2: Quantity in separate line + Price & Line Total */}
-                  <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[var(--color-border)]">
-                    {/* Quantity Stepper */}
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs text-[var(--color-text-muted)] font-medium">Qty:</span>
-                      <div className="flex items-center gap-1">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const val = Math.max(1, (typeof currentQty === 'number' ? currentQty : parseFloat(currentQty || '1')) - 1);
-                            setValue(`items.${idx}.quantity`, val);
-                          }}
-                          className="w-7 h-7 rounded-[var(--radius-base)] bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 text-emerald-900 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-bold flex items-center justify-center touch-target transition-colors shadow-xs"
-                        >
-                          <RiSubtractLine className="w-3.5 h-3.5" />
-                        </button>
-                        <input
-                          type="number"
-                          step="any"
-                          min="0.01"
-                          {...register(`items.${idx}.quantity` as const)}
-                          className="w-14 text-center py-1 border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] rounded-[var(--radius-base)] text-xs font-semibold"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const val = (typeof currentQty === 'number' ? currentQty : parseFloat(currentQty || '1')) + 1;
-                            setValue(`items.${idx}.quantity`, val);
-                          }}
-                          className="w-7 h-7 rounded-[var(--radius-base)] bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 text-emerald-900 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-bold flex items-center justify-center touch-target transition-colors shadow-xs"
-                        >
-                          <RiAddLine className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
+                  {/* Row 2: Quantity Stepper */}
+                  <div className="flex items-center gap-2 pt-2 border-t border-[var(--color-border)]">
+                    <span className="text-xs text-[var(--color-text-muted)] font-medium">Qty:</span>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const val = Math.max(1, (typeof currentQty === 'number' ? currentQty : parseFloat(currentQty || '1')) - 1);
+                          setValue(`items.${idx}.quantity`, val);
+                        }}
+                        className="w-8 h-8 rounded-[var(--radius-base)] bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 text-emerald-900 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-bold flex items-center justify-center transition-colors shadow-xs active:scale-95 shrink-0"
+                      >
+                        <RiSubtractLine className="w-3.5 h-3.5" />
+                      </button>
+                      <input
+                        type="number"
+                        step="any"
+                        min="0.01"
+                        {...register(`items.${idx}.quantity` as const)}
+                        className="w-14 h-8 text-center border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] rounded-[var(--radius-base)] text-xs font-semibold focus:ring-1 focus:ring-[var(--color-ring)]"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const val = (typeof currentQty === 'number' ? currentQty : parseFloat(currentQty || '1')) + 1;
+                          setValue(`items.${idx}.quantity`, val);
+                        }}
+                        className="w-8 h-8 rounded-[var(--radius-base)] bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 text-emerald-900 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-bold flex items-center justify-center transition-colors shadow-xs active:scale-95 shrink-0"
+                      >
+                        <RiAddLine className="w-3.5 h-3.5" />
+                      </button>
                     </div>
+                  </div>
 
-                    {/* Unit Price & Line Total */}
-                    <div className="flex items-center gap-2.5 ml-auto">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-xs text-[var(--color-text-muted)] font-medium">Price:</span>
-                        <input
-                          type="number"
-                          step="0.01"
-                          placeholder="0.00"
-                          {...register(`items.${idx}.unitPrice` as const)}
-                          className="w-20 px-2.5 py-1 border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] rounded-[var(--radius-base)] text-xs font-mono text-right"
-                        />
-                      </div>
-                      <span className="font-mono font-bold text-xs sm:text-sm text-[var(--color-text)] shrink-0 min-w-[65px] text-right">
+                  {/* Row 3: Unit Price (left) & Line Total (right) in new line */}
+                  <div className="flex items-center justify-between gap-2 pt-1">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs text-[var(--color-text-muted)] font-medium">Price:</span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        {...register(`items.${idx}.unitPrice` as const)}
+                        className="w-24 h-8 px-2.5 border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] rounded-[var(--radius-base)] text-xs font-mono text-left focus:ring-1 focus:ring-[var(--color-ring)]"
+                      />
+                    </div>
+                    <div className="flex items-center gap-1.5 text-right">
+                      <span className="text-xs text-[var(--color-text-muted)] font-medium">Total:</span>
+                      <span className="font-mono font-bold text-xs sm:text-sm text-[var(--color-text)]">
                         {lineTotal.toFixed(2)} {selectedCurrency}
                       </span>
                     </div>
