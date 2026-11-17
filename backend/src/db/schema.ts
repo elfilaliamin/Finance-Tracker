@@ -183,7 +183,7 @@ export const incomeCategories = pgTable('income_categories', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
-// 8. Incomes (NO WALLET ID)
+// 8. Incomes
 export const incomes = pgTable(
   'incomes',
   {
@@ -191,6 +191,8 @@ export const incomes = pgTable(
     userId: uuid('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
+    walletId: uuid('wallet_id')
+      .references(() => wallets.id, { onDelete: 'set null' }),
     date: date('date').notNull(),
     sourceId: uuid('source_id')
       .notNull()
@@ -214,6 +216,7 @@ export const incomes = pgTable(
     dateIdx: index('incomes_date_idx').on(table.date),
     userIdx: index('incomes_user_id_idx').on(table.userId),
     sourceIdx: index('incomes_source_id_idx').on(table.sourceId),
+    walletIdx: index('incomes_wallet_id_idx').on(table.walletId),
   })
 );
 

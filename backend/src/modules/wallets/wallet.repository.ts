@@ -472,6 +472,38 @@ export class WalletRepository {
       .where(and(...transferConditions))
       .orderBy(desc(schema.walletTransfers.transferDate), desc(schema.walletTransfers.createdAt));
 
+    // 3c. Fetch incomes deposited to this wallet
+    const incomeConditions = [
+      eq(schema.incomes.userId, userId),
+      eq(schema.incomes.isDeleted, false),
+    ];
+    if (isAll) {
+      incomeConditions.push(isNotNull(schema.incomes.walletId));
+    } else {
+      incomeConditions.push(eq(schema.incomes.walletId, walletId));
+    }
+    if (filters?.from) incomeConditions.push(gte(schema.incomes.date, filters.from));
+    if (filters?.to) incomeConditions.push(lte(schema.incomes.date, filters.to));
+
+    const incomes = await db
+      .select({
+        id: schema.incomes.id,
+        date: schema.incomes.date,
+        amount: schema.incomes.amount,
+        currency: schema.incomes.currency,
+        description: schema.incomes.description,
+        notes: schema.incomes.notes,
+        createdAt: schema.incomes.createdAt,
+        walletId: schema.incomes.walletId,
+        sourceTitle: schema.incomeSources.title,
+        categoryName: schema.incomeCategories.name,
+      })
+      .from(schema.incomes)
+      .leftJoin(schema.incomeSources, eq(schema.incomes.sourceId, schema.incomeSources.id))
+      .leftJoin(schema.incomeCategories, eq(schema.incomes.categoryId, schema.incomeCategories.id))
+      .where(and(...incomeConditions))
+      .orderBy(desc(schema.incomes.date), desc(schema.incomes.createdAt));
+
     // 4. Fetch line items for these spendings if any
     const spendingIds = spendings.map((s) => s.id);
     const spendingItemsMap: Record<
@@ -512,8 +544,8 @@ export class WalletRepository {
 
     const transactionItems: Array<{
       id: string;
-      source: 'adjustment' | 'spending' | 'transfer';
-      type: 'deposit' | 'withdrawal' | 'reconcile' | 'spending' | 'transfer_in' | 'transfer_out';
+      source: 'adjustment' | 'spending' | 'transfer' | 'income';
+      type: 'deposit' | 'withdrawal' | 'reconcile' | 'spending' | 'transfer_in' | 'transfer_out' | 'income';
       direction: 'in' | 'out';
       title: string;
       description?: string;
@@ -725,6 +757,35 @@ export class WalletRepository {
       }
     }
 
+    // Map incomes deposited to this wallet
+    for (const inc of incomes) {
+      const amountNum = parseFloat(inc.amount);
+      const absAmount = Math.abs(amountNum).toFixed(2);
+      const signedAmount = `+${absAmount}`;
+      totalAdded = Money.add(totalAdded, absAmount);
+
+      const targetWalletName = (inc.walletId && walletNameMap.get(inc.walletId)) || wallet.name;
+      const targetWalletColor = inc.walletId ? walletColorMap.get(inc.walletId) : wallet.color;
+
+      transactionItems.push({
+        id: inc.id,
+        source: 'income',
+        type: 'deposit',
+        direction: 'in',
+        title: inc.sourceTitle ? `Income: ${inc.sourceTitle}` : 'Income Deposit',
+        description: inc.description || inc.categoryName || 'Deposited to wallet',
+        amount: absAmount,
+        signedAmount,
+        currency: inc.currency,
+        date: inc.date,
+        notes: inc.notes || undefined,
+        createdAt: inc.createdAt instanceof Date ? inc.createdAt.toISOString() : String(inc.createdAt),
+        walletId: inc.walletId || undefined,
+        walletName: targetWalletName,
+        walletColor: targetWalletColor,
+      });
+    }
+
     // Sort all transactions chronologically descending
     transactionItems.sort((a, b) => {
       const dateCompare = b.date.localeCompare(a.date);
@@ -744,6 +805,8 @@ export class WalletRepository {
       filteredTransactions = transactionItems.filter((t) => t.source === 'adjustment');
     } else if (filters?.type === 'transfer') {
       filteredTransactions = transactionItems.filter((t) => t.source === 'transfer');
+    } else if (filters?.type === 'income') {
+      filteredTransactions = transactionItems.filter((t) => t.source === 'income');
     }
 
     const netChange = Money.toDbString(Money.subtract(totalAdded, totalSpent));

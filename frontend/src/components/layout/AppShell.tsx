@@ -6,6 +6,7 @@ import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/hooks/useTheme';
 import { useUserAvatar } from '@/hooks/useUserAvatar';
+import { AppLogo } from '@/components/ui/AppLogo';
 import { RiSunLine, RiMoonLine } from '@remixicon/react';
 
 export const AppShell: React.FC = () => {
@@ -55,9 +56,9 @@ export const AppShell: React.FC = () => {
         <header className="sticky top-0 z-[var(--z-sticky)] h-16 bg-[var(--color-surface)] border-b border-[var(--color-border)] px-4 md:px-6 flex items-center justify-between shadow-[var(--shadow-sm)]">
           <div className="flex items-center gap-3">
             {isMobile && (
-              <div className="w-8 h-8 rounded-[var(--radius-base)] bg-[var(--color-primary)] text-[color:var(--color-on-primary)] flex items-center justify-center font-bold text-sm tracking-tight shrink-0 shadow-[var(--shadow-sm)]">
-                FT
-              </div>
+              <Link to="/dashboard" className="shrink-0 flex items-center shadow-xs rounded-[var(--radius-base)]" title="Finance Tracker">
+                <AppLogo size={32} />
+              </Link>
             )}
             <div>
               <span className="text-[10px] uppercase font-bold text-[color:var(--color-muted)] tracking-wider hidden sm:block">

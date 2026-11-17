@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { RiAddLine, RiEditLine, RiDeleteBinLine } from '@remixicon/react';
 import { incomeApi, IncomeRecord, CreateIncomeInput } from '@/api/incomeApi';
+import { walletApi } from '@/api/walletApi';
 import { useAuth } from '@/hooks/useAuth';
 import { ResponsiveTable, Column } from '@/components/ui/ResponsiveTable';
 import { IncomeModal } from './components/IncomeModal';
@@ -57,6 +58,11 @@ export const IncomePage: React.FC = () => {
     queryFn: () => incomeApi.getAvailableYears(),
   });
 
+  const { data: wallets = [] } = useQuery({
+    queryKey: ['wallets'],
+    queryFn: () => walletApi.getWallets(),
+  });
+
   const { data: incomes = [], isLoading } = useQuery({
     queryKey: ['incomes', selectedPeriod, queryYear, queryMonth, selectedSourceId, selectedCurrency],
     queryFn: () =>
@@ -81,6 +87,8 @@ export const IncomePage: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['incomes'] });
       queryClient.invalidateQueries({ queryKey: ['incomeAvailableYears'] });
+      queryClient.invalidateQueries({ queryKey: ['wallets'] });
+      queryClient.invalidateQueries({ queryKey: ['walletTransactions'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     },
   });
@@ -91,6 +99,8 @@ export const IncomePage: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['incomes'] });
       queryClient.invalidateQueries({ queryKey: ['incomeAvailableYears'] });
+      queryClient.invalidateQueries({ queryKey: ['wallets'] });
+      queryClient.invalidateQueries({ queryKey: ['walletTransactions'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     },
   });
@@ -100,6 +110,8 @@ export const IncomePage: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['incomes'] });
       queryClient.invalidateQueries({ queryKey: ['incomeAvailableYears'] });
+      queryClient.invalidateQueries({ queryKey: ['wallets'] });
+      queryClient.invalidateQueries({ queryKey: ['walletTransactions'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     },
   });
@@ -145,6 +157,20 @@ export const IncomePage: React.FC = () => {
           </span>
         </div>
       ),
+    },
+    {
+      key: 'walletName',
+      header: 'Wallet',
+      render: (item: any) => {
+        const wName = item.wallet?.name || item.walletName;
+        return wName ? (
+          <span className="inline-flex items-center px-2 py-0.5 rounded-[var(--radius-pill)] text-xs font-medium bg-[var(--color-primary-bg)] text-[var(--color-text)] border border-[var(--color-border)]">
+            {wName}
+          </span>
+        ) : (
+          <span className="text-xs text-[var(--color-text-muted)]">—</span>
+        );
+      },
     },
     {
       key: 'amount',
@@ -248,6 +274,14 @@ export const IncomePage: React.FC = () => {
           </p>
         )}
 
+        {(item.wallet?.name || item.walletName) && (
+          <div className="mt-1.5">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-[var(--radius-pill)] text-[11px] font-medium bg-[var(--color-primary-bg)] text-[var(--color-text)] border border-[var(--color-border)]">
+              Wallet: {item.wallet?.name || item.walletName}
+            </span>
+          </div>
+        )}
+
         <div className="mt-2 pt-2 border-t border-[var(--color-border)] flex items-center justify-end gap-2">
           <button
             onClick={() => handleOpenEdit(item)}
@@ -320,6 +354,9 @@ export const IncomePage: React.FC = () => {
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         income={editingIncome}
+        sources={sources}
+        wallets={wallets}
+        defaultCurrency={defaultCurrency}
         onSubmit={async (data) => {
           if (editingIncome) {
             await updateMutation.mutateAsync({ id: editingIncome.id, data });
@@ -349,8 +386,6 @@ export const IncomePage: React.FC = () => {
             }
           }
         }}
-        sources={sources}
-        defaultCurrency={defaultCurrency}
       />
     </div>
   );

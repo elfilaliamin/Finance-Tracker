@@ -1,6 +1,7 @@
 import { IncomeRepository, incomeRepository } from './income.repository.js';
 import { incomeSourcesRepository } from '../incomeSources/incomeSources.repository.js';
 import { incomeCategoriesRepository } from '../categories/incomeCategories.repository.js';
+import { walletRepository } from '../wallets/wallet.repository.js';
 import { currencyService } from '../currencies/currency.service.js';
 import { CreateIncomeInput, UpdateIncomeInput, IncomeFilterInput } from './income.schemas.js';
 import { NotFoundError } from '../../errors/AppError.js';
@@ -30,6 +31,14 @@ export class IncomeService {
     const source = await incomeSourcesRepository.findById(input.sourceId, userId);
     if (!source) {
       throw new NotFoundError(`Income source with ID '${input.sourceId}' does not exist.`);
+    }
+
+    // 1b. Verify Wallet exists and belongs to user if specified
+    if (input.walletId) {
+      const wallet = await walletRepository.findById(input.walletId, userId);
+      if (!wallet) {
+        throw new NotFoundError(`Wallet with ID '${input.walletId}' does not exist.`);
+      }
     }
 
     // 2. Resolve Income Category (use provided, or fall back to user's first category / create General)
@@ -65,6 +74,7 @@ export class IncomeService {
       date: input.date,
       sourceId: input.sourceId,
       categoryId,
+      walletId: input.walletId,
       amount: amountStr,
       currency: input.currency,
       exchangeRateToBase: rate,
@@ -91,6 +101,13 @@ export class IncomeService {
       }
     }
 
+    if (input.walletId) {
+      const wallet = await walletRepository.findById(input.walletId, userId);
+      if (!wallet) {
+        throw new NotFoundError(`Wallet with ID '${input.walletId}' does not exist.`);
+      }
+    }
+
     const date = input.date || existing.date;
     const currency = input.currency || existing.currency;
     const amount = input.amount !== undefined ? Money.toDbString(input.amount) : existing.amount;
@@ -108,6 +125,7 @@ export class IncomeService {
       date: input.date,
       sourceId: input.sourceId,
       categoryId: input.categoryId,
+      walletId: input.walletId,
       amount: input.amount !== undefined ? amount : undefined,
       currency: input.currency,
       exchangeRateToBase,

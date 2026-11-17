@@ -632,7 +632,7 @@ export const NetworthPage: React.FC = () => {
                 IconComponent = RiEqualizerLine;
               } else if (isAdded) {
                 badgeColor = 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20';
-                badgeLabel = 'Money Added';
+                badgeLabel = t.source === 'income' ? 'Income' : 'Money Added';
                 iconColor = 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400';
                 amountColor = 'text-emerald-600 dark:text-emerald-400';
                 IconComponent = RiArrowRightDownLine;

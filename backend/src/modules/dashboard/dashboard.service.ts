@@ -491,6 +491,22 @@ export class DashboardService {
         )
       );
 
+    const incomes = await db
+      .select({
+        walletId: schema.incomes.walletId,
+        date: schema.incomes.date,
+        amount: schema.incomes.amount,
+      })
+      .from(schema.incomes)
+      .where(
+        and(
+          eq(schema.incomes.userId, userId),
+          eq(schema.incomes.isDeleted, false),
+          isNotNull(schema.incomes.walletId),
+          inArray(schema.incomes.walletId, walletIds)
+        )
+      );
+
     // Group balance deltas by date and walletId
     // deltaMap[date][walletId] = change in wallet balance on that date
     const deltaMap = new Map<string, Map<string, Decimal>>();
@@ -513,6 +529,13 @@ export class DashboardService {
     for (const sp of spendings) {
       if (sp.paidFromWalletId) {
         addDelta(sp.date, sp.paidFromWalletId, `-${sp.totalAmount}`);
+      }
+    }
+
+    // Incomes add to balance
+    for (const inc of incomes) {
+      if (inc.walletId) {
+        addDelta(inc.date, inc.walletId, inc.amount);
       }
     }
 

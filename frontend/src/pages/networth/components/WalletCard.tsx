@@ -68,12 +68,12 @@ export const WalletCard: React.FC<WalletCardProps> = ({
         </div>
       </div>
 
-      <div className="mt-4 pt-3 border-t border-[var(--color-border)] flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5">
+      <div className="mt-4 pt-3 border-t border-[var(--color-border)] flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-1.5 min-w-0">
           {onViewTransactions && (
             <button
               onClick={() => onViewTransactions(wallet)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-base)] bg-[var(--color-primary-bg)] text-[var(--color-accent)] hover:bg-[var(--color-border)]/50 text-xs font-semibold transition-colors touch-target"
+              className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-[var(--radius-base)] bg-[var(--color-primary-bg)] text-[var(--color-accent)] hover:bg-[var(--color-border)]/50 text-xs font-semibold transition-colors touch-target"
               title="View wallet transaction history"
             >
               <RiHistoryLine className="w-4 h-4" />
@@ -89,7 +89,7 @@ export const WalletCard: React.FC<WalletCardProps> = ({
           </button>
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 shrink-0 ml-auto">
           <button
             onClick={() => onEdit(wallet)}
             className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-accent)] rounded-[var(--radius-base)] hover:bg-[var(--color-primary-bg)] transition-colors touch-target"

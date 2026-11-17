@@ -1,6 +1,7 @@
 import React from 'react';
 import { ResponsiveModal } from '@/components/ui/ResponsiveModal';
 import { SpendingRecord } from '@/api/spendingApi';
+import { formatQuantity } from '@/utils/format';
 import { RiPriceTag3Line, RiCalendarLine, RiWallet3Line } from '@remixicon/react';
 
 interface MiniReceiptModalProps {
@@ -74,7 +75,7 @@ export const MiniReceiptModal: React.FC<MiniReceiptModalProps> = ({
                 <div className="flex-1">
                   <p className="font-semibold text-[var(--color-text)]">{item.name}</p>
                   <p className="text-[10px] text-[var(--color-text-muted)]">
-                    {item.quantity} x {Number(item.unitPrice).toFixed(2)} {spending.currency}
+                    {formatQuantity(item.quantity)} x {Number(item.unitPrice).toFixed(2)} {spending.currency}
                     {item.categoryName ? ` • ${item.categoryName}` : ''}
                   </p>
                 </div>

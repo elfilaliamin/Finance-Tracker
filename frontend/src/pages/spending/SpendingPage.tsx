@@ -8,6 +8,7 @@ import { ResponsiveTable, Column } from '@/components/ui/ResponsiveTable';
 import { SpendingBillModal } from './components/SpendingBillModal';
 import { MiniReceiptModal } from './components/MiniReceiptModal';
 import { SpendingFilters } from './components/SpendingFilters';
+import { formatQuantity } from '@/utils/format';
 
 export const SpendingPage: React.FC = () => {
   const queryClient = useQueryClient();
@@ -115,7 +116,7 @@ export const SpendingPage: React.FC = () => {
       header: 'Category',
       render: (item) => (
         <span className="font-semibold text-[var(--color-text)]">
-          {item.items?.[0]?.categoryName || item.storeMerchant || 'General Expense'}
+          {item.items?.[0]?.categoryName || item.storeMerchant || 'Uncategorized'}
         </span>
       ),
     },
@@ -196,7 +197,7 @@ export const SpendingPage: React.FC = () => {
     <div onClick={() => setSelectedReceipt(item)}>
       <div className="flex items-center justify-between mb-1.5">
         <span className="font-bold text-[var(--color-text)] text-sm">
-          {item.items?.[0]?.categoryName || item.storeMerchant || 'Spending Expense'}
+          {item.items?.[0]?.categoryName || item.storeMerchant || 'Uncategorized'}
         </span>
         <span className="text-xs text-[var(--color-text-muted)] font-mono">{item.date}</span>
       </div>
@@ -221,7 +222,7 @@ export const SpendingPage: React.FC = () => {
 
       {item.items && item.items.length > 0 && (
         <div className="text-xs text-[var(--color-text-muted)] mt-2 border-t border-[var(--color-border)] pt-1.5 line-clamp-1">
-          {item.items.map((i) => `${i.name} (x${i.quantity})`).join(', ')}
+          {item.items.map((i) => `${i.name} (x${formatQuantity(i.quantity)})`).join(', ')}
         </div>
       )}
 

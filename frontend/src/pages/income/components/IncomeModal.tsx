@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { ResponsiveModal } from '@/components/ui/ResponsiveModal';
 import { IncomeSource, IncomeRecord, CreateIncomeInput } from '@/api/incomeApi';
+import { Wallet } from '@/api/walletApi';
 import { parsePastedDate } from '@/utils/date';
 
 const incomeSchema = z.object({
@@ -11,6 +12,7 @@ const incomeSchema = z.object({
   amount: z.coerce.number().positive('Amount must be greater than zero'),
   currency: z.enum(['MAD', 'USD', 'EUR']),
   sourceId: z.string().uuid('Please select an income source'),
+  walletId: z.string().uuid().optional().or(z.literal('')),
   description: z.string().optional(),
   notes: z.string().optional(),
 });
@@ -22,6 +24,7 @@ interface IncomeModalProps {
   onClose: () => void;
   onSubmit: (data: CreateIncomeInput) => Promise<void>;
   sources: IncomeSource[];
+  wallets?: Wallet[];
   defaultCurrency: string;
   income?: IncomeRecord | null;
 }
@@ -31,6 +34,7 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
   onClose,
   onSubmit,
   sources,
+  wallets = [],
   defaultCurrency,
   income,
 }) => {
@@ -50,6 +54,7 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
       amount: '' as any,
       currency: (defaultCurrency as any) || 'MAD',
       sourceId: sources[0]?.id || '',
+      walletId: '',
       description: '',
       notes: '',
     },
@@ -63,6 +68,7 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
           amount: parseFloat(income.amount || '0'),
           currency: (income.currency as any) || 'MAD',
           sourceId: income.sourceId || '',
+          walletId: income.walletId || '',
           description: income.description || '',
           notes: income.notes || '',
         });
@@ -72,6 +78,7 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
           amount: '' as any,
           currency: (defaultCurrency as any) || 'MAD',
           sourceId: sources[0]?.id || '',
+          walletId: '',
           description: '',
           notes: '',
         });
@@ -113,6 +120,7 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
         amount: values.amount,
         currency: values.currency,
         sourceId: values.sourceId,
+        walletId: values.walletId ? values.walletId : undefined,
         description: values.description?.trim() || undefined,
         notes: values.notes?.trim() || undefined,
       });
@@ -144,8 +152,8 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
       title={isEditMode ? 'Edit Income Record' : 'Record New Income'}
       description={
         isEditMode
-          ? 'Update the recorded revenue details. Strictly decoupled from wallet balances.'
-          : 'Add a revenue transaction. Strictly decoupled from wallet balances.'
+          ? 'Update the recorded revenue details and wallet allocation.'
+          : 'Record revenue details and optionally credit a selected wallet.'
       }
     >
       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
@@ -225,6 +233,29 @@ export const IncomeModal: React.FC<IncomeModalProps> = ({
             ))}
           </select>
           {errors.sourceId && <p className="mt-1 text-xs text-[var(--color-danger)]">{errors.sourceId.message}</p>}
+        </div>
+
+        {/* Added to Wallet (Optional) */}
+        <div>
+          <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5">
+            Added to Wallet (Optional)
+          </label>
+          <select
+            {...register('walletId')}
+            className="w-full px-3.5 py-2.5 rounded-[var(--radius-base)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-ring)] focus:outline-none text-sm"
+          >
+            <option value="" className="bg-[var(--color-surface)] text-[var(--color-text)]">
+              No Wallet (Record Only)
+            </option>
+            {wallets.map((w) => (
+              <option key={w.id} value={w.id} className="bg-[var(--color-surface)] text-[var(--color-text)]">
+                {w.name} ({parseFloat(w.currentBalance || '0').toFixed(2)} {w.defaultCurrency})
+              </option>
+            ))}
+          </select>
+          <p className="mt-1 text-[11px] text-[var(--color-text-muted)]">
+            If selected, this income amount will be automatically added to the wallet's balance.
+          </p>
         </div>
 
         {/* Description */}

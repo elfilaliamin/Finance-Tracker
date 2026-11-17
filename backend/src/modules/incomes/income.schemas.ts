@@ -5,6 +5,7 @@ const baseIncomeObject = z
     date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be formatted YYYY-MM-DD'),
     sourceId: z.string().uuid('Valid source ID is required'),
     categoryId: z.string().uuid('Valid category ID is required').optional().nullable(),
+    walletId: z.string().uuid('Valid wallet ID is required').optional().nullable(),
     amount: z.coerce.number().positive('Amount must be positive'),
     currency: z.enum(['MAD', 'USD', 'EUR']),
     description: z.string().max(255).optional().nullable(),
@@ -17,6 +18,7 @@ export const createIncomeSchema = baseIncomeObject.transform((data) => ({
   description: data.description?.trim() || undefined,
   notes: data.notes?.trim() || undefined,
   categoryId: data.categoryId || undefined,
+  walletId: data.walletId || undefined,
 }));
 
 export const updateIncomeSchema = baseIncomeObject.partial().transform((data) => ({
@@ -24,6 +26,7 @@ export const updateIncomeSchema = baseIncomeObject.partial().transform((data) =>
   description: data.description !== undefined ? data.description?.trim() || undefined : undefined,
   notes: data.notes !== undefined ? data.notes?.trim() || undefined : undefined,
   categoryId: data.categoryId !== undefined ? data.categoryId || undefined : undefined,
+  walletId: data.walletId !== undefined ? data.walletId || undefined : undefined,
 }));
 
 export const incomeFilterSchema = z.object({

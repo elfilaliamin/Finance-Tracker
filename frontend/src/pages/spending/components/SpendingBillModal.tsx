@@ -10,8 +10,14 @@ import { Wallet } from '@/api/walletApi';
 const spendingItemSchema = z.object({
   name: z.string().min(1, 'Item name is required'),
   categoryId: z.string().optional().nullable(),
-  unitPrice: z.coerce.number().positive('Price must be greater than 0'),
-  quantity: z.coerce.number().int().positive('Quantity must be >= 1'),
+  unitPrice: z.preprocess(
+    (val) => (val === '' || val === undefined ? undefined : val),
+    z.coerce.number().positive('Price must be greater than 0')
+  ),
+  quantity: z.preprocess(
+    (val) => (val === '' || val === undefined ? 1 : val),
+    z.coerce.number().positive('Quantity must be greater than 0')
+  ),
 });
 
 const spendingBillSchema = z.object({
@@ -62,7 +68,7 @@ export const SpendingBillModal: React.FC<SpendingBillModalProps> = ({
       categoryId: '',
       notes: '',
       directFunds: false,
-      items: [{ name: '', categoryId: '', unitPrice: 0, quantity: 1 }],
+      items: [{ name: '', categoryId: '', unitPrice: '' as any, quantity: 1 }],
     },
   });
 
@@ -77,7 +83,7 @@ export const SpendingBillModal: React.FC<SpendingBillModalProps> = ({
   // Compute live subtotal
   const grandTotal = watchedItems.reduce((sum, itm) => {
     const price = typeof itm?.unitPrice === 'number' ? itm.unitPrice : parseFloat(itm?.unitPrice || '0') || 0;
-    const qty = typeof itm?.quantity === 'number' ? itm.quantity : parseInt(itm?.quantity || '1', 10) || 1;
+    const qty = typeof itm?.quantity === 'number' ? itm.quantity : parseFloat(itm?.quantity || '1') || 1;
     return sum + price * qty;
   }, 0);
 
@@ -104,20 +110,20 @@ export const SpendingBillModal: React.FC<SpendingBillModalProps> = ({
               ? spending.items.map((i) => ({
                 name: i.name,
                 categoryId: i.categoryId || initialCatId || '',
-                unitPrice: typeof i.unitPrice === 'number' ? i.unitPrice : parseFloat(i.unitPrice as any) || 0,
-                quantity: typeof i.quantity === 'number' ? i.quantity : parseInt(i.quantity as any, 10) || 1,
+                unitPrice: typeof i.unitPrice === 'number' ? i.unitPrice : parseFloat(i.unitPrice as any) || ('' as any),
+                quantity: typeof i.quantity === 'number' ? i.quantity : parseFloat(i.quantity as any) || 1,
               }))
-              : [{ name: '', categoryId: initialCatId || '', unitPrice: 0, quantity: 1 }],
+              : [{ name: '', categoryId: initialCatId || '', unitPrice: '' as any, quantity: 1 }],
         });
       } else {
         reset({
           date: new Date().toISOString().split('T')[0],
           currency: (defaultCurrency as any) || 'MAD',
           paidFromWalletId: '',
-          categoryId: categories[0]?.id || '',
+          categoryId: '',
           notes: '',
           directFunds: false,
-          items: [{ name: '', categoryId: categories[0]?.id || '', unitPrice: 0, quantity: 1 }],
+          items: [{ name: '', categoryId: '', unitPrice: '' as any, quantity: 1 }],
         });
       }
       setErrorMessage(null);
@@ -260,7 +266,7 @@ export const SpendingBillModal: React.FC<SpendingBillModalProps> = ({
             </span>
             <button
               type="button"
-              onClick={() => append({ name: '', categoryId: '', unitPrice: 0, quantity: 1 })}
+              onClick={() => append({ name: '', categoryId: '', unitPrice: '' as any, quantity: 1 })}
               className="inline-flex items-center gap-1 text-xs font-bold text-[var(--color-accent)] hover:underline touch-target px-2 py-1"
             >
               <RiAddLine className="w-4 h-4" /> Add Item
@@ -271,18 +277,20 @@ export const SpendingBillModal: React.FC<SpendingBillModalProps> = ({
             <p className="text-xs text-[var(--color-danger)]">{errors.items.message}</p>
           )}
 
-          <div className="space-y-3 max-h-[42vh] overflow-y-auto pr-1">
+          <div className="space-y-3 sm:max-h-[42vh] sm:overflow-y-auto pr-1">
             {fields.map((field, idx) => {
-              const currentQty = watchedItems[idx]?.quantity || 1;
-              const currentPrice = watchedItems[idx]?.unitPrice || 0;
-              const lineTotal = currentPrice * currentQty;
+              const currentQty = watchedItems[idx]?.quantity ?? 1;
+              const currentPrice = watchedItems[idx]?.unitPrice ?? 0;
+              const numPrice = typeof currentPrice === 'number' ? currentPrice : parseFloat(currentPrice || '0') || 0;
+              const numQty = typeof currentQty === 'number' ? currentQty : parseFloat(currentQty || '1') || 1;
+              const lineTotal = numPrice * numQty;
 
               return (
                 <div
                   key={field.id}
-                  className="p-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-base)] shadow-[var(--shadow-sm)] space-y-2 relative"
+                  className="p-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-base)] shadow-[var(--shadow-sm)] space-y-2.5 relative"
                 >
-                  {/* Article Name and Quantity Stepper side by side */}
+                  {/* Row 1: Article Name (takes full width) & Delete Icon */}
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-[var(--color-text-muted)] w-5 shrink-0">#{idx + 1}</span>
 
@@ -298,30 +306,6 @@ export const SpendingBillModal: React.FC<SpendingBillModalProps> = ({
                       )}
                     </div>
 
-                    {/* Quantity Stepper right beside the article name */}
-                    <div className="flex items-center gap-1 shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => setValue(`items.${idx}.quantity`, Math.max(1, currentQty - 1))}
-                        className="w-8 h-8 rounded-[var(--radius-base)] bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 text-emerald-900 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-bold flex items-center justify-center touch-target transition-colors shadow-xs"
-                      >
-                        <RiSubtractLine className="w-3.5 h-3.5" />
-                      </button>
-                      <input
-                        type="number"
-                        min="1"
-                        {...register(`items.${idx}.quantity` as const)}
-                        className="w-12 text-center py-1.5 border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] rounded-[var(--radius-base)] text-sm font-semibold"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setValue(`items.${idx}.quantity`, currentQty + 1)}
-                        className="w-8 h-8 rounded-[var(--radius-base)] bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 text-emerald-900 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-bold flex items-center justify-center touch-target transition-colors shadow-xs"
-                      >
-                        <RiAddLine className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-
                     {fields.length > 1 && (
                       <button
                         type="button"
@@ -334,24 +318,55 @@ export const SpendingBillModal: React.FC<SpendingBillModalProps> = ({
                     )}
                   </div>
 
-                  {/* Unit Price & Line Total */}
-                  <div className="flex items-center justify-between gap-2 pt-1.5 border-t border-[var(--color-border)]">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-[var(--color-text-muted)] font-medium">Price:</span>
-                      <input
-                        type="number"
-                        step="0.01"
-                        placeholder="0.00"
-                        {...register(`items.${idx}.unitPrice` as const)}
-                        className="w-24 px-2.5 py-1.5 border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] rounded-[var(--radius-base)] text-sm font-mono text-right"
-                      />
-                      {errors.items?.[idx]?.unitPrice && (
-                        <p className="text-[11px] text-[var(--color-danger)]">{errors.items[idx]?.unitPrice?.message}</p>
-                      )}
+                  {/* Row 2: Quantity in separate line + Price & Line Total */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[var(--color-border)]">
+                    {/* Quantity Stepper */}
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs text-[var(--color-text-muted)] font-medium">Qty:</span>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const val = Math.max(1, (typeof currentQty === 'number' ? currentQty : parseFloat(currentQty || '1')) - 1);
+                            setValue(`items.${idx}.quantity`, val);
+                          }}
+                          className="w-7 h-7 rounded-[var(--radius-base)] bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 text-emerald-900 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-bold flex items-center justify-center touch-target transition-colors shadow-xs"
+                        >
+                          <RiSubtractLine className="w-3.5 h-3.5" />
+                        </button>
+                        <input
+                          type="number"
+                          step="any"
+                          min="0.01"
+                          {...register(`items.${idx}.quantity` as const)}
+                          className="w-14 text-center py-1 border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] rounded-[var(--radius-base)] text-xs font-semibold"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const val = (typeof currentQty === 'number' ? currentQty : parseFloat(currentQty || '1')) + 1;
+                            setValue(`items.${idx}.quantity`, val);
+                          }}
+                          className="w-7 h-7 rounded-[var(--radius-base)] bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 text-emerald-900 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-bold flex items-center justify-center touch-target transition-colors shadow-xs"
+                        >
+                          <RiAddLine className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
 
-                    <div className="text-right min-w-[70px]">
-                      <span className="font-mono font-bold text-sm text-[var(--color-text)]">
+                    {/* Unit Price & Line Total */}
+                    <div className="flex items-center gap-2.5 ml-auto">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs text-[var(--color-text-muted)] font-medium">Price:</span>
+                        <input
+                          type="number"
+                          step="0.01"
+                          placeholder="0.00"
+                          {...register(`items.${idx}.unitPrice` as const)}
+                          className="w-20 px-2.5 py-1 border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] rounded-[var(--radius-base)] text-xs font-mono text-right"
+                        />
+                      </div>
+                      <span className="font-mono font-bold text-xs sm:text-sm text-[var(--color-text)] shrink-0 min-w-[65px] text-right">
                         {lineTotal.toFixed(2)} {selectedCurrency}
                       </span>
                     </div>
@@ -372,8 +387,8 @@ export const SpendingBillModal: React.FC<SpendingBillModalProps> = ({
           />
         </div>
 
-        {/* Pinned Running Total & Actions */}
-        <div className="pt-3 border-t-2 border-[var(--color-border)] flex items-center justify-between gap-3 bg-[var(--color-surface)] sticky bottom-0">
+        {/* Running Total & Actions: static on mobile (end of scroll) and sticky on desktop */}
+        <div className="pt-3 border-t-2 border-[var(--color-border)] flex flex-wrap items-center justify-between gap-3 bg-[var(--color-surface)] static sm:sticky sm:bottom-0">
           <div>
             <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider block">
               Grand Total

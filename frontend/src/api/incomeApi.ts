@@ -20,6 +20,8 @@ export interface IncomeRecord {
   sourceId: string;
   sourceName?: string;
   sourceColor?: string;
+  walletId?: string | null;
+  walletName?: string;
   description?: string;
   notes?: string;
   createdAt: string;
@@ -30,6 +32,7 @@ export interface CreateIncomeInput {
   amount: number;
   currency: string;
   sourceId: string;
+  walletId?: string;
   description?: string;
   notes?: string;
 }

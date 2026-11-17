@@ -448,11 +448,11 @@ export const WalletsPage: React.FC = () => {
                 </div>
 
                 {/* Card Actions Footer */}
-                <div className="pt-3 border-t border-[var(--color-border)] flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-1.5">
+                <div className="pt-3 border-t border-[var(--color-border)] flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex flex-wrap items-center gap-1.5 min-w-0">
                     <button
                       onClick={() => handleOpenTransactions(wallet)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-base)] bg-emerald-100 hover:bg-emerald-200/80 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 text-xs font-semibold border border-emerald-200 dark:border-emerald-800 transition-colors touch-target shadow-xs"
+                      className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-[var(--radius-base)] bg-emerald-100 hover:bg-emerald-200/80 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 text-xs font-semibold border border-emerald-200 dark:border-emerald-800 transition-colors touch-target shadow-xs"
                       title="View transactions history"
                     >
                       <RiHistoryLine size={14} />
@@ -460,7 +460,7 @@ export const WalletsPage: React.FC = () => {
                     </button>
                     <button
                       onClick={() => handleOpenAdjust(wallet)}
-                      className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-[var(--radius-base)] bg-emerald-50/60 hover:bg-emerald-100 dark:bg-emerald-950/20 dark:hover:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300 text-xs font-medium border border-emerald-200/60 dark:border-emerald-800/60 transition-colors touch-target"
+                      className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-[var(--radius-base)] bg-emerald-50/60 hover:bg-emerald-100 dark:bg-emerald-950/20 dark:hover:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300 text-xs font-medium border border-emerald-200/60 dark:border-emerald-800/60 transition-colors touch-target"
                       title="Record balance adjustment"
                     >
                       <RiSwapLine size={14} />
@@ -469,7 +469,7 @@ export const WalletsPage: React.FC = () => {
                     {wallets.length >= 2 && (
                       <button
                         onClick={() => handleOpenTransfer(wallet)}
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-[var(--radius-base)] bg-blue-50/60 hover:bg-blue-100 dark:bg-blue-950/20 dark:hover:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-xs font-medium border border-blue-200/60 dark:border-blue-800/60 transition-colors touch-target"
+                        className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-[var(--radius-base)] bg-blue-50/60 hover:bg-blue-100 dark:bg-blue-950/20 dark:hover:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-xs font-medium border border-blue-200/60 dark:border-blue-800/60 transition-colors touch-target"
                         title="Transfer money from this wallet"
                       >
                         <RiSwapLine size={14} />
@@ -478,7 +478,7 @@ export const WalletsPage: React.FC = () => {
                     )}
                   </div>
 
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 shrink-0 ml-auto">
                     <button
                       onClick={() => handleOpenEdit(wallet)}
                       className="p-1.5 text-emerald-700 dark:text-emerald-400 hover:text-emerald-900 dark:hover:text-emerald-200 rounded-[var(--radius-base)] hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors touch-target"

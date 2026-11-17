@@ -71,8 +71,8 @@ export interface WalletTransfer {
 
 export interface WalletTransactionItem {
   id: string;
-  source: 'adjustment' | 'spending' | 'transfer';
-  type: 'deposit' | 'withdrawal' | 'reconcile' | 'spending' | 'transfer_in' | 'transfer_out';
+  source: 'adjustment' | 'spending' | 'transfer' | 'income';
+  type: 'deposit' | 'withdrawal' | 'reconcile' | 'spending' | 'transfer_in' | 'transfer_out' | 'income';
   direction: 'in' | 'out';
   title: string;
   description?: string;
