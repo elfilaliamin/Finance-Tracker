@@ -110,14 +110,16 @@ export class ReportService {
     let grandTotalBase = Money.from(0);
     const formattedRows = items.map((i) => {
       grandTotalBase = Money.add(grandTotalBase, i.baseLineTotal);
+      const qtyNum = parseFloat(i.quantity);
+      const formattedQty = isNaN(qtyNum) ? i.quantity : Number(qtyNum.toFixed(3)).toString();
       return {
         date: i.date,
-        store: i.store || 'N/A',
+        store: i.store || '-',
         wallet: i.walletName || 'Unassigned',
         articleName: i.articleName,
         category: i.categoryName || 'Uncategorized',
         unitPrice: Money.format(i.unitPrice, i.currency),
-        quantity: i.quantity,
+        quantity: formattedQty,
         lineTotal: Money.format(i.lineTotal, i.currency),
         currency: i.currency,
         convertedBaseTotal: Money.format(i.baseLineTotal, 'MAD'),
